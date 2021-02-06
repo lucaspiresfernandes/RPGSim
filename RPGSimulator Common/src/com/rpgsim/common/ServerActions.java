@@ -2,7 +2,6 @@ package com.rpgsim.common;
 
 public interface ServerActions
 {
-    public void clientLogin(String username, String password);
-    public void clientRegister(String username, String password);
-    public void clientLogoff(int sessionID);
+    public void onClientLogin(String username, String password);
+    public void onClientRegister(String username, String password);
 }

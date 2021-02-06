@@ -18,8 +18,6 @@ public class AccountManager
 {
     private ArrayList<Account> registeredAccounts;
     private final HashMap<Integer, Account> activeAccounts = new HashMap<>();
-    
-    private static int validSessionID = 0;
 
     public AccountManager()
     {
@@ -45,11 +43,6 @@ public class AccountManager
             System.exit(0);
         }
     }
-    
-    public static int nextSessionID()
-    {
-        return validSessionID++;
-    }
 
     public boolean isAccountRegistered(Account acc)
     {
@@ -73,11 +66,13 @@ public class AccountManager
 
     public void setAccountActive(int sessionID, Account acc, boolean active)
     {
-        if (!isAccountRegistered(acc))
-            throw new IllegalStateException("This account is not registered.");
         
         if (active)
+        {
+            if (!isAccountRegistered(acc))
+                throw new IllegalStateException("This account is not registered.");
             activeAccounts.put(sessionID, acc);
+        }
         else
             activeAccounts.remove(sessionID, acc);
     }

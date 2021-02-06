@@ -4,8 +4,8 @@ import com.rpgsim.common.serverpackages.ServerPackage;
 
 public class ClientRequest
 {
-    private int connectionID;
-    private ServerPackage request;
+    private final int connectionID;
+    private final ServerPackage request;
 
     public ClientRequest(int connectionID, ServerPackage request)
     {

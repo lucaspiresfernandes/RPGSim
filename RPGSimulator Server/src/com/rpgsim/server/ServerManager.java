@@ -68,17 +68,11 @@ public class ServerManager extends Listener implements Runnable, ServerActions
         else
             System.out.println("The data received is not a ServerPackage. Object: " + object);
     }
-
-    @Override
-    public void connected(Connection connection)
-    {
-        
-    }
     
     @Override
     public void disconnected(Connection connection)
     {
-        
+        accountManager.setAccountActive(connection.getID(), accountManager.getActiveAccount(connection.getID()), false);
     }
     
     private void update()
@@ -137,10 +131,24 @@ public class ServerManager extends Listener implements Runnable, ServerActions
             
             dt += (now - lastTime) * 0.001f;
             
+            boolean updated = false;
             while (dt >= updateThreshold)
             {
+                updated = true;
                 update();
                 dt -= updateThreshold;
+            }
+            
+            if (updated)
+            {
+                try
+                {
+                    Thread.sleep(1);
+                }
+                catch (InterruptedException ex)
+                {
+                    Logger.getLogger(ServerManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             
             lastTime = now;
@@ -148,7 +156,7 @@ public class ServerManager extends Listener implements Runnable, ServerActions
     }
 
     @Override
-    public void clientLogin(String username, String password)
+    public void onClientLogin(String username, String password)
     {
         Account acc = new Account(username, password);
         if (accountManager.isAccountRegistered(acc))
@@ -158,15 +166,14 @@ public class ServerManager extends Listener implements Runnable, ServerActions
                 server.sendToTCP(currentRequest.getConnectionID(), 
                     new ConnectionRequestResponsePackage(false, 
                             "Account is already logged in.", 
-                            -1, ConnectionType.LOGIN));
+                            ConnectionType.LOGIN));
             }
             else
             {
-                int sessionID = AccountManager.nextSessionID();
-                accountManager.setAccountActive(sessionID, acc, true);
+                accountManager.setAccountActive(currentRequest.getConnectionID(), acc, true);
                 server.sendToTCP(currentRequest.getConnectionID(), 
                         new ConnectionRequestResponsePackage(true, "", 
-                                sessionID, ConnectionType.LOGIN));
+                                ConnectionType.LOGIN));
             }
         }
         else
@@ -174,12 +181,12 @@ public class ServerManager extends Listener implements Runnable, ServerActions
             server.sendToTCP(currentRequest.getConnectionID(), 
                     new ConnectionRequestResponsePackage(false, 
                             "Username or password is incorrect.", 
-                            -1, ConnectionType.LOGIN));
+                            ConnectionType.LOGIN));
         }
     }
 
     @Override
-    public void clientRegister(String username, String password)
+    public void onClientRegister(String username, String password)
     {
         Account acc = new Account(username, password);
         if (accountManager.isAccountRegistered(acc))
@@ -187,25 +194,16 @@ public class ServerManager extends Listener implements Runnable, ServerActions
             server.sendToTCP(currentRequest.getConnectionID(), 
                     new ConnectionRequestResponsePackage(false, 
                             "Username already exists.", 
-                            -1, ConnectionType.REGISTER));
+                            ConnectionType.REGISTER));
         }
         else
         {
             accountManager.registerNewAccount(acc);
-            int sessionID = AccountManager.nextSessionID();
-            accountManager.setAccountActive(sessionID, acc, true);
+            accountManager.setAccountActive(currentRequest.getConnectionID(), acc, true);
             server.sendToTCP(currentRequest.getConnectionID(), 
                     new ConnectionRequestResponsePackage(true, "", 
-                            sessionID, ConnectionType.REGISTER));
+                            ConnectionType.REGISTER));
         }
-    }
-
-    @Override
-    public void clientLogoff(int sessionID)
-    {
-        accountManager.setAccountActive(sessionID, accountManager.getActiveAccount(sessionID), false);
-        server.sendToTCP(currentRequest.getConnectionID(), 
-                new ConnectionRequestResponsePackage(true, "", sessionID, ConnectionType.LOGOFF));
     }
     
 }

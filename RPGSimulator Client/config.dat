@@ -1,0 +1,5 @@
+SaveUsername=false
+SavePassword=false
+IP=localhost
+TCPPort=7001
+UDPPort=7002

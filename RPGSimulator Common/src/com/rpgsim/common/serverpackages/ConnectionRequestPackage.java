@@ -18,11 +18,27 @@ public class ConnectionRequestPackage extends ServerPackage
         this.password = password;
         this.type = type;
     }
+
+    public ConnectionRequestPackage(ConnectionType type)
+    {
+        this.username = "null";
+        this.password = "null";
+        this.type = type;
+    }
+    
     
     @Override
     public void executeServerAction(ServerActions server)
     {
-        
+        switch (type)
+        {
+            case LOGIN:
+                server.onClientLogin(username, password);
+                break;
+            case REGISTER:
+                server.onClientRegister(username, password);
+                break;
+        }
     }
 
 }
