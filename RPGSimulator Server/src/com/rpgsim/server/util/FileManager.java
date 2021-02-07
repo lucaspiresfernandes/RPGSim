@@ -1,4 +1,4 @@
-package com.rpgsim.client;
+package com.rpgsim.server.util;
 
 import com.rpgsim.common.DataFile;
 import java.io.BufferedReader;
@@ -15,11 +15,9 @@ public class FileManager
     private static final DataFile[] files = new DataFile[]
     {
         new DataFile("config.dat",
-                "SaveUsername=false\n"
-                + "SavePassword=false\n"
-                + "IP=localhost\n"
-                + "TCPPort=7001\n"
-                + "UDPPort=7002")
+                "TCPPort=7001\n"
+                + "UDPPort=7002"),
+        new DataFile("accounts.bin")
     };
 
     public static void checkFiles() throws IOException

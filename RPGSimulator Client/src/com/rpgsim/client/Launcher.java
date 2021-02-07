@@ -1,5 +1,6 @@
 package com.rpgsim.client;
 
+import com.rpgsim.client.util.FileManager;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -9,7 +10,8 @@ public class Launcher
 {
     public static void main(String[] args)
     {
-        try {
+        try
+        {
             FileManager.checkFiles();
             new MainFrame().setVisible(true);
         }

@@ -3,23 +3,23 @@ package com.rpgsim.common.serverpackages;
 import com.rpgsim.common.ConnectionType;
 import com.rpgsim.common.ServerActions;
 
-public class ConnectionRequestPackage extends ServerPackage
+public class ConnectionRequest extends ServerPackage
 {
     private String username, password;
     private ConnectionType type;
 
-    public ConnectionRequestPackage()
+    public ConnectionRequest()
     {
     }
 
-    public ConnectionRequestPackage(String username, String password, ConnectionType type)
+    public ConnectionRequest(String username, String password, ConnectionType type)
     {
         this.username = username;
         this.password = password;
         this.type = type;
     }
 
-    public ConnectionRequestPackage(ConnectionType type)
+    public ConnectionRequest(ConnectionType type)
     {
         this.username = "null";
         this.password = "null";
@@ -30,15 +30,7 @@ public class ConnectionRequestPackage extends ServerPackage
     @Override
     public void executeServerAction(ServerActions server)
     {
-        switch (type)
-        {
-            case LOGIN:
-                server.onClientLogin(username, password);
-                break;
-            case REGISTER:
-                server.onClientRegister(username, password);
-                break;
-        }
+        server.onClientConnection(username, password, type);
     }
 
 }

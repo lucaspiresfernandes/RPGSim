@@ -1,4 +1,4 @@
-package com.rpgsim.server;
+package com.rpgsim.server.util;
 
 import com.rpgsim.common.serverpackages.ServerPackage;
 

@@ -1,20 +1,18 @@
-package com.rpgsim.client;
+package com.rpgsim.server.util;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ClientConfigurations
+public class ServerConfigurations
 {
     private final HashMap<String, String> configHash = new HashMap<>();
     
-    public ClientConfigurations() throws IOException
+    public ServerConfigurations()
     {
         try (BufferedReader in = new BufferedReader(new FileReader(new File(FileManager.app_dir + "config.dat"))))
         {
@@ -24,6 +22,10 @@ public class ClientConfigurations
                 String[] config = l.split("=");
                 configHash.put(config[0], config[1]);
             }
+        }
+        catch (IOException ex)
+        {
+            Logger.getLogger(ServerConfigurations.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -36,23 +38,5 @@ public class ClientConfigurations
     {
         return configHash.get(key);
     }
-    
-    public void setProperty(String key, String value)
-    {
-        configHash.replace(key, value);
-    }
-    
-    public void saveConfigurations() throws IOException
-    {
-        String[] keys = configHash.keySet().toArray(new String[0]);
-        String[] values = configHash.values().toArray(new String[0]);
-        try (BufferedWriter out = new BufferedWriter(new FileWriter(new File(FileManager.app_dir + "config.dat"), false)))
-        {
-            String config = "";
-            for (int i = 0; i < values.length; i++)
-                config += keys[i] + "=" + values[i] + "\n";
-            out.write(config);
-        }
-    }
-    
+
 }

@@ -5,9 +5,9 @@ import javax.swing.JFrame;
 
 public class GameFrame extends JFrame
 {
-    private final Game game;
+    private final ClientGame game;
 
-    public GameFrame(WindowListener l)
+    public GameFrame(ClientManager manager, WindowListener l)
     {
         super("RPG Simulator");
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -16,13 +16,15 @@ public class GameFrame extends JFrame
         setLocationRelativeTo(null);
         setLayout(null);
         addWindowListener(l);
-        this.game = new Game(super.getWidth(), super.getHeight());
+        this.game = new ClientGame(manager, super.getWidth(), super.getHeight());
         getContentPane().add(game);
     }
     
-    public Game getGame()
+    public ClientGame getGame()
     {
         return game;
     }
+    
+    
     
 }

@@ -1,4 +1,4 @@
-package com.rpgsim.common.math;
+package com.rpgsim.common;
 
 public class Vector2
 {

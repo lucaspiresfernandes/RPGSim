@@ -1,13 +1,19 @@
 package com.rpgsim.server;
 
+import com.rpgsim.server.util.ClientRequest;
+import com.rpgsim.server.util.ServerConfigurations;
+import com.rpgsim.server.util.AccountManager;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import com.rpgsim.common.Account;
-import com.rpgsim.common.CommonConfigurations;
 import com.rpgsim.common.ConnectionType;
 import com.rpgsim.common.ServerActions;
-import com.rpgsim.common.clientpackages.ConnectionRequestResponsePackage;
+import com.rpgsim.common.Vector2;
+import com.rpgsim.common.clientpackages.ConnectionRequestResponse;
+import com.rpgsim.common.clientpackages.InstantiateNetworkGameObjectResponse;
+import com.rpgsim.common.clientpackages.NetworkGameObjectPositionUpdate;
+import com.rpgsim.common.game.NetworkGameObject;
 import com.rpgsim.common.serverpackages.ServerPackage;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -17,24 +23,22 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
-public class ServerManager extends Listener implements Runnable, ServerActions
+public class ServerManager extends Listener implements ServerActions
 {
     //The server receives all client requests. Other classes are just utilities for the server.
     private final Server server;
     private final ServerConfigurations serverConfigurations;
     private final AccountManager accountManager;
     
+    private final ServerGame game;
+    
+    private Connection currentConnection;
     //The window in which the server supervises client/user actions.
     private final ServerFrame serverFrame;
-    
-    //Server Manager is responsible for processing the requests received by the server.
-    private boolean running = false;
-    private final Thread serverManagerThread = new Thread(this, "Server Manager");
     
     //Thread-safe system to link Server and ServerManager system.
     //All requests are held by the queue until ServerManager process them.
     private final ConcurrentLinkedQueue<ClientRequest> clientRequests = new ConcurrentLinkedQueue<>();
-    private ClientRequest currentRequest;
     
     public ServerManager()
     {
@@ -56,6 +60,8 @@ public class ServerManager extends Listener implements Runnable, ServerActions
         this.serverConfigurations = new ServerConfigurations();
         this.accountManager = new AccountManager();
         
+        this.game = new ServerGame();
+        
         server = new Server();
         server.getKryo().setRegistrationRequired(false);
     }
@@ -64,7 +70,10 @@ public class ServerManager extends Listener implements Runnable, ServerActions
     public void received(Connection connection, Object object)
     {
         if (object instanceof ServerPackage)
-            clientRequests.add(new ClientRequest(connection.getID(), (ServerPackage) object));
+        {
+            currentConnection = connection;
+            ((ServerPackage)object).executeServerAction(this);
+        }
         else
             System.out.println("The data received is not a ServerPackage. Object: " + object);
     }
@@ -73,14 +82,6 @@ public class ServerManager extends Listener implements Runnable, ServerActions
     public void disconnected(Connection connection)
     {
         accountManager.setAccountActive(connection.getID(), accountManager.getActiveAccount(connection.getID()), false);
-    }
-    
-    private void update()
-    {
-        while ((currentRequest = clientRequests.poll()) != null)
-        {
-            currentRequest.getRequest().executeServerAction(this);
-        }
     }
     
     public void start()
@@ -100,8 +101,6 @@ public class ServerManager extends Listener implements Runnable, ServerActions
             Logger.getLogger(ServerManager.class.getName()).log(Level.SEVERE, null, ex);
             System.exit(0);
         }
-        running = true;
-        serverManagerThread.start();
     }
     
     /**
@@ -110,100 +109,82 @@ public class ServerManager extends Listener implements Runnable, ServerActions
     public void stop()
     {
         serverFrame.dispose();
-        running = false;
         server.stop();
         server.close();
         accountManager.saveAccounts();
     }
+
+    @Override
+    public void onClientConnection(String username, String password, ConnectionType type)
+    {
+        Account acc = new Account(username, password);
+        switch (type)
+        {
+            case LOGIN:
+                if (accountManager.isAccountRegistered(acc))
+                {
+                    if (accountManager.isAccountActive(acc))
+                    {
+                        server.sendToTCP(currentConnection.getID(), 
+                            new ConnectionRequestResponse(false, 
+                                    "Account is already logged in.", 
+                                    type));
+                    }
+                    else
+                    {
+                        accountManager.setAccountActive(currentConnection.getID(), acc, true);
+                        server.sendToTCP(currentConnection.getID(), 
+                                new ConnectionRequestResponse(true, "", 
+                                        type));
+                    }
+                }
+                else
+                {
+                    server.sendToTCP(currentConnection.getID(), 
+                            new ConnectionRequestResponse(false, 
+                                    "Username or password is incorrect.", 
+                                    type));
+                }
+                break;
+            case REGISTER:
+                if (accountManager.isAccountRegistered(acc))
+                {
+                    server.sendToTCP(currentConnection.getID(), 
+                            new ConnectionRequestResponse(false, 
+                                    "Username already exists.", 
+                                    type));
+                }
+                else
+                {
+                    accountManager.registerNewAccount(acc);
+                    accountManager.setAccountActive(currentConnection.getID(), acc, true);
+                    server.sendToTCP(currentConnection.getID(), 
+                            new ConnectionRequestResponse(true, "", 
+                                    type));
+                }
+                break;
+        }
+    }
     
     @Override
-    public void run()
+    public void onNetworkGameObjectPositionChanged(int id, Vector2 newPosition)
     {
-        long lastTime = System.currentTimeMillis();
-        
-        float updateThreshold = 1f / CommonConfigurations.networkUPS;
-        
-        float dt = 0f;
-        
-        while (running)
-        {
-            long now = System.currentTimeMillis();
-            
-            dt += (now - lastTime) * 0.001f;
-            
-            boolean updated = false;
-            while (dt >= updateThreshold)
-            {
-                updated = true;
-                update();
-                dt -= updateThreshold;
-            }
-            
-            if (updated)
-            {
-                try
-                {
-                    Thread.sleep(1);
-                }
-                catch (InterruptedException ex)
-                {
-                    Logger.getLogger(ServerManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            
-            lastTime = now;
-        }
+        game.getScene().getGameObject(id).transform().position(newPosition);
+        server.sendToAllUDP(new NetworkGameObjectPositionUpdate(id, newPosition));
     }
 
     @Override
-    public void onClientLogin(String username, String password)
+    public void onNetworkGameObjectRequest(boolean clientAuthority)
     {
-        Account acc = new Account(username, password);
-        if (accountManager.isAccountRegistered(acc))
-        {
-            if (accountManager.isAccountActive(acc))
-            {
-                server.sendToTCP(currentRequest.getConnectionID(), 
-                    new ConnectionRequestResponsePackage(false, 
-                            "Account is already logged in.", 
-                            ConnectionType.LOGIN));
-            }
-            else
-            {
-                accountManager.setAccountActive(currentRequest.getConnectionID(), acc, true);
-                server.sendToTCP(currentRequest.getConnectionID(), 
-                        new ConnectionRequestResponsePackage(true, "", 
-                                ConnectionType.LOGIN));
-            }
-        }
+        NetworkGameObject go;
+        if (clientAuthority)
+            go = new NetworkGameObject(ServerGame.getGameObjectID());
         else
-        {
-            server.sendToTCP(currentRequest.getConnectionID(), 
-                    new ConnectionRequestResponsePackage(false, 
-                            "Username or password is incorrect.", 
-                            ConnectionType.LOGIN));
-        }
+            go = new NetworkGameObject(ServerGame.getGameObjectID());
+        game.getScene().addGameObject(go);
+        
+        server.sendToAllTCP(new InstantiateNetworkGameObjectResponse(go.getID(), go.transform().position()));
     }
-
-    @Override
-    public void onClientRegister(String username, String password)
-    {
-        Account acc = new Account(username, password);
-        if (accountManager.isAccountRegistered(acc))
-        {
-            server.sendToTCP(currentRequest.getConnectionID(), 
-                    new ConnectionRequestResponsePackage(false, 
-                            "Username already exists.", 
-                            ConnectionType.REGISTER));
-        }
-        else
-        {
-            accountManager.registerNewAccount(acc);
-            accountManager.setAccountActive(currentRequest.getConnectionID(), acc, true);
-            server.sendToTCP(currentRequest.getConnectionID(), 
-                    new ConnectionRequestResponsePackage(true, "", 
-                            ConnectionType.REGISTER));
-        }
-    }
+    
     
 }

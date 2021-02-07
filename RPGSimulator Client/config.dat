@@ -1,5 +1,7 @@
-SaveUsername=false
-SavePassword=false
+Username=asd
+SavePassword=true
 IP=localhost
-TCPPort=7001
 UDPPort=7002
+SaveUsername=true
+Password=asd
+TCPPort=7001

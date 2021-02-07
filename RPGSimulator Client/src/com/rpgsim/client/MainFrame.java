@@ -1,5 +1,6 @@
 package com.rpgsim.client;
 
+import com.rpgsim.client.util.ClientConfigurations;
 import com.rpgsim.common.Account;
 import com.rpgsim.common.ConnectionType;
 import java.awt.CardLayout;
@@ -12,16 +13,42 @@ import javax.swing.JOptionPane;
 public class MainFrame extends javax.swing.JFrame
 {
     private final CardLayout c;
+    private ClientConfigurations clientConfig;
     
     public MainFrame()
     {
         initComponents();
         c = (CardLayout) pnlCards.getLayout();
+        try
+        {
+            clientConfig = new ClientConfigurations();
+        }
+        catch (IOException ex)
+        {
+            JOptionPane.showMessageDialog(null, "Could not load options.");
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            dispose();
+            return;
+        }
         internalInit();
     }
     
     private void internalInit()
     {
+        boolean saveLogin = clientConfig.getBooleanProperty("SaveUsername");
+        chkLogin.setSelected(saveLogin);
+        if (saveLogin)
+            txtLogin.setText(clientConfig.getProperty("Username"));
+        
+        boolean savePassword = clientConfig.getBooleanProperty("SavePassword");
+        chkPassword.setSelected(savePassword);
+        if (savePassword)
+            txtPassword.setText(clientConfig.getProperty("Password"));
+        
+        txtIP.setText(clientConfig.getProperty("IP"));
+        txtTCP.setText(clientConfig.getProperty("TCPPort"));
+        txtUDP.setText(clientConfig.getProperty("UDPPort"));
+        
         btnLogin.addActionListener(l -> 
         {
             c.show(pnlCards, "login");
@@ -80,18 +107,7 @@ public class MainFrame extends javax.swing.JFrame
     
     private void connect(String username, String password, ConnectionType type)
     {
-        ClientManager manager;
-        try
-        {
-            manager = new ClientManager(this, new Account(username, password));
-        }
-        catch (IOException ex)
-        {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-            JOptionPane.showMessageDialog(null, "Missing files.");
-            return;
-        }
-        
+        ClientManager manager = new ClientManager(this, clientConfig, new Account(username, password));
         try
         {
             manager.start(type);
@@ -101,6 +117,32 @@ public class MainFrame extends javax.swing.JFrame
             manager.stop();
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(null, "The server seems to be down.");
+        }
+        
+        boolean saveUsername = chkLogin.isSelected();
+        boolean savePassword = chkPassword.isSelected();
+        
+        clientConfig.setProperty("SaveUsername", saveUsername + "");
+        if (saveUsername)
+            clientConfig.setProperty("Username", username);
+        else
+            clientConfig.setProperty("Username", "null");
+        clientConfig.setProperty("SavePassword", savePassword + "");
+        if (savePassword)
+            clientConfig.setProperty("Password", password);
+        else
+            clientConfig.setProperty("Password", "null");
+        clientConfig.setProperty("IP", txtIP.getText());
+        clientConfig.setProperty("TCPPort", txtTCP.getText());
+        clientConfig.setProperty("UDPPort", txtUDP.getText());
+        
+        try
+        {
+            clientConfig.saveConfigurations();
+        }
+        catch (IOException ex)
+        {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
