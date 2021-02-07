@@ -1,6 +1,7 @@
 package com.rpgsim.server;
 
-import com.rpgsim.server.util.FileManager;
+import com.rpgsim.common.DataFile;
+import com.rpgsim.common.FileManager;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,6 +13,14 @@ public class Launcher
     {
         try
         {
+            DataFile[] files = new DataFile[]
+            {
+                new DataFile("config.dat",
+                        "TCPPort=7001\n"
+                        + "UDPPort=7002"),
+                new DataFile("accounts.bin")
+            };
+            FileManager.setFiles(files);
             FileManager.checkFiles();
             new ServerManager().start();
         }

@@ -6,12 +6,9 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferStrategy;
-import java.awt.image.BufferedImage;
 
 public class Screen
 {
-    public static final BufferedImage NULL_IMAGE = new BufferedImage(50, 50, BufferedImage.TYPE_INT_ARGB);
-    
     private final BufferStrategy bs;
     private final int screenWidth, screenHeight;
     private Graphics2D g;
@@ -36,7 +33,7 @@ public class Screen
         g.dispose();
         bs.show();
     }
-
+    
     public boolean drawImage(Image img, AffineTransform xform)
     {
         return g.drawImage(img, xform, null);
@@ -81,6 +78,4 @@ public class Screen
     {
         g.drawRect(x, y, width, height);
     }
-    
-    
 }

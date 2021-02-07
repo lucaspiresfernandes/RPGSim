@@ -97,7 +97,6 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener
     public void mouseReleased(MouseEvent e)
     {
         pressedButtons.remove(new Integer(e.getButton()));
-        System.out.println("released");
         mouseDragging = false;
     }
 

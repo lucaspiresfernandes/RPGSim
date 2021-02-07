@@ -1,21 +1,58 @@
 package com.rpgsim.common.game;
 
+import com.rpgsim.common.PrefabID;
+import com.rpgsim.common.Vector2;
+
 public class NetworkGameObject
 {
-    private final int id;
+    private final int objectID;
+    private final int clientID;
+    private final PrefabID prefabID;
     private final Transform transform;
     private final Renderer renderer;
+    
+    private boolean dirty;
+    
+    private Vector2 smoothPosition;
 
-    public NetworkGameObject(int id)
+    public NetworkGameObject(int id, int clientID, PrefabID prefabID)
     {
-        this.id = id;
+        this.objectID = id;
+        this.clientID = clientID;
+        this.prefabID = prefabID;
+        this.smoothPosition = new Vector2();
         transform = new Transform(this);
         renderer = new Renderer(this);
     }
 
-    public int getID()
+    public int getObjectID()
     {
-        return id;
+        return objectID;
+    }
+
+    public int getClientID()
+    {
+        return clientID;
+    }
+    
+    public boolean hasClientID()
+    {
+        return clientID > 0;
+    }
+
+    public PrefabID getPrefabID()
+    {
+        return prefabID;
+    }
+
+    public boolean isDirty()
+    {
+        return dirty;
+    }
+
+    public void setDirty(boolean dirty)
+    {
+        this.dirty = dirty;
     }
     
     public Transform transform()
@@ -28,11 +65,16 @@ public class NetworkGameObject
         return renderer;
     }
 
+    public Vector2 getSmoothPosition()
+    {
+        return smoothPosition;
+    }
+
     @Override
     public int hashCode()
     {
         int hash = 7;
-        hash = 73 * hash + this.id;
+        hash = 73 * hash + this.objectID;
         return hash;
     }
 
@@ -52,12 +94,16 @@ public class NetworkGameObject
             return false;
         }
         final NetworkGameObject other = (NetworkGameObject) obj;
-        if (this.id != other.id)
+        if (this.objectID != other.objectID)
         {
             return false;
         }
         return true;
     }
     
-    public void update(float deltaTime) {}
+    public void update(int clientID, float dt)
+    {
+        smoothPosition = Vector2.lerp(smoothPosition, transform.position(), 10 * dt);
+    }
+    
 }

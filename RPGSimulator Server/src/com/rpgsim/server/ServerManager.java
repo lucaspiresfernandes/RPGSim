@@ -1,6 +1,5 @@
 package com.rpgsim.server;
 
-import com.rpgsim.server.util.ClientRequest;
 import com.rpgsim.server.util.ServerConfigurations;
 import com.rpgsim.server.util.AccountManager;
 import com.esotericsoftware.kryonet.Connection;
@@ -8,17 +7,19 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import com.rpgsim.common.Account;
 import com.rpgsim.common.ConnectionType;
+import com.rpgsim.common.PrefabID;
 import com.rpgsim.common.ServerActions;
 import com.rpgsim.common.Vector2;
 import com.rpgsim.common.clientpackages.ConnectionRequestResponse;
+import com.rpgsim.common.clientpackages.DestroyNetworkGameObject;
 import com.rpgsim.common.clientpackages.InstantiateNetworkGameObjectResponse;
-import com.rpgsim.common.clientpackages.NetworkGameObjectPositionUpdate;
+import com.rpgsim.common.clientpackages.NetworkGameObjectTransformUpdate;
 import com.rpgsim.common.game.NetworkGameObject;
 import com.rpgsim.common.serverpackages.ServerPackage;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -29,16 +30,11 @@ public class ServerManager extends Listener implements ServerActions
     private final Server server;
     private final ServerConfigurations serverConfigurations;
     private final AccountManager accountManager;
-    
     private final ServerGame game;
-    
     private Connection currentConnection;
+    
     //The window in which the server supervises client/user actions.
     private final ServerFrame serverFrame;
-    
-    //Thread-safe system to link Server and ServerManager system.
-    //All requests are held by the queue until ServerManager process them.
-    private final ConcurrentLinkedQueue<ClientRequest> clientRequests = new ConcurrentLinkedQueue<>();
     
     public ServerManager()
     {
@@ -82,6 +78,16 @@ public class ServerManager extends Listener implements ServerActions
     public void disconnected(Connection connection)
     {
         accountManager.setAccountActive(connection.getID(), accountManager.getActiveAccount(connection.getID()), false);
+        Iterator<NetworkGameObject> aux = game.getScene().getGameObjects().iterator();
+        while (aux.hasNext())
+        {
+            NetworkGameObject go = aux.next();
+            if (go.getClientID() == connection.getID())
+            {
+                game.getScene().removeGameObject(go.getObjectID());
+                server.sendToAllTCP(new DestroyNetworkGameObject(go.getObjectID()));
+            }
+        }
     }
     
     public void start()
@@ -136,6 +142,12 @@ public class ServerManager extends Listener implements ServerActions
                         server.sendToTCP(currentConnection.getID(), 
                                 new ConnectionRequestResponse(true, "", 
                                         type));
+                        for (NetworkGameObject go : game.getScene().getGameObjects())
+                            server.sendToTCP(currentConnection.getID(), 
+                                    new InstantiateNetworkGameObjectResponse(go.getObjectID(),
+                                            go.getClientID(), 
+                                            go.transform().position(), 
+                                            go.getPrefabID()));
                     }
                 }
                 else
@@ -161,30 +173,39 @@ public class ServerManager extends Listener implements ServerActions
                     server.sendToTCP(currentConnection.getID(), 
                             new ConnectionRequestResponse(true, "", 
                                     type));
+                    for (NetworkGameObject go : game.getScene().getGameObjects())
+                            server.sendToTCP(currentConnection.getID(), 
+                                    new InstantiateNetworkGameObjectResponse(go.getObjectID(), 
+                                            go.getClientID(), 
+                                            go.transform().position(), 
+                                            go.getPrefabID()));
                 }
                 break;
         }
     }
-    
-    @Override
-    public void onNetworkGameObjectPositionChanged(int id, Vector2 newPosition)
-    {
-        game.getScene().getGameObject(id).transform().position(newPosition);
-        server.sendToAllUDP(new NetworkGameObjectPositionUpdate(id, newPosition));
-    }
 
     @Override
-    public void onNetworkGameObjectRequest(boolean clientAuthority)
+    public void onNetworkGameObjectPositionChanged(int id, Vector2 position, Vector2 scale, float rotation, boolean flipX, boolean flipY)
     {
-        NetworkGameObject go;
-        if (clientAuthority)
-            go = new NetworkGameObject(ServerGame.getGameObjectID());
-        else
-            go = new NetworkGameObject(ServerGame.getGameObjectID());
-        game.getScene().addGameObject(go);
+        NetworkGameObject go = game.getScene().getGameObject(id);
+        go.transform().position(position);
+        go.transform().scale(scale);
+        go.transform().rotation(rotation);
+        go.transform().flipX(flipX);
+        go.transform().flipY(flipY);
         
-        server.sendToAllTCP(new InstantiateNetworkGameObjectResponse(go.getID(), go.transform().position()));
+        NetworkGameObjectTransformUpdate p = new NetworkGameObjectTransformUpdate(id, position, scale, rotation, flipX, flipY);
+        
+        server.sendToAllUDP(p);
     }
     
+    @Override
+    public void onNetworkGameObjectRequest(Vector2 position, PrefabID pID)
+    {
+        NetworkGameObject go;
+        go = new NetworkGameObject(ServerGame.getGameObjectID(), currentConnection.getID(), pID);
+        game.getScene().addGameObject(go);
+        server.sendToAllTCP(new InstantiateNetworkGameObjectResponse(go.getObjectID(), go.getClientID(), position, pID));
+    }
     
 }

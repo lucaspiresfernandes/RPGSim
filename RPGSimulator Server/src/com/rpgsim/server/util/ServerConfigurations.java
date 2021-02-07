@@ -1,5 +1,6 @@
 package com.rpgsim.server.util;
 
+import com.rpgsim.common.FileManager;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;

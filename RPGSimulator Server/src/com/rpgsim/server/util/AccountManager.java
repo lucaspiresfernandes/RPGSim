@@ -1,6 +1,7 @@
 package com.rpgsim.server.util;
 
 import com.rpgsim.common.Account;
+import com.rpgsim.common.FileManager;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;

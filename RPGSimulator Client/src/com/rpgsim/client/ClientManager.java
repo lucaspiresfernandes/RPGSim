@@ -4,14 +4,17 @@ import com.rpgsim.client.util.ClientConfigurations;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import com.rpgsim.client.prefabs.DraggableObjectPrefab;
+import com.rpgsim.client.prefabs.MousePrefab;
 import com.rpgsim.common.Account;
 import com.rpgsim.common.ClientActions;
-import com.rpgsim.common.CommonConfigurations;
 import com.rpgsim.common.ConnectionType;
+import com.rpgsim.common.PrefabID;
 import com.rpgsim.common.Vector2;
 import com.rpgsim.common.clientpackages.ClientPackage;
 import com.rpgsim.common.game.NetworkGameObject;
 import com.rpgsim.common.serverpackages.ConnectionRequest;
+import com.rpgsim.common.serverpackages.NetworkGameObjectPositionUptadeRequest;
 import com.rpgsim.common.serverpackages.ServerPackage;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -62,6 +65,11 @@ public class ClientManager extends Listener implements ClientActions
         client.getKryo().setRegistrationRequired(false);
     }
     
+    public int getConnectionID()
+    {
+        return connection.getID();
+    }
+    
     public void sendPackage(ServerPackage _package)
     {
         client.sendTCP(_package);
@@ -110,6 +118,18 @@ public class ClientManager extends Listener implements ClientActions
     
     public void update()
     {
+        for (NetworkGameObject go : game.getScene().getGameObjects())
+        {
+            if (go.isDirty())
+            {
+                NetworkGameObjectPositionUptadeRequest r = new NetworkGameObjectPositionUptadeRequest
+                (go.getObjectID(), go.transform().position(), go.transform().scale(), 
+                go.transform().rotation(), go.transform().flipX(), go.transform().flipY());
+                client.sendUDP(r);
+                go.setDirty(false);
+            }
+        }
+        
         ClientPackage p;
         while ((p = packages.poll()) != null)
         {
@@ -118,23 +138,7 @@ public class ClientManager extends Listener implements ClientActions
     }
 
     @Override
-    public void onLoginRequestResponse(boolean accepted, String message)
-    {
-        if (accepted)
-        {
-            mainFrame.dispatchEvent(new WindowEvent(mainFrame, WindowEvent.WINDOW_CLOSING));
-            gameFrame.setVisible(true);
-            game.open();
-        }
-        else
-        {
-            JOptionPane.showMessageDialog(null, message);
-            stop();
-        }
-    }
-
-    @Override
-    public void onRegisterRequestResponse(boolean accepted, String message)
+    public void onConnectionRequestResponse(boolean accepted, String message, ConnectionType type)
     {
         if (accepted)
         {
@@ -158,11 +162,39 @@ public class ClientManager extends Listener implements ClientActions
     }
     
     @Override
-    public void onInstantiateNetworkGameObject(int id, Vector2 position)
+    public void onInstantiateNetworkGameObject(int id, int clientID, Vector2 position, PrefabID pID)
     {
-        NetworkGameObject go = new NetworkGameObject(id);
-        go.transform().position(position);
+        NetworkGameObject go;
+        switch (pID)
+        {
+            case MOUSE:
+                go = new MousePrefab(id, clientID, pID);
+                break;
+            case DRAGGABLE_OBJECT:
+                go = new DraggableObjectPrefab(id, clientID, pID);
+                break;
+            default:
+                go = new NetworkGameObject(id, clientID, pID);
+                break;
+        }
         game.getScene().addGameObject(go);
+    }
+    
+    @Override
+    public void updateNetworkGameObjectTransform(int id, Vector2 position, Vector2 scale, float rotation, boolean flipX, boolean flipY)
+    {
+        NetworkGameObject go = game.getScene().getGameObject(id);
+        go.transform().position(position);
+        go.transform().scale(scale);
+        go.transform().rotation(rotation);
+        go.transform().flipX(flipX);
+        go.transform().flipY(flipY);
+    }
+
+    @Override
+    public void onNetworkGameObjectDestroy(int id)
+    {
+        game.getScene().removeGameObject(id);
     }
     
 }

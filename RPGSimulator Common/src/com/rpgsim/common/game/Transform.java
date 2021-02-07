@@ -1,39 +1,38 @@
 package com.rpgsim.common.game;
 
 import com.rpgsim.common.Vector2;
-import java.awt.Image;
-import java.awt.geom.AffineTransform;
 
 public class Transform
 {
-    private final NetworkGameObject gameObject;
-    private AffineTransform transform;
+    private Vector2 position;
+    private Vector2 scale;
     private float rotation = 0f;
     private boolean flipX = false, flipY = false;
 
     public Transform(NetworkGameObject gameObject)
     {
-        this.gameObject = gameObject;
+        this.position = new Vector2();
+        this.scale = new Vector2(1f, 1f);
     }
     
     public Vector2 position()
     {
-        return new Vector2(transform.getTranslateX(), transform.getTranslateY());
+        return new Vector2(position);
     }
     
     public void position(Vector2 newPosition)
     {
-        transform.setToTranslation(newPosition.x, newPosition.y);
+        position = new Vector2(newPosition);
     }
     
     public Vector2 scale()
     {
-        return new Vector2(transform.getScaleX(), transform.getScaleY());
+        return new Vector2(scale);
     }
     
     public void scale(Vector2 newScale)
     {
-        transform.setToScale(newScale.x, newScale.y);
+        this.scale = new Vector2(newScale);
     }
     
     public float rotation()
@@ -64,14 +63,6 @@ public class Transform
     public boolean flipY()
     {
         return flipY;
-    }
-    
-    public AffineTransform getProcessedInstance()
-    {
-        AffineTransform t = new AffineTransform(transform);
-        Image img = gameObject.renderer().getImage();
-        t.rotate(Math.toRadians(rotation), img.getWidth(null) * 0.5f, img.getHeight(null) * 0.5f);
-        return t;
     }
     
 }

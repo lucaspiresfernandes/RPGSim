@@ -1,9 +1,11 @@
 package com.rpgsim.client;
 
+import com.rpgsim.common.Screen;
 import com.rpgsim.common.CommonConfigurations;
+import com.rpgsim.common.PrefabID;
 import com.rpgsim.common.Scene;
 import com.rpgsim.common.game.Input;
-import com.rpgsim.common.Screen;
+import com.rpgsim.common.serverpackages.InstantiatePrefabRequest;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.util.logging.Level;
@@ -34,13 +36,13 @@ public class ClientGame extends Canvas implements Runnable
     
     private void update(float dt)
     {
-        scene.updateGameObjects(dt);
+        scene.updateGameObjects(client.getConnectionID(), dt);
     }
     
     private void render()
     {
         screen.begin();
-        
+        scene.renderGameObjects(client.getConnectionID(), screen);
         screen.end();
     }
     
@@ -59,6 +61,8 @@ public class ClientGame extends Canvas implements Runnable
         createBufferStrategy(3);
         screen = new Screen(getBufferStrategy(), getWidth(), getHeight());
         gameRunning = true;
+        
+        client.sendPackage(new InstantiatePrefabRequest(Input.mousePosition(), PrefabID.MOUSE));
     }
 
     public void stop()

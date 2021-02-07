@@ -1,6 +1,7 @@
 package com.rpgsim.client;
 
-import com.rpgsim.client.util.FileManager;
+import com.rpgsim.common.DataFile;
+import com.rpgsim.common.FileManager;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,6 +13,20 @@ public class Launcher
     {
         try
         {
+            DataFile[] files = new DataFile[]
+            {
+                new DataFile("config.dat",
+                "SaveUsername=false\n"
+                + "SavePassword=false\n"
+                + "Username=null\n"
+                + "Password=null\n"
+                + "IP=localhost\n"
+                + "TCPPort=7001\n"
+                + "UDPPort=7002"),
+                new DataFile("data files\\images"),
+                new DataFile("data files\\prefabs")
+            };
+            FileManager.setFiles(files);
             FileManager.checkFiles();
             new MainFrame().setVisible(true);
         }

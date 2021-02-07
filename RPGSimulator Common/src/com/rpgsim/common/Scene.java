@@ -10,23 +10,39 @@ public class Scene
     
     public void addGameObject(NetworkGameObject go)
     {
-        gameObjects.put(go.getID(), go);
+        gameObjects.put(go.getObjectID(), go);
     }
 
-    public void updateGameObjects(float dt) 
+    public void updateGameObjects(int clientID, float dt)
     {
         for (NetworkGameObject go : gameObjects.values())
-            go.update(dt);
+            go.update(clientID, dt);
+    }
+    
+    public void renderGameObjects(int clientID, Screen screen)
+    {
+        for (NetworkGameObject go : gameObjects.values())
+            go.renderer().render(clientID, screen);
     }
     
     public NetworkGameObject getGameObject(int id)
     {
         return gameObjects.get(id);
     }
-
+    
     public Collection<NetworkGameObject> getGameObjects()
     {
         return gameObjects.values();
+    }
+
+    public HashMap<Integer, NetworkGameObject> getGameObjectsHash()
+    {
+        return gameObjects;
+    }
+
+    public void removeGameObject(int id)
+    {
+        gameObjects.remove(id);
     }
     
 }

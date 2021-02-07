@@ -23,15 +23,7 @@ public class ConnectionRequestResponse extends ClientPackage
     @Override
     public void executeClientAction(ClientActions client)
     {
-        switch (type)
-        {
-            case LOGIN:
-                client.onLoginRequestResponse(accepted, message);
-                break;
-            case REGISTER:
-                client.onRegisterRequestResponse(accepted, message);
-                break;
-        }
+        client.onConnectionRequestResponse(accepted, message, type);
     }
 
 }

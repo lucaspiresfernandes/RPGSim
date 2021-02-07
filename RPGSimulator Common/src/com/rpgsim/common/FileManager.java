@@ -1,25 +1,27 @@
-package com.rpgsim.server.util;
+package com.rpgsim.common;
 
-import com.rpgsim.common.DataFile;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 
 public class FileManager
 {
     public static final String app_dir = System.getProperty("user.dir") + "\\";
-    
-    private static final DataFile[] files = new DataFile[]
-    {
-        new DataFile("config.dat",
-                "TCPPort=7001\n"
-                + "UDPPort=7002"),
-        new DataFile("accounts.bin")
-    };
+    private static DataFile[] files;
 
+    public static void setFiles(DataFile[] files)
+    {
+        FileManager.files = files;
+    }
+    
     public static void checkFiles() throws IOException
     {
         File parent = new File(app_dir);
@@ -28,7 +30,7 @@ public class FileManager
         {
             File f = new File(parent, df.getFileName());
             
-            if (f.exists())
+            if (f.exists() && df.getFileName().contains("."))
             {
                 String line;
                 try (BufferedReader in = new BufferedReader(new FileReader(f)))
@@ -67,6 +69,22 @@ public class FileManager
         }
     }
     
+    private static BufferedImage defaultImage;
+    public static Image getDefaultImage()
+    {
+        if (defaultImage == null)
+        {
+            try
+            {
+                defaultImage = ImageIO.read(new File(FileManager.app_dir + "data files\\images\\null.png"));
+            }
+            catch (IOException ex)
+            {
+                System.out.println("could not read file.");
+            }
+        }
+        return defaultImage;
+    }
     
     
 }

@@ -19,6 +19,12 @@ public class Vector2
         this.x = (float) x;
         this.y = (float) y;
     }
+    
+    public Vector2(Vector2 other)
+    {
+        this.x = other.x;
+        this.y = other.y;
+    }
 
     @Override
     public String toString()
@@ -55,6 +61,14 @@ public class Vector2
         return true;
     }
     
+    private static float lerp(float firstFloat, float secondFloat, float by)
+    {
+         return firstFloat * (1 - by) + secondFloat * by;
+    }
     
+    public static Vector2 lerp(Vector2 a, Vector2 b, float t)
+    {
+        return new Vector2(lerp(a.x, b.x, t), lerp(a.y, b.y, t));
+    }
     
 }
