@@ -5,9 +5,15 @@ import com.rpgsim.common.CommonConfigurations;
 import com.rpgsim.common.PrefabID;
 import com.rpgsim.common.Scene;
 import com.rpgsim.common.game.Input;
+import com.rpgsim.common.game.KeyCode;
 import com.rpgsim.common.serverpackages.InstantiatePrefabRequest;
+import com.rpgsim.common.sheets.PlayerSheet;
+import com.rpgsim.client.sheet.SheetFrame;
+import com.rpgsim.common.sheets.SheetModel;
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,16 +32,38 @@ public class ClientGame extends Canvas implements Runnable
     
     private final Scene scene;
     
+    private SheetFrame sheetFrame;
+    
     public ClientGame(ClientManager manager, int width, int height)
     {
         super.setBounds(0, 0, width, height);
         super.setBackground(Color.BLACK);
+        
         this.client = manager;
         this.scene = new Scene();
+        
+        WindowAdapter l = new WindowAdapter()
+        {
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+                requestFocus();
+            }
+        };
+        this.sheetFrame = new SheetFrame(l);
+        
+        input = new Input();
+        super.addKeyListener(input);
+        super.addMouseListener(input);
+        super.addMouseMotionListener(input);
     }
     
     private void update(float dt)
     {
+        if (Input.getKeyDown(KeyCode.F1))
+        {
+            sheetFrame.setVisible(true);
+        }
         scene.updateGameObjects(client.getConnectionID(), dt);
     }
     
@@ -52,21 +80,21 @@ public class ClientGame extends Canvas implements Runnable
         gameThread.start();
     }
     
-    public void open()
+    public void open(SheetModel model, PlayerSheet sheet)
     {
-        input = new Input();
-        this.addKeyListener(input);
-        this.addMouseListener(input);
-        this.addMouseMotionListener(input);
         createBufferStrategy(3);
         screen = new Screen(getBufferStrategy(), getWidth(), getHeight());
-        gameRunning = true;
+        
+        this.sheetFrame.loadSheet(model, sheet);
         
         client.sendPackage(new InstantiatePrefabRequest(Input.mousePosition(), PrefabID.MOUSE));
+        gameRunning = true;
+        requestFocus();
     }
 
     public void stop()
     {
+        this.sheetFrame.dispose();
         gameRunning = false;
         networkRunning = false;
     }
@@ -128,6 +156,11 @@ public class ClientGame extends Canvas implements Runnable
             
             lastTime = now;
         }
+    }
+
+    public Input getInput()
+    {
+        return input;
     }
 
     public Scene getScene()

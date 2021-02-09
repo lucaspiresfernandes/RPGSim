@@ -1,4 +1,4 @@
-package com.rpgsim.common;
+package com.rpgsim.common.sheets;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -6,17 +6,31 @@ import java.util.Objects;
 public class Account implements Serializable
 {
     private final String username, password;
+    private PlayerSheet playerSheet;
 
     public Account()
     {
+        this.username = null;
+        this.password = null;
+    }
+    
+    public Account(SheetModel model)
+    {
         username = "null";
         password = "null";
+        playerSheet = new PlayerSheet(model);
     }
 
-    public Account(String username, String password)
+    public Account(String username, String password, SheetModel model)
     {
         this.username = username;
         this.password = password;
+        playerSheet = new PlayerSheet(model);
+    }
+
+    public PlayerSheet getPlayerSheet()
+    {
+        return playerSheet;
     }
 
     public String getUsername()

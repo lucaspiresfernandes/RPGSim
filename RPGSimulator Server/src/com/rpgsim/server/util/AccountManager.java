@@ -1,63 +1,162 @@
 package com.rpgsim.server.util;
 
-import com.rpgsim.common.Account;
+import com.rpgsim.common.sheets.Account;
 import com.rpgsim.common.FileManager;
-import java.io.EOFException;
+import com.rpgsim.common.sheets.PlayerSheet;
+import com.rpgsim.common.sheets.SheetManager;
+import com.rpgsim.common.sheets.SheetModel;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 
 public class AccountManager
 {
-    private ArrayList<Account> registeredAccounts;
     private final HashMap<Integer, Account> activeAccounts = new HashMap<>();
-
-    public AccountManager()
+    private final File accountFile = new File(FileManager.app_dir + "data\\accounts\\");
+    
+    /**
+     * Check all accounts and its sheets.
+     * 
+     * @throws java.io.IOException standard I/O exceptions.
+     */
+    public void checkAccounts() throws IOException
     {
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(new File(FileManager.app_dir + "accounts.bin"))))
+        for (File f : accountFile.listFiles())
         {
-            registeredAccounts = (ArrayList<Account>) in.readObject();
+            boolean changed = false;
+            Account acc = null;
+            
+            try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(f)))
+            {
+                acc = (Account) in.readObject();
+                PlayerSheet sheet = acc.getPlayerSheet();
+                SheetModel model = SheetManager.defaultSheetModel;
+                
+                if (model.getBasicInfo().length != sheet.getBasicInfo().length)
+                {
+                    int oldLength = sheet.getBasicInfo().length;
+                    sheet.setBasicInfo(Arrays.copyOf(sheet.getBasicInfo(), model.getBasicInfo().length));
+                    if (oldLength < sheet.getBasicInfo().length)
+                    {
+                        for (int i = oldLength; i < sheet.getBasicInfo().length; i++)
+                        {
+                            sheet.getBasicInfo()[i] = "none";
+                        }
+                    }
+                    changed = true;
+                }
+                
+                if (model.getBasicStats().length != sheet.getBasicStats().length)
+                {
+                    int oldLength = sheet.getBasicStats().length;
+                    sheet.setBasicStats(Arrays.copyOf(sheet.getBasicStats(), model.getBasicStats().length));
+                    if (oldLength < sheet.getBasicStats().length)
+                    {
+                        for (int i = oldLength; i < sheet.getBasicStats().length; i++)
+                        {
+                            sheet.getBasicStats()[i] = 0;
+                        }
+                    }
+                    
+                    changed = true;
+                }
+                
+                if (model.getAttributes().length != sheet.getAttributes().length)
+                {
+                    int oldLength = sheet.getAttributes().length;
+                    sheet.setAttributes(Arrays.copyOf(sheet.getAttributes(), model.getAttributes().length));
+                    if (oldLength < sheet.getAttributes().length)
+                    {
+                        for (int i = oldLength; i < sheet.getAttributes().length; i++)
+                        {
+                            sheet.getAttributes()[i] = 0;
+                        }
+                    }
+                    
+                    changed = true;
+                }
+                
+                if (model.getSkills().length != sheet.getSkills().length)
+                {
+                    int oldLength = sheet.getSkills().length;
+                    sheet.setSkills(Arrays.copyOf(sheet.getSkills(), model.getSkills().length));
+                    if (oldLength < sheet.getSkills().length)
+                    {
+                        for (int i = oldLength; i < sheet.getSkills().length; i++)
+                        {
+                            sheet.getSkills()[i] = 0;
+                        }
+                    }
+                    
+                    changed = true;
+                }
+            }
+            catch (ClassNotFoundException ex)
+            {
+                Logger.getLogger(AccountManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            if (changed)
+            {
+                try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(f)))
+                {
+                    out.writeObject(acc);
+                }
+            }
         }
-        catch (EOFException ex)
+    }
+    
+    public boolean isAccountRegistered(String username, String password)
+    {
+        File f = new File(accountFile, username + ".dat");
+        return f.exists();
+    }
+    
+    public Account getRegisteredAccount(String username, String password) throws IOException
+    {
+        File f = new File(accountFile, username + ".dat");
+        if (!f.exists())
+            return null;
+        
+        Account acc = null;
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(f)))
         {
-            registeredAccounts = new ArrayList<>();
-            System.out.println("accounts.bin is empty.");
-        }
-        catch (IOException ex)
-        {
-            registeredAccounts = new ArrayList<>();
-            JOptionPane.showMessageDialog(null, "Accounts.bin is either corrupted or not found. Reseting accounts.");
-            Logger.getLogger(AccountManager.class.getName()).log(Level.SEVERE, null, ex);
+            acc = (Account) in.readObject();
         }
         catch (ClassNotFoundException ex)
         {
-            JOptionPane.showMessageDialog(null, "Unknown error. Please contact application owner at <GITHUB>", "Unknown error", JOptionPane.ERROR_MESSAGE);
             Logger.getLogger(AccountManager.class.getName()).log(Level.SEVERE, null, ex);
-            System.exit(0);
         }
-    }
-
-    public boolean isAccountRegistered(Account acc)
-    {
-        return registeredAccounts.contains(acc);
+        
+        return acc;
     }
     
-    public void registerNewAccount(Account acc)
+    public Account registerNewAccount(String username, String password, SheetModel model) throws IOException
     {
-        registeredAccounts.add(acc);
+        File f = new File(accountFile, username + ".dat");
+        Account acc = new Account(username, password, model);
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(f)))
+        {
+            out.writeObject(acc);
+        }
+        return acc;
     }
 
-    public boolean isAccountActive(Account acc)
+    public boolean isAccountActive(String username, String password)
     {
-        return activeAccounts.containsValue(acc);
+        for (Account acc : activeAccounts.values())
+        {
+            if (acc.getUsername().equals(username) && acc.getPassword().equals(password))
+                return true;
+        }
+        return false;
     }
     
     public Account getActiveAccount(int sessionID)
@@ -67,28 +166,10 @@ public class AccountManager
 
     public void setAccountActive(int sessionID, Account acc, boolean active)
     {
-        
         if (active)
-        {
-            if (!isAccountRegistered(acc))
-                throw new IllegalStateException("This account is not registered.");
             activeAccounts.put(sessionID, acc);
-        }
         else
             activeAccounts.remove(sessionID, acc);
-    }
-    
-    public void saveAccounts()
-    {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(new File(FileManager.app_dir + "accounts.bin"))))
-        {
-            out.writeObject(registeredAccounts);
-        }
-        catch (IOException ex)
-        {
-            JOptionPane.showMessageDialog(null, "Could not save accounts.");
-            Logger.getLogger(AccountManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
 }

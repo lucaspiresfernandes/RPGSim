@@ -1,6 +1,5 @@
 package com.rpgsim.common.game;
 
-import com.rpgsim.common.FileManager;
 import com.rpgsim.common.Screen;
 import com.rpgsim.common.Vector2;
 import java.awt.Image;
@@ -14,7 +13,7 @@ public class Renderer
     public Renderer(NetworkGameObject gameObject)
     {
         this.gameObject = gameObject;
-        image = FileManager.getDefaultImage();
+        this.image = null;
     }
 
     public Image getImage()

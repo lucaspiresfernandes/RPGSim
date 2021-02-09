@@ -6,9 +6,11 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 import java.util.ArrayList;
 
-public class Input implements KeyListener, MouseListener, MouseMotionListener
+public class Input implements KeyListener, MouseListener, MouseMotionListener, WindowFocusListener
 {
     private static final ArrayList<Integer> pressedKeys = new ArrayList<>();
     private static final ArrayList<Integer> heldKeys = new ArrayList<>();
@@ -120,6 +122,20 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener
         mouseX = e.getX();
         mouseY = e.getY();
         mouseMoved = true;
+    }
+    
+    @Override
+    public void windowGainedFocus(WindowEvent e) {}
+
+    @Override
+    public void windowLostFocus(WindowEvent e)
+    {
+        heldButtons.clear();
+        heldKeys.clear();
+        mouseDragging = false;
+        mouseMoved = false;
+        pressedButtons.clear();
+        pressedKeys.clear();
     }
     
     public void update()

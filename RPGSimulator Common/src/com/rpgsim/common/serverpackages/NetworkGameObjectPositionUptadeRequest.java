@@ -27,7 +27,7 @@ public class NetworkGameObjectPositionUptadeRequest extends ServerPackage
     @Override
     public void executeServerAction(ServerActions server)
     {
-        server.onNetworkGameObjectPositionChanged(id, position, scale, rotation, flipX, flipY);
+        server.onNetworkGameObjectTransformUpdate(id, position, scale, rotation, flipX, flipY);
     }
     
 }

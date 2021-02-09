@@ -10,14 +10,15 @@ public class GameFrame extends JFrame
     public GameFrame(ClientManager manager, WindowListener l)
     {
         super("RPG Simulator");
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        setSize(800, 600);
-        setResizable(false);
-        setLocationRelativeTo(null);
-        setLayout(null);
-        addWindowListener(l);
+        super.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        super.setSize(800, 600);
+        super.setResizable(false);
+        super.setLocationRelativeTo(null);
+        super.setLayout(null);
+        super.addWindowListener(l);
         this.game = new ClientGame(manager, super.getWidth(), super.getHeight());
-        getContentPane().add(game);
+        super.addWindowFocusListener(this.game.getInput());
+        super.getContentPane().add(game);
     }
     
     public ClientGame getGame()

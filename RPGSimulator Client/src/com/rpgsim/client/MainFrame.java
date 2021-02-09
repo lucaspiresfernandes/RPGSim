@@ -1,8 +1,8 @@
 package com.rpgsim.client;
 
-import com.rpgsim.client.util.ClientConfigurations;
-import com.rpgsim.common.Account;
+import com.rpgsim.common.ApplicationConfigurations;
 import com.rpgsim.common.ConnectionType;
+import com.rpgsim.common.FileManager;
 import java.awt.CardLayout;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -13,7 +13,7 @@ import javax.swing.JOptionPane;
 public class MainFrame extends javax.swing.JFrame
 {
     private final CardLayout c;
-    private ClientConfigurations clientConfig;
+    private ApplicationConfigurations clientConfig;
     
     public MainFrame()
     {
@@ -21,7 +21,7 @@ public class MainFrame extends javax.swing.JFrame
         c = (CardLayout) pnlCards.getLayout();
         try
         {
-            clientConfig = new ClientConfigurations();
+            clientConfig = new ApplicationConfigurations(FileManager.app_dir + "data files\\config.ini");
         }
         catch (IOException ex)
         {
@@ -107,10 +107,10 @@ public class MainFrame extends javax.swing.JFrame
     
     private void connect(String username, String password, ConnectionType type)
     {
-        ClientManager manager = new ClientManager(this, clientConfig, new Account(username, password));
+        ClientManager manager = new ClientManager(this, clientConfig);
         try
         {
-            manager.start(type);
+            manager.start(username, password, type);
         }
         catch (IOException ex)
         {

@@ -1,28 +1,23 @@
 package com.rpgsim.common;
 
-import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 
 public class FileManager
 {
     public static final String app_dir = System.getProperty("user.dir") + "\\";
-    private static DataFile[] files;
+    private final DataFile[] files;
 
-    public static void setFiles(DataFile[] files)
+    public FileManager(DataFile[] files)
     {
-        FileManager.files = files;
+        this.files = files;
     }
     
-    public static void checkFiles() throws IOException
+    public void checkFiles() throws IOException
     {
         File parent = new File(app_dir);
         
@@ -30,7 +25,7 @@ public class FileManager
         {
             File f = new File(parent, df.getFileName());
             
-            if (f.exists() && df.getFileName().contains("."))
+            if (f.exists() && f.isFile())
             {
                 String line;
                 try (BufferedReader in = new BufferedReader(new FileReader(f)))
@@ -68,23 +63,5 @@ public class FileManager
             }
         }
     }
-    
-    private static BufferedImage defaultImage;
-    public static Image getDefaultImage()
-    {
-        if (defaultImage == null)
-        {
-            try
-            {
-                defaultImage = ImageIO.read(new File(FileManager.app_dir + "data files\\images\\null.png"));
-            }
-            catch (IOException ex)
-            {
-                System.out.println("could not read file.");
-            }
-        }
-        return defaultImage;
-    }
-    
     
 }

@@ -1,6 +1,5 @@
-package com.rpgsim.client.util;
+package com.rpgsim.common;
 
-import com.rpgsim.common.FileManager;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -9,18 +8,22 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class ClientConfigurations
+public class ApplicationConfigurations
 {
+    private final String path;
     private final HashMap<String, String> configHash = new HashMap<>();
     
-    public ClientConfigurations() throws IOException
+    public ApplicationConfigurations(String path) throws IOException
     {
-        try (BufferedReader in = new BufferedReader(new FileReader(new File(FileManager.app_dir + "config.dat"))))
+        this.path = path;
+        try (BufferedReader in = new BufferedReader(new FileReader(new File(path))))
         {
-            String l;
-            while ((l = in.readLine()) != null)
+            String line;
+            while ((line = in.readLine()) != null)
             {
-                String[] config = l.split("=");
+                if (line.isEmpty() || line.contains("#"))
+                    continue;
+                String[] config = line.split("=");
                 configHash.put(config[0], config[1]);
             }
         }
@@ -50,7 +53,7 @@ public class ClientConfigurations
     {
         String[] keys = configHash.keySet().toArray(new String[0]);
         String[] values = configHash.values().toArray(new String[0]);
-        try (BufferedWriter out = new BufferedWriter(new FileWriter(new File(FileManager.app_dir + "config.dat"), false)))
+        try (BufferedWriter out = new BufferedWriter(new FileWriter(new File(path), false)))
         {
             String config = "";
             for (int i = 0; i < values.length; i++)

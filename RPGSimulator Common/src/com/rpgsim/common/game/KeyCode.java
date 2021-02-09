@@ -27,7 +27,8 @@ public enum KeyCode
     W(0x57),
     X(0x58),
     Y(0x59),
-    Z(0x5A);
+    Z(0x5A),
+    F1(0x70);
     
     private final int code;
 
