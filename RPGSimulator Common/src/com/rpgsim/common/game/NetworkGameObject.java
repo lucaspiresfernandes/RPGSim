@@ -2,6 +2,7 @@ package com.rpgsim.common.game;
 
 import com.rpgsim.common.PrefabID;
 import com.rpgsim.common.Vector2;
+import java.awt.Rectangle;
 
 public class NetworkGameObject
 {
@@ -11,7 +12,8 @@ public class NetworkGameObject
     private final Transform transform;
     private final Renderer renderer;
     
-    private boolean dirty;
+    private boolean dirty = false;
+    private boolean destroyed = false;
     
     private Vector2 smoothPosition;
 
@@ -53,6 +55,16 @@ public class NetworkGameObject
     public void setDirty(boolean dirty)
     {
         this.dirty = dirty;
+    }
+
+    public boolean isDestroyed()
+    {
+        return destroyed;
+    }
+
+    public void setDestroyed(boolean destroyed)
+    {
+        this.destroyed = destroyed;
     }
     
     public Transform transform()
@@ -104,6 +116,13 @@ public class NetworkGameObject
     public void update(int clientID, float dt)
     {
         smoothPosition = Vector2.lerp(smoothPosition, transform.position(), 10 * dt);
+    }
+    
+    public Rectangle getBounds()
+    {
+        return new Rectangle((int)transform.position().x, (int)transform.position().y, 
+                (int) (renderer.getImage().getWidth(null) * transform.scale().x), 
+                (int) (renderer.getImage().getHeight(null) * transform.scale().y));
     }
     
 }

@@ -28,7 +28,15 @@ public enum KeyCode
     X(0x58),
     Y(0x59),
     Z(0x5A),
-    F1(0x70);
+    F1(0x70),
+    EQUALS(0x3D),
+    MINUS(0x2D),
+    OPEN_BRACKET(0x5B),
+    CLOSE_BRACKET(0x5D),
+    COMMA(0x2C),
+    PERIOD(0x2E),
+    DELETE(0x7F)
+    ;
     
     private final int code;
 

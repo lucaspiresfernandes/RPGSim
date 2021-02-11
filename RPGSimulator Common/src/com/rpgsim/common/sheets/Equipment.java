@@ -13,7 +13,7 @@ public class Equipment implements Serializable
     private String range;
     private boolean broken;
     private boolean areaOfEffect;
-
+    
     public Equipment()
     {
         name = "none";
@@ -25,6 +25,64 @@ public class Equipment implements Serializable
         range = "0";
         broken = false;
         areaOfEffect = false;
+    }
+
+    public Equipment(String name, EquipmentType type, String damage, String currentAmmo, String maxAmmo, String attacks, String range, boolean broken, boolean areaOfEffect)
+    {
+        this.name = name;
+        this.type = type;
+        this.damage = damage;
+        this.currentAmmo = currentAmmo;
+        this.maxAmmo = maxAmmo;
+        this.attacks = attacks;
+        this.range = range;
+        this.broken = broken;
+        this.areaOfEffect = areaOfEffect;
+    }
+    
+    public static String[] getPropertiesDescriptions()
+    {
+        return new String[]
+        {
+            "Name",
+            "Type",
+            "Damage",
+            "Current Ammo",
+            "Maximum Ammo",
+            "Attacks",
+            "Range",
+            "Broken",
+            "AoE"
+        };
+    }
+    
+    public static String[] getProperties(Equipment e)
+    {
+        return new String[]
+        {
+            e.getName(),
+            e.getType().getName(),
+            e.getDamage(),
+            e.getCurrentAmmo(),
+            e.getMaxAmmo(),
+            e.getAttacks(),
+            e.getRange(),
+            e.isBroken() ? "Yes" : "No",
+            e.hasAreaOfEffect() ? "Yes" : "No"
+        };
+    }
+    
+    public void set(Equipment e)
+    {
+        this.areaOfEffect = e.areaOfEffect;
+        this.attacks = e.attacks;
+        this.broken = e.broken;
+        this.currentAmmo = e.currentAmmo;
+        this.damage = e.damage;
+        this.maxAmmo = e.maxAmmo;
+        this.name = e.name;
+        this.range = e.range;
+        this.type = e.type;
     }
 
     public String getName() {
@@ -91,7 +149,7 @@ public class Equipment implements Serializable
         this.broken = broken;
     }
 
-    public boolean isAreaOfEffect() {
+    public boolean hasAreaOfEffect() {
         return areaOfEffect;
     }
 

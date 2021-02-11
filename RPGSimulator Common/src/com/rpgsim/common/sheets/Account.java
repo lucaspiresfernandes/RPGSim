@@ -28,6 +28,11 @@ public class Account implements Serializable
         playerSheet = new PlayerSheet(model);
     }
 
+    public void setPlayerSheet(PlayerSheet playerSheet)
+    {
+        this.playerSheet = playerSheet;
+    }
+
     public PlayerSheet getPlayerSheet()
     {
         return playerSheet;
@@ -46,7 +51,7 @@ public class Account implements Serializable
     @Override
     public String toString()
     {
-        return "Account{" + "username=" + username + ", password=" + password + '}';
+        return username;
     }
 
     @Override

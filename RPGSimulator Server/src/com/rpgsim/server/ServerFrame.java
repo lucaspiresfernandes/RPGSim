@@ -1,14 +1,68 @@
 package com.rpgsim.server;
 
-import java.awt.event.WindowListener;
+import com.rpgsim.common.sheets.Account;
+import com.rpgsim.common.sheets.PlayerSheet;
+import com.rpgsim.common.sheets.graphics.SheetFrame;
+import com.rpgsim.server.util.SheetManager;
+import java.awt.AWTEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
 
 public class ServerFrame extends javax.swing.JFrame
 {
-
-    public ServerFrame(WindowListener l)
+    private final SheetFrame sheetFrame;
+    private PlayerSheet playerSheet;
+    private final DefaultListModel<Account> list = new DefaultListModel<>();
+    
+    public ServerFrame(SheetFrame sheetFrame)
     {
         initComponents();
-        super.addWindowListener(l);
+        
+        this.sheetFrame = sheetFrame;
+        
+        this.sheetFrame.addWindowListener(new WindowAdapter()
+        {
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+                playerSheet = null;
+            }
+        });
+        
+        this.lstPlayer.setModel(list);
+        btnOpenCharacterSheet.addActionListener(l -> 
+        {
+            int i = lstPlayer.getSelectedIndex();
+            if (i < 0)
+            {
+                JOptionPane.showMessageDialog(null, "You should select an account first!");
+                return;
+            }
+            
+            if (playerSheet != null)
+            {
+                JOptionPane.showMessageDialog(null, "You should close the sheet that is opened first befora opening another one.");
+                return;
+            }
+            
+            playerSheet = list.get(i).getPlayerSheet();
+            sheetFrame.setPlayerSheet(playerSheet);
+            sheetFrame.setVisible(true);
+        });
+    }
+    
+    public void addPlayer(Account acc)
+    {
+        list.addElement(acc);
+    }
+    
+    public void removePlayer(Account acc)
+    {
+        if (acc.getPlayerSheet().equals(playerSheet))
+            sheetFrame.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+        list.removeElement(acc);
     }
 
     /** This method is called from within the constructor to
@@ -20,18 +74,53 @@ public class ServerFrame extends javax.swing.JFrame
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        scrPlayer = new javax.swing.JScrollPane();
+        lstPlayer = new javax.swing.JList<>();
+        btnKickPlayer = new javax.swing.JButton();
+        btnBanPlayer = new javax.swing.JButton();
+        btnOpenCharacterSheet = new javax.swing.JButton();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("RPG Simulator Server");
+
+        scrPlayer.setViewportView(lstPlayer);
+
+        btnKickPlayer.setText("Kick Player");
+
+        btnBanPlayer.setText("Ban Player");
+
+        btnOpenCharacterSheet.setText("Open Character Sheet");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 800, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(scrPlayer, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(btnKickPlayer)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnBanPlayer)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnOpenCharacterSheet)
+                .addContainerGap(440, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 600, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(scrPlayer, javax.swing.GroupLayout.DEFAULT_SIZE, 546, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(btnOpenCharacterSheet)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnKickPlayer)
+                    .addComponent(btnBanPlayer))
+                .addContainerGap())
         );
 
         pack();
@@ -39,6 +128,11 @@ public class ServerFrame extends javax.swing.JFrame
     }// </editor-fold>//GEN-END:initComponents
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBanPlayer;
+    private javax.swing.JButton btnKickPlayer;
+    private javax.swing.JButton btnOpenCharacterSheet;
+    private javax.swing.JList<Account> lstPlayer;
+    private javax.swing.JScrollPane scrPlayer;
     // End of variables declaration//GEN-END:variables
 
 }

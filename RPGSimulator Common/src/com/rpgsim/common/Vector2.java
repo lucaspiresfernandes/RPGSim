@@ -71,4 +71,14 @@ public class Vector2
         return new Vector2(lerp(a.x, b.x, t), lerp(a.y, b.y, t));
     }
     
+    public static Vector2 subtract(Vector2 a, Vector2 b)
+    {
+        return new Vector2(a.x - b.x, a.y - b.y);
+    }
+    
+    public static Vector2 add(Vector2 a, Vector2 b)
+    {
+        return new Vector2(a.x + b.x, a.y + b.y);
+    }
+    
 }

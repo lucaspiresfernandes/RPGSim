@@ -2,7 +2,7 @@ package com.rpgsim.server;
 
 import com.rpgsim.common.DataFile;
 import com.rpgsim.common.FileManager;
-import com.rpgsim.common.sheets.SheetManager;
+import com.rpgsim.server.util.SheetManager;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,14 +16,42 @@ public class Launcher
         {
             FileManager manager = new FileManager(generateFiles());
             manager.checkFiles();
-            SheetManager model = new SheetManager();
-            model.checkSheetModel();
-            new ServerManager().start();
         }
         catch (IOException ex)
         {
-            JOptionPane.showMessageDialog(null, "Could not check essential files. "
-                    + "Try deleting config.ini or sheets.json and reopen the app", 
+            JOptionPane.showMessageDialog(null, "Could not check and initialize "
+                    + "essential files (They are either corrupted or inacessible). "
+                    + "Try deleting all configuration files and run the server again.", 
+                    "FATAL ERROR", JOptionPane.ERROR_MESSAGE);
+            Logger.getLogger(Launcher.class.getName()).log(Level.SEVERE, null, ex);
+            return;
+        }
+        
+        try
+        {
+            SheetManager model = new SheetManager();
+            model.checkSheetModel();
+        }
+        catch (IOException ex)
+        {
+            JOptionPane.showMessageDialog(null, "Could not check and initialize "
+                    + "sheet.json file (It is either corrupted or inacessible). "
+                    + "Try deleting it and run the server again.", 
+                    "FATAL ERROR", JOptionPane.ERROR_MESSAGE);
+            Logger.getLogger(Launcher.class.getName()).log(Level.SEVERE, null, ex);
+            return;
+        }
+        
+        try
+        {
+            ServerManager manager = new ServerManager();
+            manager.start();
+        }
+        catch (IOException ex)
+        {
+            JOptionPane.showMessageDialog(null, "Could not check and initialize "
+                    + "server configurations files (It is either corrupted or "
+                    + "inacessible). Try deleteting configurations and run the server again.", 
                     "FATAL ERROR", JOptionPane.ERROR_MESSAGE);
             Logger.getLogger(Launcher.class.getName()).log(Level.SEVERE, null, ex);
         }

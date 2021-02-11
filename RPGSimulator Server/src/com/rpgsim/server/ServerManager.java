@@ -11,16 +11,20 @@ import com.rpgsim.common.FileManager;
 import com.rpgsim.common.PrefabID;
 import com.rpgsim.common.ServerActions;
 import com.rpgsim.common.Vector2;
+import com.rpgsim.common.clientpackages.ClientPackage;
 import com.rpgsim.common.clientpackages.ConnectionRequestResponse;
-import com.rpgsim.common.clientpackages.DestroyNetworkGameObject;
+import com.rpgsim.common.clientpackages.NetworkGameObjectDestroyResponse;
 import com.rpgsim.common.clientpackages.InstantiateNetworkGameObjectResponse;
+import com.rpgsim.common.clientpackages.NetworkGameObjectImageUpdateResponse;
 import com.rpgsim.common.clientpackages.NetworkGameObjectTransformUpdate;
 import com.rpgsim.common.game.NetworkGameObject;
 import com.rpgsim.common.serverpackages.ServerPackage;
-import com.rpgsim.common.sheets.SheetManager;
+import com.rpgsim.common.serverpackages.UpdateType;
+import com.rpgsim.server.util.SheetManager;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,6 +38,8 @@ public class ServerManager extends Listener implements ServerActions
     private final AccountManager accountManager;
     private final ServerGame game;
     private Connection currentConnection;
+    private final ServerSheetFrame sheetFrame;
+    
     
     //The window in which the server supervises client/user actions.
     private final ServerFrame serverFrame;
@@ -52,12 +58,26 @@ public class ServerManager extends Listener implements ServerActions
                 }
             }
         };
-        this.serverFrame = new ServerFrame(l);
+        this.sheetFrame = new ServerSheetFrame(this, SheetManager.defaultSheetModel);
+        this.sheetFrame.setTitle(this.sheetFrame.getTitle() + " - Server");
+        this.serverFrame = new ServerFrame(sheetFrame);
+        this.serverFrame.addWindowListener(l);
         this.serverFrame.setVisible(true);
         
+        
         this.serverConfigurations = new ApplicationConfigurations(FileManager.app_dir + "data\\config.ini");
+        
         this.accountManager = new AccountManager();
-        this.accountManager.checkAccounts();
+        try
+        {
+            this.accountManager.checkAccounts();
+        }
+        catch (IOException ex)
+        {
+            Logger.getLogger(Launcher.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(null, "Could not open and check all accounts "
+                    + "(They are either corrupted or not accessible).", "WARNING", JOptionPane.WARNING_MESSAGE);
+        }
         
         this.game = new ServerGame();
         
@@ -80,17 +100,34 @@ public class ServerManager extends Listener implements ServerActions
     @Override
     public void disconnected(Connection connection)
     {
+        Account acc = accountManager.getActiveAccount(connection.getID());
+        
+        if (acc == null)
+        {
+            //The client wasn't able to pass login and disconnected.
+            return;
+        }
+        
         accountManager.setAccountActive(connection.getID(), accountManager.getActiveAccount(connection.getID()), false);
-        Iterator<NetworkGameObject> aux = game.getScene().getGameObjects().iterator();
+        Iterator<NetworkGameObject> aux = new ArrayList<>(game.getScene().getGameObjects()).iterator();
         while (aux.hasNext())
         {
             NetworkGameObject go = aux.next();
             if (go.getClientID() == connection.getID())
             {
-                game.getScene().removeGameObject(go.getObjectID());
-                server.sendToAllTCP(new DestroyNetworkGameObject(go.getObjectID()));
+                onNetworkGameObjectDestroy(go.getObjectID());
             }
         }
+        
+        try
+        {
+            accountManager.updateAccountSheet(acc);
+        }
+        catch (IOException ex)
+        {
+            Logger.getLogger(ServerManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        serverFrame.removePlayer(acc);
     }
     
     public void start()
@@ -118,8 +155,14 @@ public class ServerManager extends Listener implements ServerActions
     public void stop()
     {
         serverFrame.dispose();
+        sheetFrame.dispose();
         server.stop();
         server.close();
+    }
+    
+    public void sendPackage(ClientPackage p)
+    {
+        server.sendToTCP(currentConnection.getID(), p);
     }
 
     @Override
@@ -147,11 +190,14 @@ public class ServerManager extends Listener implements ServerActions
                                     new ConnectionRequestResponse(true, "", acc, SheetManager.defaultSheetModel, 
                                             type));
                             for (NetworkGameObject go : game.getScene().getGameObjects())
+                            {
                                 server.sendToTCP(currentConnection.getID(),
                                         new InstantiateNetworkGameObjectResponse(go.getObjectID(),
                                                 go.getClientID(),
                                                 go.transform().position(),
-                                                go.getPrefabID()));
+                                                go.getPrefabID(), go.renderer().getImagePath()));
+                            }
+                            serverFrame.addPlayer(acc);
                         }
                         catch (IOException ex)
                         {
@@ -189,7 +235,8 @@ public class ServerManager extends Listener implements ServerActions
                                     new InstantiateNetworkGameObjectResponse(go.getObjectID(),
                                             go.getClientID(),
                                             go.transform().position(),
-                                            go.getPrefabID()));
+                                            go.getPrefabID(), go.renderer().getImagePath()));
+                        serverFrame.addPlayer(acc);
                     }
                     catch (IOException ex)
                     {
@@ -216,12 +263,35 @@ public class ServerManager extends Listener implements ServerActions
     }
     
     @Override
-    public void onNetworkGameObjectRequest(Vector2 position, PrefabID pID)
+    public void onNetworkGameObjectRequest(Vector2 position, PrefabID pID, int clientID, String imageRelativePath)
     {
         NetworkGameObject go;
-        go = new NetworkGameObject(ServerGame.getGameObjectID(), currentConnection.getID(), pID);
+        go = new NetworkGameObject(ServerGame.getGameObjectID(), clientID, pID);
+        go.renderer().setImagePath(imageRelativePath);
         game.getScene().addGameObject(go);
-        server.sendToAllTCP(new InstantiateNetworkGameObjectResponse(go.getObjectID(), go.getClientID(), position, pID));
+        server.sendToAllTCP(new InstantiateNetworkGameObjectResponse(go.getObjectID(), go.getClientID(), position, pID, imageRelativePath));
+    }
+
+    @Override
+    public void onNetworkGameObjectImageUpdate(int id, String relativePath)
+    {
+        game.getScene().getGameObject(id).renderer().setImagePath(relativePath);
+        server.sendToAllTCP(new NetworkGameObjectImageUpdateResponse(id, relativePath));
+    }
+
+    @Override
+    public void onNetworkGameObjectDestroy(int id)
+    {
+        game.getScene().removeGameObject(id);
+        server.sendToAllTCP(new NetworkGameObjectDestroyResponse(id));
+    }
+
+    @Override
+    public void onCharacterSheetFieldUpdate(int connectionID, int fieldID, int propertyID, Object newValue, UpdateType type)
+    {
+        Account acc = accountManager.getActiveAccount(connectionID);
+        sheetFrame.setPlayerSheet(acc.getPlayerSheet());
+        sheetFrame.onReceiveCharacterSheetUpdate(fieldID, propertyID, newValue, type);
     }
     
 }

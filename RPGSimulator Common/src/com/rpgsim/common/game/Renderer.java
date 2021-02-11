@@ -8,6 +8,7 @@ import java.awt.geom.AffineTransform;
 public class Renderer
 {
     private final NetworkGameObject gameObject;
+    private String imagePath;
     private Image image;
 
     public Renderer(NetworkGameObject gameObject)
@@ -24,6 +25,16 @@ public class Renderer
     public void setImage(Image image)
     {
         this.image = image;
+    }
+
+    public String getImagePath()
+    {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath)
+    {
+        this.imagePath = imagePath;
     }
     
     public void render(int clientID, Screen screen)

@@ -15,11 +15,13 @@ import com.rpgsim.common.Vector2;
 import com.rpgsim.common.clientpackages.ClientPackage;
 import com.rpgsim.common.game.NetworkGameObject;
 import com.rpgsim.common.serverpackages.ConnectionRequest;
-import com.rpgsim.common.serverpackages.NetworkGameObjectPositionUptadeRequest;
+import com.rpgsim.common.serverpackages.NetworkGameObjectStateUptadeRequest;
 import com.rpgsim.common.serverpackages.ServerPackage;
+import com.rpgsim.common.serverpackages.UpdateType;
 import com.rpgsim.common.sheets.SheetModel;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -40,7 +42,8 @@ public class ClientManager extends Listener implements ClientActions
     private final GameFrame gameFrame;
     private final ClientGame game;
     
-    private final ConcurrentLinkedQueue<ClientPackage> packages = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<ClientPackage> receivedPackages = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<ServerPackage> packagesToSend = new ConcurrentLinkedQueue<>();
 
     public ClientManager(MainFrame mainFrame, ApplicationConfigurations clientConfig)
     {
@@ -71,17 +74,22 @@ public class ClientManager extends Listener implements ClientActions
     {
         return connection.getID();
     }
+
+    public Account getAccount()
+    {
+        return account;
+    }
     
     public void sendPackage(ServerPackage _package)
     {
-        client.sendTCP(_package);
+        packagesToSend.add(_package);
     }
 
     @Override
     public void received(Connection connection, Object object)
     {
         if (object instanceof ClientPackage)
-            packages.add((ClientPackage) object);
+            receivedPackages.add((ClientPackage) object);
         else
             System.out.println("The data received is not a ClientPackage. Object: " + object);
     }
@@ -128,23 +136,24 @@ public class ClientManager extends Listener implements ClientActions
     
     public void update()
     {
+        ServerPackage sp;
+        while ((sp = packagesToSend.poll()) != null)
+            client.sendTCP(sp);
+        
         for (NetworkGameObject go : game.getScene().getGameObjects())
         {
             if (go.isDirty())
             {
-                NetworkGameObjectPositionUptadeRequest r = new NetworkGameObjectPositionUptadeRequest
+                NetworkGameObjectStateUptadeRequest r = new NetworkGameObjectStateUptadeRequest
                 (go.getObjectID(), go.transform().position(), go.transform().scale(), 
-                go.transform().rotation(), go.transform().flipX(), go.transform().flipY());
+                go.transform().rotation(), go.transform().flipX(), go.transform().flipY(), go.isDestroyed());
                 client.sendUDP(r);
-                go.setDirty(false);
             }
         }
         
-        ClientPackage p;
-        while ((p = packages.poll()) != null)
-        {
-            p.executeClientAction(this);
-        }
+        ClientPackage cp;
+        while ((cp = receivedPackages.poll()) != null)
+            cp.executeClientAction(this);
     }
 
     @Override
@@ -155,6 +164,7 @@ public class ClientManager extends Listener implements ClientActions
             this.account = account;
             mainFrame.dispatchEvent(new WindowEvent(mainFrame, WindowEvent.WINDOW_CLOSING));
             gameFrame.setVisible(true);
+            
             game.open(model, account.getPlayerSheet());
             try
             {
@@ -173,7 +183,7 @@ public class ClientManager extends Listener implements ClientActions
     }
     
     @Override
-    public void onInstantiateNetworkGameObject(int id, int clientID, Vector2 position, PrefabID pID)
+    public void onInstantiateNetworkGameObject(int id, int clientID, Vector2 position, PrefabID pID, String imageRelativePath)
     {
         NetworkGameObject go;
         switch (pID)
@@ -188,17 +198,7 @@ public class ClientManager extends Listener implements ClientActions
                 go = new NetworkGameObject(id, clientID, pID);
                 break;
         }
-        if (go.renderer().getImage() == null)
-        {
-            try
-            {
-                go.renderer().setImage(ImageIO.read(new File(FileManager.app_dir + "data files\\images\\null.png")));
-            }
-            catch (IOException ex)
-            {
-                Logger.getLogger(ClientManager.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+        asyncLoadImage(go, imageRelativePath);
         game.getScene().addGameObject(go);
     }
     
@@ -206,17 +206,56 @@ public class ClientManager extends Listener implements ClientActions
     public void updateNetworkGameObjectTransform(int id, Vector2 position, Vector2 scale, float rotation, boolean flipX, boolean flipY)
     {
         NetworkGameObject go = game.getScene().getGameObject(id);
-        go.transform().position(position);
-        go.transform().scale(scale);
-        go.transform().rotation(rotation);
-        go.transform().flipX(flipX);
-        go.transform().flipY(flipY);
+        
+        if (go.isDirty())
+        {
+            go.setDirty(false);
+        }
+        else
+        {
+            go.transform().position(position);
+            go.transform().scale(scale);
+            go.transform().rotation(rotation);
+            go.transform().flipX(flipX);
+            go.transform().flipY(flipY);
+        }
     }
 
     @Override
     public void onNetworkGameObjectDestroy(int id)
     {
         game.getScene().removeGameObject(id);
+    }
+
+    @Override
+    public void onNetworkGameObjectImageChange(int id, String relativePath)
+    {
+        asyncLoadImage(game.getScene().getGameObject(id), relativePath);
+    }
+    
+    public static void asyncLoadImage(NetworkGameObject obj, String relativePath)
+    {
+        obj.renderer().setImage(new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB));
+        AsynTask.executeAsyncTask("Async Image Load", () ->
+        {
+            try
+            {
+                obj.renderer().setImage(ImageIO.read(new File(FileManager.app_dir + relativePath)));
+                obj.renderer().setImagePath(relativePath);
+            }
+            catch (IOException ex)
+            {
+                System.out.println("could not load " + FileManager.app_dir + relativePath);
+                Logger.getLogger(ClientManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+        });
+    }
+
+    @Override
+    public void onCharacterSheetUpdate(int fieldID, int propertyID, Object value, UpdateType type)
+    {
+        game.getSheetFrame().onReceiveCharacterSheetUpdate(fieldID, propertyID, value, type);
     }
     
 }

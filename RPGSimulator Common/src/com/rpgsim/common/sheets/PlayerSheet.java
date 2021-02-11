@@ -1,7 +1,9 @@
 package com.rpgsim.common.sheets;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class PlayerSheet implements Serializable
 {
@@ -13,10 +15,9 @@ public class PlayerSheet implements Serializable
     private int[] skills;
     private ArrayList<Equipment> equipments;
     private ArrayList<Item> items;
-    
-    private PlayerSheet()
+
+    public PlayerSheet()
     {
-        
     }
     
     public PlayerSheet(SheetModel sheet)
@@ -30,6 +31,8 @@ public class PlayerSheet implements Serializable
         attributes = new int[sheet.getAttributes().length];
         skills = new int[sheet.getSkills().length];
         equipments = new ArrayList<>();
+        equipments.add(new Equipment("Sword", EquipmentType.HEAVY_MELEE, "10 + 1d10", "0", "0", "1", "2m", false, false));
+        equipments.add(new Equipment("Shotgun", EquipmentType.HEAVY_RANGED, "20 + 1d15", "3", "6", "1", "15m", false, true));
         items = new ArrayList<>();
     }
 
@@ -112,9 +115,5 @@ public class PlayerSheet implements Serializable
     {
         this.items = items;
     }
-
-    
-    
-    
     
 }

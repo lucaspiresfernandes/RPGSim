@@ -3,7 +3,6 @@ package com.rpgsim.server.util;
 import com.rpgsim.common.sheets.Account;
 import com.rpgsim.common.FileManager;
 import com.rpgsim.common.sheets.PlayerSheet;
-import com.rpgsim.common.sheets.SheetManager;
 import com.rpgsim.common.sheets.SheetModel;
 import java.io.File;
 import java.io.FileInputStream;
@@ -147,6 +146,17 @@ public class AccountManager
             out.writeObject(acc);
         }
         return acc;
+    }
+    
+    public void updateAccountSheet(Account acc) throws IOException
+    {
+        File f = new File(accountFile, acc.getUsername() + ".dat");
+        acc.setPlayerSheet(acc.getPlayerSheet());
+        
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(f)))
+        {
+            out.writeObject(acc);
+        }
     }
 
     public boolean isAccountActive(String username, String password)
