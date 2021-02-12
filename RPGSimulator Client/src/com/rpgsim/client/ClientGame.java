@@ -29,7 +29,7 @@ public class ClientGame extends Canvas implements Runnable
     
     private final ClientManager client;
     
-    private Screen screen;
+    private static Screen screen;
     private final Input input;
     private final Physics physics;
     
@@ -90,7 +90,8 @@ public class ClientGame extends Canvas implements Runnable
         createBufferStrategy(3);
         screen = new Screen(getBufferStrategy(), getWidth(), getHeight());
         
-        this.sheetFrame = new ClientSheetFrame(client, model, sheet);
+        this.sheetFrame = new ClientSheetFrame(client);
+        this.sheetFrame.load(model, sheet);
         WindowAdapter l = new WindowAdapter()
         {
             @Override
@@ -188,6 +189,11 @@ public class ClientGame extends Canvas implements Runnable
     public Scene getScene()
     {
         return scene;
+    }
+
+    public static Screen getScreen()
+    {
+        return screen;
     }
 
 }

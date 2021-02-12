@@ -32,7 +32,6 @@ import javax.swing.JOptionPane;
 
 public class ClientManager extends Listener implements ClientActions
 {
-    private Connection connection;
     private Account account;
     
     private final Client client;
@@ -72,7 +71,7 @@ public class ClientManager extends Listener implements ClientActions
     
     public int getConnectionID()
     {
-        return connection.getID();
+        return client.getID();
     }
 
     public Account getAccount()
@@ -95,16 +94,8 @@ public class ClientManager extends Listener implements ClientActions
     }
 
     @Override
-    public void connected(Connection connection)
-    {
-        this.connection = connection;
-    }
-
-    @Override
     public void disconnected(Connection connection)
     {
-        client.stop();
-        client.close();
         game.stop();
         gameFrame.dispose();
     }
@@ -118,20 +109,20 @@ public class ClientManager extends Listener implements ClientActions
                 clientConfig.getIntegerProperty("UDPPort"));
         game.start();
         
-        client.sendTCP(new ConnectionRequest(username, password, type));
+        client.sendTCP(new ConnectionRequest(client.getID(), username, password, type));
     }
     
     public void stop()
     {
-        if (connection == null)
+        if (client.isConnected())
         {
             client.stop();
             client.close();
-            game.stop();
-            gameFrame.dispose();
         }
         else
-            connection.close();
+        {
+            disconnected(null);
+        }
     }
     
     public void update()
@@ -255,7 +246,7 @@ public class ClientManager extends Listener implements ClientActions
     @Override
     public void onCharacterSheetUpdate(int fieldID, int propertyID, Object value, UpdateType type)
     {
-        game.getSheetFrame().onReceiveCharacterSheetUpdate(fieldID, propertyID, value, type);
+        //game.getSheetFrame().onReceiveCharacterSheetUpdate(fieldID, propertyID, value, type);
     }
     
 }

@@ -23,7 +23,7 @@ public class NetworkGameObject
         this.clientID = clientID;
         this.prefabID = prefabID;
         this.smoothPosition = new Vector2();
-        transform = new Transform(this);
+        transform = new Transform();
         renderer = new Renderer(this);
     }
 

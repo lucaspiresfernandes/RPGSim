@@ -1,49 +1,51 @@
 package com.rpgsim.common.sheets;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class PlayerSheet implements Serializable
 {
-    private String[] basicInfo;
+    private String[] info;
     private String about;
     private String extras;
-    private int[] basicStats;
+    private int[] currentStats;
+    private int[] maxStats;
     private int[] attributes;
     private int[] skills;
-    private ArrayList<Equipment> equipments;
-    private ArrayList<Item> items;
+    private final ArrayList<Object[]> equipments;
+    private final ArrayList<String> items;
 
-    public PlayerSheet()
+    private PlayerSheet()
     {
+        this.equipments = null;
+        this.items = null;
     }
     
     public PlayerSheet(SheetModel sheet)
     {
-        basicInfo = new String[sheet.getBasicInfo().length];
-        for (int i = 0; i < basicInfo.length; i++)
-            basicInfo[i] = "none";
+        info = new String[sheet.getInfo().length];
+        for (int i = 0; i < info.length; i++)
+            info[i] = "none";
         about = "";
         extras = "";
-        basicStats = new int[sheet.getBasicStats().length];
+        currentStats = new int[sheet.getCurrentStats().length];
+        maxStats = new int[sheet.getMaxStats().length];
         attributes = new int[sheet.getAttributes().length];
         skills = new int[sheet.getSkills().length];
         equipments = new ArrayList<>();
-        equipments.add(new Equipment("Sword", EquipmentType.HEAVY_MELEE, "10 + 1d10", "0", "0", "1", "2m", false, false));
-        equipments.add(new Equipment("Shotgun", EquipmentType.HEAVY_RANGED, "20 + 1d15", "3", "6", "1", "15m", false, true));
         items = new ArrayList<>();
+        items.add("Bottle of Water");
+        items.add("10x Coins");
     }
 
-    public String[] getBasicInfo()
+    public String[] getInfo()
     {
-        return basicInfo;
+        return info;
     }
 
     public void setBasicInfo(String[] basicInfo)
     {
-        this.basicInfo = basicInfo;
+        this.info = basicInfo;
     }
 
     public String getAbout()
@@ -66,14 +68,24 @@ public class PlayerSheet implements Serializable
         this.extras = extras;
     }
 
-    public int[] getBasicStats()
+    public int[] getCurrentStats()
     {
-        return basicStats;
+        return currentStats;
     }
 
-    public void setBasicStats(int[] basicStats)
+    public void setCurrentStats(int[] basicStats)
     {
-        this.basicStats = basicStats;
+        this.currentStats = basicStats;
+    }
+
+    public int[] getMaxStats()
+    {
+        return maxStats;
+    }
+
+    public void setMaxStats(int[] maxStats)
+    {
+        this.maxStats = maxStats;
     }
 
     public int[] getAttributes()
@@ -96,24 +108,14 @@ public class PlayerSheet implements Serializable
         this.skills = skills;
     }
 
-    public ArrayList<Equipment> getEquipments()
+    public ArrayList<Object[]> getEquipments()
     {
         return equipments;
     }
 
-    public void setEquipments(ArrayList<Equipment> equipments)
-    {
-        this.equipments = equipments;
-    }
-
-    public ArrayList<Item> getItems()
+    public ArrayList<String> getItems()
     {
         return items;
-    }
-
-    public void setItems(ArrayList<Item> items)
-    {
-        this.items = items;
     }
     
 }

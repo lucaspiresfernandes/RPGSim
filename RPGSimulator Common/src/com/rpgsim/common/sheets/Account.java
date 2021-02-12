@@ -5,27 +5,36 @@ import java.util.Objects;
 
 public class Account implements Serializable
 {
+    private final int connectionID;
     private final String username, password;
     private PlayerSheet playerSheet;
 
-    public Account()
+    private Account()
     {
+        this.connectionID = -1;
         this.username = null;
         this.password = null;
     }
     
-    public Account(SheetModel model)
+    public Account(int connectionID, SheetModel model)
     {
+        this.connectionID = connectionID;
         username = "null";
         password = "null";
         playerSheet = new PlayerSheet(model);
     }
 
-    public Account(String username, String password, SheetModel model)
+    public Account(int connectionID, String username, String password, SheetModel model)
     {
+        this.connectionID = connectionID;
         this.username = username;
         this.password = password;
         playerSheet = new PlayerSheet(model);
+    }
+
+    public int getConnectionID()
+    {
+        return connectionID;
     }
 
     public void setPlayerSheet(PlayerSheet playerSheet)

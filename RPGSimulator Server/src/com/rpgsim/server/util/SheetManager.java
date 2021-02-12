@@ -11,90 +11,12 @@ import java.io.IOException;
 
 public class SheetManager
 {
-    public static SheetModel defaultSheetModel;
-    
-    private final String[] basicInformations = new String[]
+    private static SheetModel defaultSheetModel;
+
+    public static SheetModel getDefaultSheetModel()
     {
-        "Name",
-        "Player",
-        "Occupation",
-        "Age",
-        "Sex",
-        "Residence",
-        "Birthplace"
-    };
-    
-    private final String[] attributes = new String[]
-    {
-        "Strength"
-        , "Dexterity"
-        , "Intelligence"
-        , "Constituition"
-        , "Appeal"
-        , "Power"
-        , "Size"
-        , "Education"
-        , "Move Rate"
-    };
-    
-    private final String[] basicStats = new String[]
-    {
-        "Current HP"
-        , "Max HP"
-        , "Current Sanity"
-        , "Max Sanity"
-        , "Luck"
-        , "Current MP"
-        , "Max MP"
-    };
-    
-    private final String[] skills = new String[]
-    {
-            "Accounting"
-            , "Antrhopology"
-            , "Appraise"
-            , "Archaeology"
-            , "Art/Craft"
-            , "Charm"
-            , "Climb"
-            , "Computer Use"
-            , "Disguise"
-            , "Dodge"
-            , "Drive Auto"
-            , "Elec Repair"
-            , "Electronics"
-            , "Fast Talk"
-            , "Fighting"
-            , "Firearms(Handgun)"
-            , "Firearms(Rifle)"
-            , "First Aid"
-            , "History"
-            , "Intimidate"
-            , "Jump"
-            , "Language"
-            , "Law"
-            , "Library Use"
-            , "Listen"
-            , "Locksmith"
-            , "Mech Repair"
-            , "Medicine"
-            , "Natural World"
-            , "Navigate"
-            , "Occult"
-            , "Op. Hv. Machine"
-            , "Persuade"
-            , "Pilot"
-            , "Psychology"
-            , "Psychoanalysis"
-            , "Science"
-            , "Sleight Of Hand"
-            , "Spot Hidden"
-            , "Stealth"
-            , "Survival"
-            , "Swim"
-            , "Throw"
-            , "Track"
-    };
+        return defaultSheetModel;
+    }
     
     public void checkSheetModel() throws IOException
     {
@@ -123,7 +45,107 @@ public class SheetManager
         builder.setPrettyPrinting();
         Gson gson = builder.create();
         
-        defaultSheetModel = new SheetModel(basicInformations, basicStats, attributes, skills);
+        String[] basicInformations = new String[]
+        {
+            "Name",
+            "Player",
+            "Occupation",
+            "Age",
+            "Sex",
+            "Residence",
+            "Birthplace"
+        };
+
+        String[] attributes = new String[]
+        {
+            "Strength"
+            , "Dexterity"
+            , "Intelligence"
+            , "Constituition"
+            , "Appeal"
+            , "Power"
+            , "Size"
+            , "Education"
+            , "Luck"
+            , "Move Rate"
+        };
+
+        String[] currentStats = new String[]
+        {
+            "Current HP"
+            , "Current Sanity"
+            , "Current MP"
+        };
+
+        String[] maxStats = new String[]
+        {
+            "Max HP"
+            , "Max Sanity"
+            , "Max MP"
+        };
+
+        String[] skills = new String[]
+        {
+                "Accounting"
+                , "Antrhopology"
+                , "Appraise"
+                , "Archaeology"
+                , "Art/Craft"
+                , "Charm"
+                , "Climb"
+                , "Computer Use"
+                , "Disguise"
+                , "Dodge"
+                , "Drive Auto"
+                , "Elec Repair"
+                , "Electronics"
+                , "Fast Talk"
+                , "Fighting"
+                , "Firearms(Handgun)"
+                , "Firearms(Rifle)"
+                , "First Aid"
+                , "History"
+                , "Intimidate"
+                , "Jump"
+                , "Language"
+                , "Law"
+                , "Library Use"
+                , "Listen"
+                , "Locksmith"
+                , "Mech Repair"
+                , "Medicine"
+                , "Natural World"
+                , "Navigate"
+                , "Occult"
+                , "Op. Hv. Machine"
+                , "Persuade"
+                , "Pilot"
+                , "Psychology"
+                , "Psychoanalysis"
+                , "Science"
+                , "Sleight Of Hand"
+                , "Spot Hidden"
+                , "Stealth"
+                , "Survival"
+                , "Swim"
+                , "Throw"
+                , "Track"
+        };
+        
+        String[] equipments = new String[]
+        {
+            "Name      ",
+            "Type ",
+            "Damage",
+            "Cur. Ammo",
+            "Max. Ammo",
+            "Attacks",
+            "Range",
+            "Broken",
+            "AoE"
+        };
+        
+        defaultSheetModel = new SheetModel(basicInformations, currentStats, maxStats, attributes, skills, equipments);
         
         try (FileWriter file = new FileWriter(f))
         {

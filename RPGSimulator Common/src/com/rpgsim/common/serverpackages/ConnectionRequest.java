@@ -5,6 +5,7 @@ import com.rpgsim.common.ServerActions;
 
 public class ConnectionRequest extends ServerPackage
 {
+    private int connectionID;
     private String username, password;
     private ConnectionType type;
 
@@ -12,25 +13,18 @@ public class ConnectionRequest extends ServerPackage
     {
     }
 
-    public ConnectionRequest(String username, String password, ConnectionType type)
+    public ConnectionRequest(int connectionID, String username, String password, ConnectionType type)
     {
+        this.connectionID = connectionID;
         this.username = username;
         this.password = password;
         this.type = type;
     }
-
-    public ConnectionRequest(ConnectionType type)
-    {
-        this.username = "null";
-        this.password = "null";
-        this.type = type;
-    }
-    
     
     @Override
     public void executeServerAction(ServerActions server)
     {
-        server.onClientConnection(username, password, type);
+        server.onClientConnection(connectionID, username, password, type);
     }
 
 }

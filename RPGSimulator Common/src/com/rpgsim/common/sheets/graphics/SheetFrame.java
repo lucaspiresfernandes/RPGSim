@@ -1,234 +1,177 @@
 package com.rpgsim.common.sheets.graphics;
 
-import com.rpgsim.common.serverpackages.UpdateType;
-import com.rpgsim.common.sheets.Equipment;
 import com.rpgsim.common.sheets.PlayerSheet;
 import com.rpgsim.common.sheets.SheetModel;
 import java.awt.Color;
+import static java.awt.Component.CENTER_ALIGNMENT;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.MatteBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
-public abstract class SheetFrame extends javax.swing.JFrame
+public class SheetFrame extends javax.swing.JFrame
 {
-    protected static final int CHARACTER_INFO_ID = 0;
-    protected static final int ABOUT_ID = 1;
-    protected static final int EXTRAS_ID = 2;
-    protected static final int ATTRIBUTES_ID = 3;
-    protected static final int SKILLS_ID = 4;
-    protected static final int EQUIPMENT_ID = 5;
-    protected static final int ITEM_ID = 6;
-    protected static final int FIELDS_LENGTH = 7;
-    
+    private final int connectionID;
     private SheetModel model;
-    private PlayerSheet playerSheet;
+    private PlayerSheet sheet;
     
     private final Font f = new Font("Comic Sans MS", Font.PLAIN, 16);
     private final Font f12 = f.deriveFont(12f);
     private final Font f24 = f.deriveFont(24f);
     
-    private SheetPanel pnlInfo, pnlAbout, pnlExtras, pnlStats, 
-            pnlAttributes, pnlSkills, pnlItems;
-    private EquipmentPanel pnlEquipments;
-    private JScrollPane scrSkills, scrEquipments, scrItems;
+    private final SheetScrollPane scrMain;
+    private final JPanel pnlMain;
+    private SheetScrollPane scrSkills, scrEquipments, scrItems;
+    private SheetPanel pnlInfo, pnlStats, pnlAbout, pnlExtras, pnlAttributes, pnlSkills, pnlEquipments, pnlItems;
+    private JPanel pnlEquipmentFields;
     
     private JTextField[] txtInfo;
     private JTextArea txaAbout, txaExtras;
     private JTextField[] txtAttributes;
     private JTextField[] txtSkills;
+    private final ArrayList<JEquipmentField> equipments = new ArrayList<>();
+    private final JButton btnAddEquipment = new JButton("+");
+    private final ArrayList<JLabel> items = new ArrayList<>();
+    private final JButton btnAddItem = new JButton("+");
     
-    private final SheetPanel[] fields = new SheetPanel[FIELDS_LENGTH];
+    private boolean loaded = false;
     
-    public SheetFrame(SheetModel model)
+    public SheetFrame(int connectionID)
     {
-        this.model = model;
-        this.playerSheet = new PlayerSheet(model);
-        
         initComponents();
-        internalLoad();
+        this.connectionID = connectionID;
         
-        fields[CHARACTER_INFO_ID] = pnlInfo;
-        fields[ABOUT_ID] = pnlAbout;
-        fields[EXTRAS_ID] = pnlExtras;
-        fields[ATTRIBUTES_ID] = pnlAttributes;
-        fields[SKILLS_ID] = pnlSkills;
-        fields[EQUIPMENT_ID] = pnlEquipments;
-        fields[ITEM_ID] = pnlItems;
-        
-        pnlMain.setPreferredSize(new Dimension(pnlMain.getPreferredSize().width, scrEquipments.getY() + scrEquipments.getHeight() + 20));
-        pnlMain.setBackground(Color.BLACK);
-        scrMain.getVerticalScrollBar().setUnitIncrement(40);
+        pnlMain = new JPanel(null, false);
+        scrMain = new SheetScrollPane(pnlMain);
+        scrMain.setBounds(0, 0, getWidth(), getHeight());
+        getContentPane().add(scrMain);
     }
     
-    public SheetFrame(SheetModel model, PlayerSheet sheet)
+    public void load(SheetModel model, PlayerSheet sheet)
     {
         this.model = model;
-        this.playerSheet = sheet;
+        this.sheet = sheet;
         
-        initComponents();
-        internalLoad();
+        txtInfo = new JTextField[sheet.getInfo().length];
+        txtAttributes = new JTextField[sheet.getAttributes().length];
+        txtSkills = new JTextField[sheet.getSkills().length];
         
-        fields[CHARACTER_INFO_ID] = pnlInfo;
-        fields[ABOUT_ID] = pnlAbout;
-        fields[EXTRAS_ID] = pnlExtras;
-        fields[ATTRIBUTES_ID] = pnlAttributes;
-        fields[SKILLS_ID] = pnlSkills;
-        fields[EQUIPMENT_ID] = pnlEquipments;
-        fields[ITEM_ID] = pnlItems;
+        initInfoPanel();
+        initStatsPanel();
+        initAboutPanel();
+        initExtrasPanel();
+        initAttributesPanel();
+        initSkillsPanel();
+        initEquipmentsPanel();
+        initItemsPanel();
         
-        pnlMain.setPreferredSize(new Dimension(pnlMain.getPreferredSize().width, scrEquipments.getY() + scrEquipments.getHeight() + 20));
+        pnlMain.setPreferredSize(new Dimension(getWidth(), scrItems.getY() + scrItems.getHeight() + 50));
         pnlMain.setBackground(Color.BLACK);
         scrMain.getVerticalScrollBar().setUnitIncrement(40);
+        
+        loaded = true;
     }
     
-    private void internalLoad()
+    public void reload(PlayerSheet sheet)
     {
-        loadBasicInfoPanel();
-        loadBasicStatsPanel();
-        loadAboutPanel();
-        loadAttributesPanel();
-        loadSkillsPanel();
-        loadEquipmentsPanel();
-        loadItemsPanel();
+        this.sheet = sheet;
+        System.out.println("reloading...");
     }
 
-    public void setPlayerSheet(PlayerSheet playerSheet)
+    public boolean isLoaded()
     {
-        if (this.playerSheet.equals(playerSheet))
-            return;
-        this.playerSheet = playerSheet;
-        reloadSheets();
+        return loaded;
     }
     
-    private void reloadSheets()
+    private void initInfoPanel()
     {
-        for (int i = 0; i < txtInfo.length; i++)
-            txtInfo[i].setText(playerSheet.getBasicInfo()[i]);
-        for (int i = 0; i < txtAttributes.length; i++)
-            txtAttributes[i].setText(playerSheet.getAttributes()[i] + "");
-        for (int i = 0; i < txtSkills.length; i++)
-            txtSkills[i].setText(playerSheet.getSkills()[i] + "");
-        pnlEquipments.setEquipments(playerSheet.getEquipments());
-    }
-    
-    private void loadBasicInfoPanel()
-    {
-        pnlInfo = new SheetPanel("Character Information", f24, null, true)
-        {
-            @Override
-            public void updateSheet(int propertyID, Object newValue, UpdateType type)
-            {
-                String s = (String) newValue;
-                playerSheet.getBasicInfo()[propertyID] = s;
-                txtInfo[propertyID].setText(s);
-            }
-        };
-        pnlMain.add(pnlInfo);
-        JLabel[] lblBasicInfo = new JLabel[model.getBasicInfo().length];
-        txtInfo = new JTextField[model.getBasicInfo().length];
+        int x = 100;
+        int y = 10;
+        int w = getWidth() / 2 - x;
         
-        int lines = lblBasicInfo.length;
+        int lines = sheet.getInfo().length;
         int gap = 40;
         
         int txtGap = 10;
         
-        int x = 100;
-        int y = 10;
+        int h = lines * f.getSize() + lines * txtGap + lines * gap;
         
-        pnlInfo.setBounds(x, y, getWidth() / 2 - 100, lines * f.getSize() + lines * txtGap + lines * gap);
+        pnlInfo = new SheetPanel("Character Information", f24, true);
+        pnlInfo.setLayout(null);
+        pnlInfo.setBounds(x, y, w, h);
+        pnlInfo.setBackground(Color.BLACK);
         
-        x = 10;
-        y = 50;
+        x = 15;
+        y = 55;
+        w = pnlInfo.getWidth() - x -  20;
         
-        for (int i = 0; i < lblBasicInfo.length; i++)
+        JLabel[] lblInfo = new JLabel[model.getInfo().length];
+        
+        for (int i = 0; i < txtInfo.length; i++)
         {
-            lblBasicInfo[i] = new JLabel(model.getBasicInfo()[i]);
+            lblInfo[i] = new JLabel(model.getInfo()[i]);
+            lblInfo[i].setFont(f);
+            lblInfo[i].setBounds(x, y, getStringWidth(lblInfo[i].getFont(), lblInfo[i].getText()), lblInfo[i].getFont().getSize());
+            lblInfo[i].setForeground(Color.WHITE);
             
-            txtInfo[i] = new JTextField(playerSheet.getBasicInfo()[i]);
-            final int ii = i;
-            txtInfo[i].addKeyListener(new KeyAdapter()
-            {
-                @Override
-                public void keyTyped(KeyEvent e)
-                {
-                    String txt;
-                    if (Character.isLetterOrDigit(e.getKeyChar()))
-                        txt = txtInfo[ii].getText() + e.getKeyChar();
-                    else
-                        txt = txtInfo[ii].getText();
-                    sendCharacterSheetUpdate(CHARACTER_INFO_ID, ii, txt, UpdateType.UPDATE);
-                }
-            });
-
+            txtInfo[i] = new JTextField(sheet.getInfo()[i]);
+            txtInfo[i].setBounds(x, y, w, h);
+            txtInfo[i].setBackground(Color.BLACK);
+            txtInfo[i].setForeground(Color.WHITE);
+            txtInfo[i].setBorder(new MatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
+            txtInfo[i].setBounds(x, y + lblInfo[i].getHeight() + txtGap, pnlInfo.getWidth() - x - 30, 20);
             
+            pnlInfo.add(lblInfo[i]);
             pnlInfo.add(txtInfo[i]);
-            pnlInfo.add(lblBasicInfo[i]);
             
-            JLabel lbl = lblBasicInfo[i];
-            JTextField txt = txtInfo[i];
-            
-            lbl.setFont(f);
-            lbl.setBounds(x, y, getStringWidth(lbl.getFont(), lbl.getText()), lbl.getFont().getSize());
-            lbl.setForeground(Color.WHITE);
-            
-            txt.setBackground(Color.BLACK);
-            txt.setForeground(Color.WHITE);
-            txt.setBorder(new MatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
-            txt.setBounds(x, y + lbl.getHeight() + txtGap, pnlInfo.getWidth() - x - 30, 20);
-            
-            y += lbl.getHeight() + gap;
+            y += lblInfo[i].getHeight() + gap;
         }
+        pnlMain.add(pnlInfo);
     }
     
-    private void loadBasicStatsPanel()
+    private void initStatsPanel()
     {
-        pnlStats = new SheetPanel("Stats", f24, null, true)
-        {
-            @Override
-            public void updateSheet(int propertyID, Object newValue, UpdateType type)
-            {
-                System.out.println("stats updateSheet called.");
-            }
-        };
+        int x = pnlInfo.getX() + pnlInfo.getWidth()+ 20;
+        int y = 10;
+        int w = getWidth() / 2 - x;
+        int h = pnlInfo.getHeight();
+        
+        pnlStats = new SheetPanel("Stats", f24, true);
+        pnlStats.setLayout(null);
+        pnlStats.setBounds(x, y, w, h);
+        pnlStats.setBackground(Color.BLACK);
         pnlMain.add(pnlStats);
         
-        pnlStats.setBounds(pnlInfo.getX() + pnlInfo.getWidth() + 20, 10, getWidth() / 2 - 100, pnlInfo.getHeight());
-        
-        JLabel[] lblBasicStats = new JLabel[model.getBasicStats().length];
-        for (int i = 0; i < lblBasicStats.length; i++)
-        {
-            lblBasicStats[i] = new JLabel(model.getBasicStats()[i]);
-            pnlStats.add(lblBasicStats[i]);
-        }
+        pnlStats.setBounds(x, y, getWidth() / 2 - 100, h);
     }
     
-    private void loadAboutPanel()
+    private void initAboutPanel()
     {
+        int x = pnlInfo.getX();
+        int y = pnlInfo.getY() + pnlInfo.getHeight() + 20;
+        int w = pnlInfo.getWidth();
         int txtH = 250;
+        int h = txtH + 60;
         
-        pnlAbout = new SheetPanel("About", f24, null, true)
-        {
-            @Override
-            public void updateSheet(int propertyID, Object newValue, UpdateType type)
-            {
-                String s = (String) newValue;
-                playerSheet.setAbout(s);
-                txaAbout.setText(s);
-            }
-        };
-        pnlAbout.setBounds(pnlStats.getX(), pnlStats.getY() + pnlStats.getHeight() + 20, pnlStats.getWidth(), txtH + 60);
+        pnlAbout = new SheetPanel("About", f24, true);
+        pnlAbout.setLayout(null);
+        pnlAbout.setBounds(x, y, w, h);
+        pnlAbout.setBackground(Color.BLACK);
         pnlMain.add(pnlAbout);
         
         txaAbout = new JTextArea()
@@ -241,48 +184,62 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 {
                     g.setColor(Color.GRAY);
                     g.setFont(f);
-                    g.drawString("Write about your character's likes, dislikes, ", 0, f.getSize());
-                    g.drawString("dreams, etc.", 0, f.getSize() * 2);
+                    g.drawString("Write about your character's likes, dislikes, dreams, etc.", 
+                        getInsets().left, g.getFontMetrics().getMaxAscent() + getInsets().top);
                 }
             }
         };
-        txaAbout.addKeyListener(new KeyAdapter()
+        
+        txaAbout.getDocument().addDocumentListener(new DocumentListener()
         {
             @Override
-            public void keyTyped(KeyEvent e)
+            public void insertUpdate(DocumentEvent e)
             {
-                if (txaAbout.getText().length() < 1)
+                if (txaAbout.getText().length() <= 1)
                 {
                     txaAbout.repaint();
                 }
-                String txt;
-                if (Character.isLetterOrDigit(e.getKeyChar()))
-                    txt = txaAbout.getText() + e.getKeyChar();
-                else
-                    txt = txaAbout.getText();
-                sendCharacterSheetUpdate(ABOUT_ID, 0, txt, UpdateType.UPDATE);
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e)
+            {
+                if (txaAbout.getText().length() <= 1)
+                {
+                    txaAbout.repaint();
+                }
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e)
+            {
+                if (txaAbout.getText().length() <= 1)
+                {
+                    txaAbout.repaint();
+                }
             }
         });
+        
         txaAbout.setBackground(Color.DARK_GRAY);
         txaAbout.setForeground(Color.WHITE);
-        txaAbout.setBorder(new MatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
         txaAbout.setFont(f);
-        txaAbout.setBounds(10, 50, pnlAbout.getWidth() - 10 - 20, txtH);
-        txaAbout.setWrapStyleWord(true);
+        txaAbout.setBounds(10, 50, pnlAbout.getWidth() - 20, txtH);
         txaAbout.setLineWrap(true);
         pnlAbout.add(txaAbout);
+    }
+    
+    private void initExtrasPanel()
+    {
+        int x = pnlStats.getX();
+        int y = pnlStats.getY() + pnlStats.getHeight() + 20;
+        int w = pnlStats.getWidth();
+        int txtH = 250;
+        int h = txtH + 60;
         
-        pnlExtras = new SheetPanel("Extras", f24, null, true)
-        {
-            @Override
-            public void updateSheet(int propertyID, Object newValue, UpdateType type)
-            {
-                String s = (String) newValue;
-                playerSheet.setExtras(s);
-                txaExtras.setText(s);
-            }
-        };
-        pnlExtras.setBounds(pnlAbout.getX(), pnlAbout.getY() + pnlAbout.getHeight() + 20, pnlAbout.getWidth(), txtH + 60);
+        pnlExtras = new SheetPanel("Extras", f24, true);
+        pnlExtras.setLayout(null);
+        pnlExtras.setBounds(x, y, w, h);
+        pnlExtras.setBackground(Color.BLACK);
         pnlMain.add(pnlExtras);
         
         txaExtras = new JTextArea()
@@ -295,274 +252,343 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 {
                     g.setColor(Color.GRAY);
                     g.setFont(f);
-                    g.drawString("You can write anything you want here. E.g:", 0, f.getSize());
-                    g.drawString("Notes, things you want to do, etc.", 0, f.getSize() * 2);
+                    g.drawString("You can write anything you want here. (Notes, extra informations...)", 
+                        getInsets().left, g.getFontMetrics().getMaxAscent() + getInsets().top);
                 }
             }
         };
-        txaExtras.addKeyListener(new KeyAdapter()
+        
+        txaExtras.getDocument().addDocumentListener(new DocumentListener()
         {
             @Override
-            public void keyTyped(KeyEvent e)
+            public void insertUpdate(DocumentEvent e)
             {
-                if (txaExtras.getText().length() < 1)
+                if (txaExtras.getText().length() <= 1)
                 {
                     txaExtras.repaint();
                 }
-                String txt;
-                if (Character.isLetterOrDigit(e.getKeyChar()))
-                    txt = txaExtras.getText() + e.getKeyChar();
-                else
-                    txt = txaExtras.getText();
-                sendCharacterSheetUpdate(EXTRAS_ID, 0, txt, UpdateType.UPDATE);
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e)
+            {
+                if (txaExtras.getText().length() <= 1)
+                {
+                    txaExtras.repaint();
+                }
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e)
+            {
+                if (txaExtras.getText().length() <= 1)
+                {
+                    txaExtras.repaint();
+                }
             }
         });
+        
         txaExtras.setBackground(Color.DARK_GRAY);
         txaExtras.setForeground(Color.WHITE);
-        txaExtras.setBorder(new MatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
         txaExtras.setFont(f);
-        txaExtras.setBounds(10, 50, pnlAbout.getWidth() - 10 - 20, txtH);
-        txaExtras.setWrapStyleWord(true);
+        txaExtras.setBounds(10, 50, pnlExtras.getWidth() - 20, txtH);
         txaExtras.setLineWrap(true);
-        
         pnlExtras.add(txaExtras);
     }
     
-    private void loadAttributesPanel()
+    private void initAttributesPanel()
     {
-        int w = pnlInfo.getWidth();
+        int x = pnlAbout.getX();
+        int y = pnlAbout.getY() + pnlAbout.getHeight() + 20;
+        int w = pnlExtras.getX() + pnlExtras.getWidth() - x;
         
-        FlowLayout l = new FlowLayout(FlowLayout.CENTER, 25, 50);
-        pnlAttributes = new SheetPanel("Attributes", f24, l, true)
-        {
-            @Override
-            public void updateSheet(int propertyID, Object newValue, UpdateType type)
-            {
-                String s = (String) newValue;
-                try
-                {
-                    playerSheet.getAttributes()[propertyID] = Integer.parseInt(s);
-                }
-                catch(NumberFormatException ex)
-                {
-                    System.out.println("could not parse " + s);
-                }
-                txtAttributes[propertyID].setText(s);
-            }
-        };
+        int pnlW = 100;
+        int pnlH = 75;
+        int hGap = 25;
+        int vGap = 50;
+        int numRow = (int) Math.ceil(model.getAttributes().length / (w / (pnlW + hGap)));
+        
+        int h = numRow * pnlH + numRow * vGap + 20;
+        
+        pnlAttributes = new SheetPanel("Attributes", f24, true);
+        pnlAttributes.setLayout(new FlowLayout(FlowLayout.CENTER, hGap, vGap));
+        pnlAttributes.setBounds(x, y, w, h);
+        pnlAttributes.setBackground(Color.BLACK);
         pnlMain.add(pnlAttributes);
         
         JLabel[] lblAttributes = new JLabel[model.getAttributes().length];
-        txtAttributes = new JTextField[model.getAttributes().length];
-        
-        int attrW = 100;
-        int attrH = 75;
-        
-        int numRow = (int) Math.ceil(lblAttributes.length / (w / (attrW + l.getHgap())));
-        
-        pnlAttributes.setBounds(pnlInfo.getX(), pnlInfo.getY() + pnlInfo.getHeight() + 20, w, numRow * attrH + numRow * l.getVgap() + 20);
-        
         for (int i = 0; i < lblAttributes.length; i++)
         {
             lblAttributes[i] = new JLabel(model.getAttributes()[i]);
-            txtAttributes[i] = new JTextField(playerSheet.getAttributes()[i] + "");
-            final int ii = i;
-            txtAttributes[i].addKeyListener(new KeyAdapter()
-            {
-                @Override
-                public void keyTyped(KeyEvent e)
-                {
-                    String txt;
-                    if (Character.isLetterOrDigit(e.getKeyChar()))
-                        txt = txtAttributes[ii].getText() + e.getKeyChar();
-                    else
-                        txt = txtAttributes[ii].getText();
-                    sendCharacterSheetUpdate(ATTRIBUTES_ID, ii, txt, UpdateType.UPDATE);
-                }
-            });
-            
-            JLabel lbl = lblAttributes[i];
-            JTextField txt = txtAttributes[i];
+            txtAttributes[i] = new JTextField(sheet.getAttributes()[i] + "");
             
             JPanel miniAttr = new JPanel(null, false);
             miniAttr.setLayout(new BoxLayout(miniAttr, BoxLayout.PAGE_AXIS));
-            miniAttr.setPreferredSize(new Dimension(attrW, attrH));
+            miniAttr.setPreferredSize(new Dimension(pnlW, pnlH));
             miniAttr.setBackground(Color.BLACK);
             
-            lbl.setFont(f12);
-            lbl.setBounds(0, 0, getStringWidth(lbl.getFont(), lbl.getText()), lbl.getFont().getSize());
-            lbl.setForeground(Color.WHITE);
-            lbl.setAlignmentX(CENTER_ALIGNMENT);
+            lblAttributes[i].setFont(f12);
+            lblAttributes[i].setBounds(0, 0, getStringWidth(lblAttributes[i].getFont(), lblAttributes[i].getText()), lblAttributes[i].getFont().getSize());
+            lblAttributes[i].setForeground(Color.WHITE);
+            lblAttributes[i].setAlignmentX(CENTER_ALIGNMENT);
             
-            txt.setBackground(Color.BLACK);
-            txt.setForeground(Color.WHITE);
-            txt.setBorder(new MatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
-            txt.setAlignmentX(CENTER_ALIGNMENT);
-            txt.setHorizontalAlignment(SwingConstants.CENTER);
-            txt.setFont(f);
+            txtAttributes[i].setBackground(Color.BLACK);
+            txtAttributes[i].setForeground(Color.WHITE);
+            txtAttributes[i].setBorder(new MatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
+            txtAttributes[i].setAlignmentX(CENTER_ALIGNMENT);
+            txtAttributes[i].setHorizontalAlignment(SwingConstants.CENTER);
+            txtAttributes[i].setFont(f);
             
-            miniAttr.add(lbl);
-            miniAttr.add(txt);
+            miniAttr.add(lblAttributes[i]);
+            miniAttr.add(txtAttributes[i]);
             
             pnlAttributes.add(miniAttr);
         }
     }
     
-    private void loadSkillsPanel()
+    private void initSkillsPanel()
     {
-        int x = pnlInfo.getX();
-        int y = Math.max(pnlAttributes.getY() + pnlAttributes.getHeight(), pnlExtras.getY() + pnlExtras.getHeight()) + 20;
-        int w = getWidth() - x - 125;
+        int x = pnlAttributes.getX();
+        int y = pnlAttributes.getY() + pnlAttributes.getHeight() + 30;
+        int w = pnlAttributes.getWidth();
         
         int sklW = 100;
         int sklH = 75;
+        int hGap = 50;
+        int vGap = 75;
+        int numRow = (int) Math.ceil(model.getSkills().length / (w / (sklW + hGap)));
         
-        JLabel[] lblSkills = new JLabel[model.getSkills().length];
-        txtSkills = new JTextField[model.getSkills().length];
+        int h = numRow * sklH + numRow * vGap + 20;
         
-        FlowLayout l = new FlowLayout(FlowLayout.CENTER, 50, 75);
-        pnlSkills = new SheetPanel("Skills", f24, l, false)
-        {
-            @Override
-            public void updateSheet(int propertyID, Object newValue, UpdateType type)
-            {
-                String s = (String) newValue;
-                try
-                {
-                    playerSheet.getSkills()[propertyID] = Integer.parseInt(s);
-                }
-                catch(NumberFormatException ex)
-                {
-                    System.out.println("could not parse " + s);
-                }
-                txtSkills[propertyID].setText(s);
-            }
-        };
-        
-        int numRow = (int) Math.ceil(lblSkills.length / (w / (sklW + l.getHgap())));
-        
-        int h = numRow * sklH + numRow * l.getVgap() + 20;
-        
-        pnlSkills.setBounds(x, y, w, h);
+        pnlSkills = new SheetPanel("Skills", f24, false);
+        pnlSkills.setBackground(Color.BLACK);
+        pnlSkills.setLayout(new FlowLayout(FlowLayout.CENTER, hGap, vGap));
         pnlSkills.setPreferredSize(new Dimension(w, h));
         
         scrSkills = new SheetScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrSkills.getVerticalScrollBar().setBackground(Color.BLACK);
-        scrSkills.setBounds(x, y, w, 500);
-        scrSkills.setPreferredSize(new Dimension(w, 500));
+        scrSkills.setBounds(x, y, w, 450);
         scrSkills.setViewportView(pnlSkills);
         scrSkills.getVerticalScrollBar().setUnitIncrement(40);
         
         pnlMain.add(scrSkills);
         
+        JLabel[] lblSkills = new JLabel[model.getSkills().length];
         for (int i = 0; i < lblSkills.length; i++)
         {
             lblSkills[i] = new JLabel(model.getSkills()[i]);
-            txtSkills[i] = new JTextField(playerSheet.getSkills()[i] + "");
-            final int ii = i;
-            txtSkills[i].addKeyListener(new KeyAdapter()
-            {
-                @Override
-                public void keyTyped(KeyEvent e)
-                {
-                    String txt;
-                    if (Character.isLetterOrDigit(e.getKeyChar()))
-                        txt = txtSkills[ii].getText() + e.getKeyChar();
-                    else
-                        txt = txtSkills[ii].getText();
-                    sendCharacterSheetUpdate(SKILLS_ID, ii, txt, UpdateType.UPDATE);
-                }
-            });
-            
-            JLabel lbl = lblSkills[i];
-            JTextField txt = txtSkills[i];
+            txtSkills[i] = new JTextField(sheet.getSkills()[i] + "");
             
             JPanel miniSkl = new JPanel(null, false);
             miniSkl.setLayout(new BoxLayout(miniSkl, BoxLayout.PAGE_AXIS));
             miniSkl.setPreferredSize(new Dimension(sklW, sklH));
             miniSkl.setBackground(Color.BLACK);
             
-            lbl.setFont(f12);
-            lbl.setBounds(0, 0, getStringWidth(lbl.getFont(), lbl.getText()), lbl.getFont().getSize());
-            lbl.setForeground(Color.WHITE);
-            lbl.setAlignmentX(CENTER_ALIGNMENT);
+            lblSkills[i].setFont(f12);
+            lblSkills[i].setBounds(0, 0, getStringWidth(lblSkills[i].getFont(), lblSkills[i].getText()), lblSkills[i].getFont().getSize());
+            lblSkills[i].setForeground(Color.WHITE);
+            lblSkills[i].setAlignmentX(CENTER_ALIGNMENT);
             
-            txt.setBackground(Color.BLACK);
-            txt.setForeground(Color.WHITE);
-            txt.setBorder(new MatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
-            txt.setAlignmentX(CENTER_ALIGNMENT);
-            txt.setHorizontalAlignment(SwingConstants.CENTER);
-            txt.setFont(f);
+            txtSkills[i].setBackground(Color.BLACK);
+            txtSkills[i].setForeground(Color.WHITE);
+            txtSkills[i].setBorder(new MatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
+            txtSkills[i].setAlignmentX(CENTER_ALIGNMENT);
+            txtSkills[i].setHorizontalAlignment(SwingConstants.CENTER);
+            txtSkills[i].setFont(f);
             
-            miniSkl.add(lbl);
-            miniSkl.add(txt);
+            miniSkl.add(lblSkills[i]);
+            miniSkl.add(txtSkills[i]);
             
             pnlSkills.add(miniSkl);
         }
     }
     
-    private void loadEquipmentsPanel()
+    private void initEquipmentsPanel()
     {
         int x = scrSkills.getX();
-        int y = scrSkills.getY() + scrSkills.getHeight() + 20;
+        int y = scrSkills.getY() + scrSkills.getHeight() + 30;
         int w = scrSkills.getWidth();
+        int h = 200;
         
-        ArrayList<Equipment> equipments = playerSheet.getEquipments();
-        pnlEquipments = new EquipmentPanel("Equipments", f24, null, false, equipments)
-        {
-            @Override
-            public void buttonRemoveEquipment(int propertyID)
-            {
-                pnlEquipments.removeEquipment(propertyID);
-                sendCharacterSheetUpdate(EQUIPMENT_ID, propertyID, null, UpdateType.REMOVE);
-            }
-        };
-        pnlEquipments.setBounds(10, 60, pnlEquipments.getWidth() - 20, pnlEquipments.getHeight() - 80);
-        pnlEquipments.setPreferredSize(new Dimension(w, 2000));
+        pnlEquipments = new SheetPanel("Equipments", f24, false);
+        pnlEquipments.setBackground(Color.BLACK);
+        pnlEquipments.setLayout(null);
         
-        scrEquipments = new SheetScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrEquipments.setViewportView(pnlEquipments);
+        scrEquipments = new SheetScrollPane(pnlEquipments, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrEquipments.getVerticalScrollBar().setUnitIncrement(40);
-        scrEquipments.setBounds(x, y, w, 200);
+        scrEquipments.getHorizontalScrollBar().setUnitIncrement(40);
+        scrEquipments.setBounds(x, y, w, h);
         pnlMain.add(scrEquipments);
         
+        JPanel pnlDescriptions = new JPanel(null, false);
+        pnlDescriptions.setBounds(0, 50, scrEquipments.getWidth(), f.getSize());
+        pnlDescriptions.setBackground(Color.BLACK);
+        pnlEquipments.add(pnlDescriptions);
+        
+        x = pnlDescriptions.getX();
+        y = pnlDescriptions.getY() + pnlDescriptions.getHeight() + 10;
+        w = pnlDescriptions.getWidth();
+        h = f12.getSize() * sheet.getEquipments().size() + 10;
+        
+        pnlEquipmentFields = new JPanel(null, false);
+        pnlEquipmentFields.setLayout(new BoxLayout(pnlEquipmentFields, BoxLayout.PAGE_AXIS));
+        pnlEquipmentFields.setBounds(x, y, w, h);
+        pnlEquipmentFields.setBackground(Color.BLACK);
+        pnlEquipments.add(pnlEquipmentFields);
+        
+        pnlEquipments.setPreferredSize(new Dimension(scrSkills.getWidth(), pnlEquipmentFields.getY() + pnlEquipmentFields.getHeight() + 20));
+        
+        JLabel[] desc = new JLabel[model.getEquipments().length];
+        int[] positions = new int[desc.length];
+        x = 60;
+        for (int i = 0; i < desc.length; i++)
+        {
+            desc[i] = new JLabel(model.getEquipments()[i]);
+            desc[i].setForeground(Color.WHITE);
+            desc[i].setFont(f);
+            desc[i].setBounds(x, 0, getStringWidth(desc[i].getFont(), desc[i].getText()), desc[i].getFont().getSize());
+            positions[i] = x;
+            pnlDescriptions.add(desc[i]);
+            x += desc[i].getWidth() + 60;
+        }
+        
+        btnAddEquipment.setBackground(Color.BLACK);
+        btnAddEquipment.setForeground(Color.WHITE);
+        btnAddEquipment.setBounds(positions[positions.length - 1], 10, 50, 25);
+        btnAddEquipment.addActionListener(l ->
+        {
+            Object[] obj = new Object[model.getEquipments().length];
+            for (int i = 0; i < obj.length; i++)
+                obj[i] = "none";
+            JEquipmentField e = createEquipmentField(obj);
+        });
+        pnlEquipments.add(btnAddEquipment);
+        
+        JEquipmentField.setPositions(positions);
+        for (int i = 0; i < sheet.getEquipments().size(); i++)
+            createEquipmentField(sheet.getEquipments().get(i));
     }
     
-    private void loadItemsPanel()
+    private void initItemsPanel()
     {
         int x = scrEquipments.getX();
-        int y = scrEquipments.getY() + scrEquipments.getHeight() + 20;
+        int y = scrEquipments.getY() + scrEquipments.getHeight();
         int w = scrEquipments.getWidth();
+        int h = 200;
+        int hGap = 50;
+        int vGap = 50;
         
-        FlowLayout l = new FlowLayout(FlowLayout.CENTER, 10, 45);
-        pnlItems = new SheetPanel("Equipments", f24, null, false)
+        pnlItems = new SheetPanel("Items", f24, false);
+        pnlItems.setPreferredSize(new Dimension(scrSkills.getWidth(), 2000));
+        pnlItems.setBackground(Color.BLACK);
+        pnlItems.setLayout(new FlowLayout(FlowLayout.LEADING, hGap, vGap));
+        
+        scrItems = new SheetScrollPane(pnlItems, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrItems.getVerticalScrollBar().setUnitIncrement(40);
+        scrItems.setBounds(x, y, w, h);
+        pnlMain.add(scrItems);
+        
+        btnAddItem.setBackground(Color.BLACK);
+        btnAddItem.setForeground(Color.WHITE);
+        btnAddItem.setPreferredSize(new Dimension(75, 25));
+        btnAddItem.addActionListener(l ->
+        {
+            String i = "New Item";
+            createItem(i, hGap, vGap);
+        });
+        pnlItems.add(btnAddItem);
+        
+        for (int i = 0; i < sheet.getItems().size(); i++)
+            createItem(sheet.getItems().get(i), hGap, vGap);
+    }
+    
+    private JEquipmentField createEquipmentField(Object[] equip)
+    {
+        JEquipmentField e = new JEquipmentField(equip);
+        e.setFont(f12);
+        e.setForeground(Color.WHITE);
+        
+        equipments.add(e);
+        pnlEquipmentFields.add(e);
+        int h = (f12.getSize() + 10) * equipments.size();
+        e.getRemoveButton().addActionListener(l ->
+        {
+            equipments.remove(e);
+            pnlEquipmentFields.remove(e);
+            int hh = (f12.getSize() + 10) * equipments.size();
+            pnlEquipmentFields.setBounds(pnlEquipmentFields.getX(), 
+                pnlEquipmentFields.getY(), 
+                pnlEquipmentFields.getWidth(), hh);
+            
+            pnlEquipments.setPreferredSize(new Dimension(pnlEquipments.getPreferredSize().width, pnlEquipmentFields.getY() + pnlEquipmentFields.getHeight() + 20));
+            
+            scrEquipments.revalidate();
+            pnlEquipments.revalidate();
+        });
+        
+        pnlEquipmentFields.setBounds(pnlEquipmentFields.getX(), 
+                pnlEquipmentFields.getY(), 
+                pnlEquipmentFields.getWidth(), h);
+        pnlEquipments.setPreferredSize(new Dimension(getPreferredSize().width, pnlEquipmentFields.getY() + pnlEquipmentFields.getHeight() + 20));
+        scrEquipments.revalidate();
+        pnlEquipments.revalidate();
+        return e;
+    }
+    
+    private JLabel createItem(String name, int hGap, int vGap)
+    {
+        JLabel i = new JLabel(name);
+        i.setFont(f);
+        i.setForeground(Color.WHITE);
+        i.setPreferredSize(new Dimension(getStringWidth(i.getFont(), name), i.getFont().getSize()));
+        
+        items.add(i);
+        pnlItems.add(i);
+        int numRow = (int) Math.ceil(items.size() / (scrItems.getWidth() / (i.getPreferredSize().width + hGap)));
+        int h = numRow * i.getPreferredSize().height + numRow * vGap + 20;
+        pnlItems.setPreferredSize(new Dimension(pnlItems.getPreferredSize().width, h));
+        i.addMouseListener(new MouseAdapter()
         {
             @Override
-            public void updateSheet(int propertyID, Object newValue, UpdateType type)
+            public void mouseClicked(MouseEvent e)
             {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                if (e.getButton() == MouseEvent.BUTTON3)
+                {
+                    items.remove(i);
+                    pnlItems.remove(i);
+                    int numRow = (int) Math.ceil(items.size() / (scrItems.getWidth() / (i.getPreferredSize().width + hGap)));
+                    int h = numRow * i.getPreferredSize().height + numRow * vGap + 20;
+                    pnlItems.setPreferredSize(new Dimension(pnlItems.getPreferredSize().width, h));
+                    pnlItems.revalidate();
+                    pnlItems.repaint();
+                    scrItems.revalidate();
+                }
+                else
+                {
+                    if (e.getClickCount() == 2)
+                    {
+                        String newVal = JOptionPane.showInputDialog("Please type in new value.", i.getText());
+                        
+                        if (newVal == null)
+                            return;
+                        
+                        i.setText(newVal);
+                        i.setPreferredSize(new Dimension(getStringWidth(i.getFont(), i.getText()), i.getPreferredSize().height));
+                    }
+                }
             }
-        };
-        pnlItems.setBackground(Color.red);
-        this.pnlItems.setLayout(l);
-    }
-
-    public PlayerSheet getPlayerSheet()
-    {
-        return playerSheet;
+        });
+        
+        pnlItems.revalidate();
+        pnlItems.repaint();
+        scrItems.revalidate();
+        return i;
     }
     
     private int getStringWidth(Font font, String text)
     {
         return getFontMetrics(font).stringWidth(text);
     }
-    
-    public void onReceiveCharacterSheetUpdate(int fieldID, int propertyID, Object newValue, UpdateType type)
-    {
-        fields[fieldID].updateSheet(propertyID, newValue, type);
-    }
-    
-    protected abstract void sendCharacterSheetUpdate(int fieldID, int propertyID, Object newValue, UpdateType type);
     
     /** This method is called from within the constructor to
      * initialize the form.
@@ -573,39 +599,18 @@ public abstract class SheetFrame extends javax.swing.JFrame
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        scrMain = scrMain = new SheetScrollPane(null)
-        ;
-        pnlMain = new javax.swing.JPanel();
-
         setTitle("RPG Simulator Sheet");
         setResizable(false);
-
-        scrMain.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-        pnlMain.setPreferredSize(new java.awt.Dimension(1280, 720));
-
-        javax.swing.GroupLayout pnlMainLayout = new javax.swing.GroupLayout(pnlMain);
-        pnlMain.setLayout(pnlMainLayout);
-        pnlMainLayout.setHorizontalGroup(
-            pnlMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1280, Short.MAX_VALUE)
-        );
-        pnlMainLayout.setVerticalGroup(
-            pnlMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 720, Short.MAX_VALUE)
-        );
-
-        scrMain.setViewportView(pnlMain);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(scrMain, javax.swing.GroupLayout.DEFAULT_SIZE, 1280, Short.MAX_VALUE)
+            .addGap(0, 1280, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(scrMain, javax.swing.GroupLayout.DEFAULT_SIZE, 720, Short.MAX_VALUE)
+            .addGap(0, 720, Short.MAX_VALUE)
         );
 
         pack();
@@ -614,8 +619,6 @@ public abstract class SheetFrame extends javax.swing.JFrame
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel pnlMain;
-    private javax.swing.JScrollPane scrMain;
     // End of variables declaration//GEN-END:variables
 
     

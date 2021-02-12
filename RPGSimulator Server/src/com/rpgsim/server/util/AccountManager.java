@@ -36,34 +36,48 @@ public class AccountManager
             {
                 acc = (Account) in.readObject();
                 PlayerSheet sheet = acc.getPlayerSheet();
-                SheetModel model = SheetManager.defaultSheetModel;
+                SheetModel model = SheetManager.getDefaultSheetModel();
                 
-                if (model.getBasicInfo().length != sheet.getBasicInfo().length)
+                if (model.getInfo().length != sheet.getInfo().length)
                 {
-                    int oldLength = sheet.getBasicInfo().length;
-                    sheet.setBasicInfo(Arrays.copyOf(sheet.getBasicInfo(), model.getBasicInfo().length));
-                    if (oldLength < sheet.getBasicInfo().length)
+                    int oldLength = sheet.getInfo().length;
+                    sheet.setBasicInfo(Arrays.copyOf(sheet.getInfo(), model.getInfo().length));
+                    if (oldLength < sheet.getInfo().length)
                     {
-                        for (int i = oldLength; i < sheet.getBasicInfo().length; i++)
+                        for (int i = oldLength; i < sheet.getInfo().length; i++)
                         {
-                            sheet.getBasicInfo()[i] = "none";
+                            sheet.getInfo()[i] = "none";
                         }
                     }
                     changed = true;
                 }
                 
-                if (model.getBasicStats().length != sheet.getBasicStats().length)
+                if (model.getCurrentStats().length != sheet.getCurrentStats().length)
                 {
-                    int oldLength = sheet.getBasicStats().length;
-                    sheet.setBasicStats(Arrays.copyOf(sheet.getBasicStats(), model.getBasicStats().length));
-                    if (oldLength < sheet.getBasicStats().length)
+                    int oldLength = sheet.getCurrentStats().length;
+                    sheet.setCurrentStats(Arrays.copyOf(sheet.getCurrentStats(), model.getCurrentStats().length));
+                    if (oldLength < sheet.getCurrentStats().length)
                     {
-                        for (int i = oldLength; i < sheet.getBasicStats().length; i++)
+                        for (int i = oldLength; i < sheet.getCurrentStats().length; i++)
                         {
-                            sheet.getBasicStats()[i] = 0;
+                            sheet.getCurrentStats()[i] = 0;
                         }
                     }
                     
+                    changed = true;
+                }
+                
+                if (model.getMaxStats().length != sheet.getMaxStats().length)
+                {
+                    int oldLength = sheet.getMaxStats().length;
+                    sheet.setMaxStats(Arrays.copyOf(sheet.getMaxStats(), model.getMaxStats().length));
+                    if (oldLength < sheet.getMaxStats().length)
+                    {
+                        for (int i = oldLength; i < sheet.getMaxStats().length; i++)
+                        {
+                            sheet.getMaxStats()[i] = 0;
+                        }
+                    }
                     changed = true;
                 }
                 
@@ -137,10 +151,10 @@ public class AccountManager
         return acc;
     }
     
-    public Account registerNewAccount(String username, String password, SheetModel model) throws IOException
+    public Account registerNewAccount(int connectionID, String username, String password, SheetModel model) throws IOException
     {
         File f = new File(accountFile, username + ".dat");
-        Account acc = new Account(username, password, model);
+        Account acc = new Account(connectionID, username, password, model);
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(f)))
         {
             out.writeObject(acc);

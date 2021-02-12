@@ -42,6 +42,11 @@ public class MousePrefab extends NetworkGameObject
                     anchorPoint = Vector2.subtract(transform().position(), obj.transform().position());
                 }
             }
+            
+            if (Input.getKeyDown(KeyCode.EQUALS))
+            {
+                
+            }
         }
         else
         {

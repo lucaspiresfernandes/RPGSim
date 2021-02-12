@@ -1,29 +1,52 @@
 package com.rpgsim.common.sheets.graphics;
 
-import com.rpgsim.common.serverpackages.UpdateType;
+
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.LayoutManager;
 import java.awt.RenderingHints;
 import javax.swing.JPanel;
 
-public abstract class SheetPanel extends JPanel
+public class SheetPanel extends JPanel
 {
     private final String title;
-    private final Font font;
+    private final Font titleFont;
     private final boolean border;
     
-    public SheetPanel(String title, Font font, LayoutManager layout, boolean border)
+    private Color borderColor;
+    private Color titleColor;
+    
+    public SheetPanel(String title, Font titleFont, boolean border)
     {
-        super(layout, false);
-        this.font = font;
+        this.titleFont = titleFont;
         this.title = title;
         this.border = border;
-        super.setBackground(Color.BLACK);
+        this.titleColor = Color.WHITE;
+        this.borderColor = Color.DARK_GRAY;
+    }
+
+    public Color getBorderColor()
+    {
+        return borderColor;
+    }
+
+    public void setBorderColor(Color borderColor)
+    {
+        this.borderColor = borderColor;
+    }
+
+    public Color getTitleColor()
+    {
+        return titleColor;
+    }
+
+    public void setTitleColor(Color titleColor)
+    {
+        this.titleColor = titleColor;
     }
 
     @Override
@@ -33,31 +56,29 @@ public abstract class SheetPanel extends JPanel
         
         int width = getWidth();
         int height = getHeight();
-        Graphics2D graphics = (Graphics2D) g;
+        Graphics2D g2d = (Graphics2D) g;
         
         Dimension arc = new Dimension(10, 10);
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        graphics.setColor(getBackground());
-        graphics.fillRoundRect(0,  0, width - 1, height - 1, arc.width, arc.height);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setColor(getBackground());
+        g2d.fillRoundRect(0,  0, width - 1, height - 1, arc.width, arc.height);
         
-        g.setColor(Color.WHITE);
-        g.setFont(font);
+        g.setColor(titleColor);
+        g.setFont(titleFont);
         
+        g.drawString(title, getWidth() / 2 - g.getFontMetrics(titleFont).stringWidth(title) / 2, 30);
         
-        g.drawString(title, getWidth() / 2 - g.getFontMetrics(font).stringWidth(title) / 2, 30);
-        
-        g.setColor(Color.DARK_GRAY);
-        g.drawLine(10, font.getSize() + 15, getWidth() - 10, font.getSize() + 15);
+        g.setColor(borderColor);
+        g.drawLine(10, titleFont.getSize() + 15, getWidth() - 10, titleFont.getSize() + 15);
         
         if (border)
         {
-            graphics.setStroke(new BasicStroke(1));
-            graphics.setColor(getForeground());
-            graphics.drawRoundRect(0,  0, width - 1, height - 1, arc.width, arc.height);
-            graphics.setStroke(new BasicStroke());
+            g2d.setColor(borderColor);
+            g2d.setStroke(new BasicStroke(1));
+            g2d.setColor(getForeground());
+            g2d.drawRoundRect(0,  0, width - 1, height - 1, arc.width, arc.height);
+            g2d.setStroke(new BasicStroke());
         }
     }
-    
-    public abstract void updateSheet(int propertyID, Object newValue, UpdateType type);
     
 }

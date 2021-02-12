@@ -9,7 +9,7 @@ public class Transform
     private float rotation = 0f;
     private boolean flipX = false, flipY = false;
 
-    public Transform(NetworkGameObject gameObject)
+    public Transform()
     {
         this.position = new Vector2();
         this.scale = new Vector2(1f, 1f);

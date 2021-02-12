@@ -4,35 +4,46 @@ import java.io.Serializable;
 
 public class SheetModel implements Serializable
 {
-    private final String[] basicInfo;
-    private final String[] basicStats;
+    private final String[] info;
+    private final String[] currentStats;
+    private final String[] maxStats;
     private final String[] attributes;
     private final String[] skills;
+    private final String[] equipments;
 
-    public SheetModel()
+    private SheetModel()
     {
-        this.basicInfo = null;
-        this.basicStats = null;
+        this.info = null;
+        this.currentStats = null;
+        this.maxStats = null;
         this.attributes = null;
         this.skills = null;
+        this.equipments = null;
     }
 
-    public SheetModel(String[] basicInfo, String[] basicStats, String[] attributes, String[] skills)
+    public SheetModel(String[] info, String[] currentStats, String[] maxStats, String[] attributes, String[] skills, String[] equipments)
     {
-        this.basicInfo = basicInfo;
-        this.basicStats = basicStats;
+        this.info = info;
+        this.currentStats = currentStats;
+        this.maxStats = maxStats;
         this.attributes = attributes;
         this.skills = skills;
+        this.equipments = equipments;
     }
 
-    public String[] getBasicInfo()
+    public String[] getInfo()
     {
-        return basicInfo;
+        return info;
     }
 
-    public String[] getBasicStats()
+    public String[] getCurrentStats()
     {
-        return basicStats;
+        return currentStats;
+    }
+
+    public String[] getMaxStats()
+    {
+        return maxStats;
     }
 
     public String[] getAttributes()
@@ -43,6 +54,11 @@ public class SheetModel implements Serializable
     public String[] getSkills()
     {
         return skills;
+    }
+
+    public String[] getEquipments()
+    {
+        return equipments;
     }
     
 }

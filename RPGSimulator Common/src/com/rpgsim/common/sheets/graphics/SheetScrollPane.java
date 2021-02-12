@@ -19,7 +19,7 @@ public class SheetScrollPane extends JScrollPane
     private static final int SCROLL_BAR_ALPHA_ROLLOVER = 100;
     private static final int SCROLL_BAR_ALPHA = 50;
     private static final int THUMB_SIZE = 8;
-    private static final int SB_SIZE = 10;
+    private static final int SB_SIZE = 5;
     private static final Color THUMB_COLOR = Color.LIGHT_GRAY;
 
     public SheetScrollPane(Component view) {

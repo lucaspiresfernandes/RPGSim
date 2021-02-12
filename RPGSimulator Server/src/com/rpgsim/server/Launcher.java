@@ -62,10 +62,13 @@ public class Launcher
         return new DataFile[]
             {
             new DataFile("README.txt",
-                    "Welcome to RPG Simulator!\n"
-                    + "To configure your character sheet, you can access data/sheet.json.\n"
+                    " Welcome to RPG Simulator!\n"
+                    + " To configure your character sheet, you can access data/sheet.json.\n"
                     + "You can add, remove or edit data inside, but do not change description\n"
-                    + "names. (it is bounded to the program code.)"),
+                    + "names. (it is bounded to the program code.)\n\n"
+                    + " Current Stats and Max Stats need to be in synchronization. It means\n"
+                    + "that if the first one is \"Current HP\", the other first also should be\n"
+                    + "\"Max HP\". Changing this rule may cause in strange bugs in your character sheet."),
                 new DataFile("data"),
                 new DataFile("data\\config.ini",
                         "TCPPort=7001\n"

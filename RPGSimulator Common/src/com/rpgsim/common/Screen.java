@@ -1,5 +1,6 @@
 package com.rpgsim.common;
 
+import com.rpgsim.common.game.Transform;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -12,7 +13,9 @@ public class Screen
     private final BufferStrategy bs;
     private final int screenWidth, screenHeight;
     private Graphics2D g;
-
+    
+    private final Transform transform = new Transform();
+    
     public Screen(BufferStrategy bs, int screenWidth, int screenHeight)
     {
         this.bs = bs;

@@ -37,7 +37,6 @@ public class ServerManager extends Listener implements ServerActions
     private final ApplicationConfigurations serverConfigurations;
     private final AccountManager accountManager;
     private final ServerGame game;
-    private Connection currentConnection;
     private final ServerSheetFrame sheetFrame;
     
     
@@ -58,12 +57,11 @@ public class ServerManager extends Listener implements ServerActions
                 }
             }
         };
-        this.sheetFrame = new ServerSheetFrame(this, SheetManager.defaultSheetModel);
+        this.sheetFrame = new ServerSheetFrame(-1, this);
         this.sheetFrame.setTitle(this.sheetFrame.getTitle() + " - Server");
         this.serverFrame = new ServerFrame(sheetFrame);
         this.serverFrame.addWindowListener(l);
         this.serverFrame.setVisible(true);
-        
         
         this.serverConfigurations = new ApplicationConfigurations(FileManager.app_dir + "data\\config.ini");
         
@@ -90,11 +88,8 @@ public class ServerManager extends Listener implements ServerActions
     {
         if (object instanceof ServerPackage)
         {
-            currentConnection = connection;
             ((ServerPackage)object).executeServerAction(this);
         }
-        else
-            System.out.println("The data received is not a ServerPackage. Object: " + object);
     }
     
     @Override
@@ -160,13 +155,13 @@ public class ServerManager extends Listener implements ServerActions
         server.close();
     }
     
-    public void sendPackage(ClientPackage p)
+    public void sendPackage(int connectionID, ClientPackage p)
     {
-        server.sendToTCP(currentConnection.getID(), p);
+        server.sendToTCP(connectionID, p);
     }
 
     @Override
-    public void onClientConnection(String username, String password, ConnectionType type)
+    public void onClientConnection(int connectionID, String username, String password, ConnectionType type)
     {
         switch (type)
         {
@@ -175,7 +170,7 @@ public class ServerManager extends Listener implements ServerActions
                 {
                     if (accountManager.isAccountActive(username, password))
                     {
-                        server.sendToTCP(currentConnection.getID(), 
+                        server.sendToTCP(connectionID, 
                             new ConnectionRequestResponse(false, 
                                     "Account is already logged in.", null, null, 
                                     type));
@@ -185,13 +180,13 @@ public class ServerManager extends Listener implements ServerActions
                         try
                         {
                             Account acc = accountManager.getRegisteredAccount(username, password);
-                            accountManager.setAccountActive(currentConnection.getID(), acc, true);
-                            server.sendToTCP(currentConnection.getID(),
-                                    new ConnectionRequestResponse(true, "", acc, SheetManager.defaultSheetModel, 
+                            accountManager.setAccountActive(connectionID, acc, true);
+                            server.sendToTCP(connectionID,
+                                    new ConnectionRequestResponse(true, "", acc, SheetManager.getDefaultSheetModel(), 
                                             type));
                             for (NetworkGameObject go : game.getScene().getGameObjects())
                             {
-                                server.sendToTCP(currentConnection.getID(),
+                                server.sendToTCP(connectionID,
                                         new InstantiateNetworkGameObjectResponse(go.getObjectID(),
                                                 go.getClientID(),
                                                 go.transform().position(),
@@ -207,7 +202,7 @@ public class ServerManager extends Listener implements ServerActions
                 }
                 else
                 {
-                    server.sendToTCP(currentConnection.getID(), 
+                    server.sendToTCP(connectionID, 
                             new ConnectionRequestResponse(false, 
                                     "Username or password is incorrect.", null,  null, 
                                     type));
@@ -216,7 +211,7 @@ public class ServerManager extends Listener implements ServerActions
             case REGISTER:
                 if (accountManager.isAccountRegistered(username, password))
                 {
-                    server.sendToTCP(currentConnection.getID(), 
+                    server.sendToTCP(connectionID, 
                             new ConnectionRequestResponse(false, 
                                     "Username already exists.", null,  null, 
                                     type));
@@ -225,13 +220,13 @@ public class ServerManager extends Listener implements ServerActions
                 {
                     try
                     {
-                        Account acc = accountManager.registerNewAccount(username, password, SheetManager.defaultSheetModel);
-                        accountManager.setAccountActive(currentConnection.getID(), acc, true);
-                        server.sendToTCP(currentConnection.getID(),
-                                new ConnectionRequestResponse(true, "", acc, SheetManager.defaultSheetModel, 
+                        Account acc = accountManager.registerNewAccount(connectionID, username, password, SheetManager.getDefaultSheetModel());
+                        accountManager.setAccountActive(connectionID, acc, true);
+                        server.sendToTCP(connectionID,
+                                new ConnectionRequestResponse(true, "", acc, SheetManager.getDefaultSheetModel(), 
                                         type));
                         for (NetworkGameObject go : game.getScene().getGameObjects())
-                            server.sendToTCP(currentConnection.getID(),
+                            server.sendToTCP(connectionID,
                                     new InstantiateNetworkGameObjectResponse(go.getObjectID(),
                                             go.getClientID(),
                                             go.transform().position(),
@@ -290,8 +285,8 @@ public class ServerManager extends Listener implements ServerActions
     public void onCharacterSheetFieldUpdate(int connectionID, int fieldID, int propertyID, Object newValue, UpdateType type)
     {
         Account acc = accountManager.getActiveAccount(connectionID);
-        sheetFrame.setPlayerSheet(acc.getPlayerSheet());
-        sheetFrame.onReceiveCharacterSheetUpdate(fieldID, propertyID, newValue, type);
+        //sheetFrame.setPlayerSheet(connectionID, acc.getPlayerSheet());
+        //sheetFrame.onReceiveCharacterSheetUpdate(fieldID, propertyID, newValue, type);
     }
     
 }

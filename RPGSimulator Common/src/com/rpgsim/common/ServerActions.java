@@ -4,7 +4,7 @@ import com.rpgsim.common.serverpackages.UpdateType;
 
 public interface ServerActions
 {
-    public void onClientConnection(String username, String password, ConnectionType type);
+    public void onClientConnection(int connectionID, String username, String password, ConnectionType type);
     
     public void onNetworkGameObjectTransformUpdate(int id, Vector2 position, Vector2 scale, float rotation, boolean flipX, boolean flipY);
     

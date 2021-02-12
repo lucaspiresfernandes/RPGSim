@@ -4,7 +4,6 @@ import com.rpgsim.common.sheets.Account;
 import com.rpgsim.common.sheets.PlayerSheet;
 import com.rpgsim.common.sheets.graphics.SheetFrame;
 import com.rpgsim.server.util.SheetManager;
-import java.awt.AWTEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.DefaultListModel;
@@ -47,8 +46,12 @@ public class ServerFrame extends javax.swing.JFrame
                 return;
             }
             
-            playerSheet = list.get(i).getPlayerSheet();
-            sheetFrame.setPlayerSheet(playerSheet);
+            Account acc = list.get(i);
+            playerSheet = acc.getPlayerSheet();
+            if (sheetFrame.isLoaded())
+                sheetFrame.reload(playerSheet);
+            else
+                sheetFrame.load(SheetManager.getDefaultSheetModel(), playerSheet);
             sheetFrame.setVisible(true);
         });
     }
