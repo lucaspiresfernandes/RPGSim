@@ -49,9 +49,9 @@ public class ServerFrame extends javax.swing.JFrame
             Account acc = list.get(i);
             playerSheet = acc.getPlayerSheet();
             if (sheetFrame.isLoaded())
-                sheetFrame.reload(playerSheet);
+                sheetFrame.reload(acc.getConnectionID(), playerSheet);
             else
-                sheetFrame.load(SheetManager.getDefaultSheetModel(), playerSheet);
+                sheetFrame.load(acc.getConnectionID(), SheetManager.getDefaultSheetModel(), playerSheet);
             sheetFrame.setVisible(true);
         });
     }

@@ -1,6 +1,7 @@
 package com.rpgsim.common;
 
 import com.rpgsim.common.serverpackages.UpdateType;
+import com.rpgsim.common.sheets.UpdateField;
 
 public interface ServerActions
 {
@@ -14,6 +15,6 @@ public interface ServerActions
     
     public void onNetworkGameObjectDestroy(int id);
     
-    public void onCharacterSheetFieldUpdate(int sessionID, int fieldID, int propertyID, Object newValue, UpdateType type);
+    public void onCharacterSheetFieldUpdate(int connectionID, UpdateField field, Object newValue, int propertyIndex, UpdateType type);
     
 }

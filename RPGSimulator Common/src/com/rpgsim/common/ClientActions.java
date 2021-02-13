@@ -3,6 +3,7 @@ package com.rpgsim.common;
 import com.rpgsim.common.serverpackages.UpdateType;
 import com.rpgsim.common.sheets.Account;
 import com.rpgsim.common.sheets.SheetModel;
+import com.rpgsim.common.sheets.UpdateField;
 
 public interface ClientActions
 {
@@ -14,5 +15,5 @@ public interface ClientActions
     
     public void onNetworkGameObjectImageChange(int id, String image);
     
-    public void onCharacterSheetUpdate(int fieldID, int propertyID, Object value, UpdateType type);
+    public void onCharacterSheetUpdate(UpdateField field, Object newValue, int propertyIndex, UpdateType type);
 }

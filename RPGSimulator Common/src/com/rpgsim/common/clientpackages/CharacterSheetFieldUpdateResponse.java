@@ -1,32 +1,31 @@
 package com.rpgsim.common.clientpackages;
 
 import com.rpgsim.common.ClientActions;
-import com.rpgsim.common.Vector2;
 import com.rpgsim.common.serverpackages.UpdateType;
+import com.rpgsim.common.sheets.UpdateField;
 
 public class CharacterSheetFieldUpdateResponse extends ClientPackage
 {
-    private int fieldID;
-    private int propertyID;
-    private Object value;
+    private UpdateField field;
+    private Object newValue;
+    private int propertyIndex;
     private UpdateType type;
 
     public CharacterSheetFieldUpdateResponse()
     {
     }
 
-    public CharacterSheetFieldUpdateResponse(int fieldID, int propertyID, Object value, UpdateType type)
+    public CharacterSheetFieldUpdateResponse(UpdateField field, Object newValue, int propertyIndex, UpdateType type)
     {
-        this.fieldID = fieldID;
-        this.propertyID = propertyID;
-        this.value = value;
+        this.field = field;
+        this.newValue = newValue;
+        this.propertyIndex = propertyIndex;
         this.type = type;
     }
-    
     
     @Override
     public void executeClientAction(ClientActions client)
     {
-        client.onCharacterSheetUpdate(fieldID, propertyID, value, type);
+        client.onCharacterSheetUpdate(field, newValue, propertyIndex, type);
     }
 }

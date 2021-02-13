@@ -5,19 +5,16 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JOptionPane;
 
 public class JEquipmentField extends JComponent
 {
     private static int[] positions;
-    private final Object[] equipment;
+    private String[] equipment;
     private final JButton btnRemove;
 
-    public JEquipmentField(Object[] equipment)
+    public JEquipmentField(String[] equipment)
     {
         this.equipment = equipment;
         this.btnRemove = new JButton("-");
@@ -25,45 +22,8 @@ public class JEquipmentField extends JComponent
         this.btnRemove.setForeground(Color.WHITE);
         this.btnRemove.setBounds(5, 1, 50, 15);
         this.btnRemove.setVerticalAlignment(JButton.CENTER);
-        
-        this.addMouseListener(new MouseAdapter()
-        {
-            @Override
-            public void mousePressed(MouseEvent e)
-            {
-                if (e.getClickCount() < 2)
-                    return;
-                int selected = -1;
-                for (int i = 0; i < positions.length; i++)
-                {
-                    int x = e.getX();
-                    if (i < positions.length - 1)
-                    {
-                        if (x > positions[i] && x < positions[i + 1])
-                        {
-                            selected = i;
-                        }
-                    }
-                    else if (x > positions[i])
-                    {
-                        selected = i;
-                    }
-                }
-                
-                if (selected < 0)
-                    return;
-                
-                String a = JOptionPane.showInputDialog("Please type in new value.", equipment[selected]);
-                
-                if (a == null)
-                    return;
-                
-                equipment[selected] = a;
-                repaint();
-            }
-        });
-        
         this.add(btnRemove);
+        
     }
 
     public static void setPositions(int[] positions)
@@ -81,6 +41,16 @@ public class JEquipmentField extends JComponent
         return btnRemove;
     }
 
+    public String[] getEquipment()
+    {
+        return equipment;
+    }
+
+    public void setEquipment(String[] equipment)
+    {
+        this.equipment = equipment;
+    }
+
     @Override
     public void paintComponent(Graphics g)
     {
@@ -93,7 +63,7 @@ public class JEquipmentField extends JComponent
         
         for (int i = 0; i < equipment.length; i++)
         {
-            g.drawString(equipment[i].toString(), positions[i], g.getFont().getSize());
+            g.drawString(equipment[i], positions[i], g.getFont().getSize());
         }
     }
     

@@ -35,7 +35,7 @@ public class ClientGame extends Canvas implements Runnable
     
     private final Scene scene;
     
-    private SheetFrame sheetFrame;
+    private ClientSheetFrame sheetFrame;
     
     private float deltaTime;
     
@@ -68,14 +68,14 @@ public class ClientGame extends Canvas implements Runnable
                 client.sendPackage(new InstantiatePrefabRequest(new Vector2(0, 0), PrefabID.DRAGGABLE_OBJECT, -1, relativePath));
             });
         }
-        scene.updateGameObjects(client.getConnectionID(), dt);
+        scene.updateGameObjects(client.getAccount().getConnectionID(), dt);
     }
     
     private void render()
     {
         screen.begin();
         screen.drawString("FPS: " + deltaTime, new Vector2(10, 10));
-        scene.renderGameObjects(client.getConnectionID(), screen);
+        scene.renderGameObjects(client.getAccount().getConnectionID(), screen);
         screen.end();
     }
     
@@ -91,7 +91,7 @@ public class ClientGame extends Canvas implements Runnable
         screen = new Screen(getBufferStrategy(), getWidth(), getHeight());
         
         this.sheetFrame = new ClientSheetFrame(client);
-        this.sheetFrame.load(model, sheet);
+        this.sheetFrame.load(client.getAccount().getConnectionID(), model, sheet);
         WindowAdapter l = new WindowAdapter()
         {
             @Override
@@ -101,8 +101,12 @@ public class ClientGame extends Canvas implements Runnable
             }
         };
         this.sheetFrame.addWindowListener(l);
-        
-        client.sendPackage(new InstantiatePrefabRequest(Input.mousePosition(), PrefabID.MOUSE, client.getConnectionID(), "data files\\images\\null.png"));
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ClientGame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        client.sendPackage(new InstantiatePrefabRequest(Input.mousePosition(), PrefabID.MOUSE, client.getAccount().getConnectionID(), "data files\\images\\null.png"));
         gameRunning = true;
         requestFocus();
     }
@@ -176,7 +180,7 @@ public class ClientGame extends Canvas implements Runnable
         }
     }
 
-    public SheetFrame getSheetFrame()
+    public ClientSheetFrame getSheetFrame()
     {
         return sheetFrame;
     }

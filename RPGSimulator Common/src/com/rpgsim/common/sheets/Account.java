@@ -5,13 +5,12 @@ import java.util.Objects;
 
 public class Account implements Serializable
 {
-    private final int connectionID;
+    private int connectionID;
     private final String username, password;
     private PlayerSheet playerSheet;
 
     private Account()
     {
-        this.connectionID = -1;
         this.username = null;
         this.password = null;
     }
@@ -35,6 +34,11 @@ public class Account implements Serializable
     public int getConnectionID()
     {
         return connectionID;
+    }
+
+    public void setConnectionID(int connectionID)
+    {
+        this.connectionID = connectionID;
     }
 
     public void setPlayerSheet(PlayerSheet playerSheet)

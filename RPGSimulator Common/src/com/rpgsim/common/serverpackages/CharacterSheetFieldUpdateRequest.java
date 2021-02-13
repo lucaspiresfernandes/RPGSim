@@ -1,31 +1,31 @@
 package com.rpgsim.common.serverpackages;
 
 import com.rpgsim.common.ServerActions;
+import com.rpgsim.common.sheets.UpdateField;
 
 public class CharacterSheetFieldUpdateRequest extends ServerPackage
 {
     private int connectionID;
-    private int fieldID;
-    private int propertyID;
-    private Object value;
+    private UpdateField field;
+    private Object newValue;
+    private int propertyIndex;
     private UpdateType type;
 
     public CharacterSheetFieldUpdateRequest()
     {
     }
 
-    public CharacterSheetFieldUpdateRequest(int connectionID, int fieldID, int propertyID, Object value, UpdateType type)
-    {
+    public CharacterSheetFieldUpdateRequest(int connectionID, UpdateField field, Object newValue, int propertyIndex, UpdateType type) {
         this.connectionID = connectionID;
-        this.fieldID = fieldID;
-        this.propertyID = propertyID;
-        this.value = value;
+        this.field = field;
+        this.newValue = newValue;
+        this.propertyIndex = propertyIndex;
         this.type = type;
     }
     
     @Override
     public void executeServerAction(ServerActions server)
     {
-        server.onCharacterSheetFieldUpdate(connectionID, fieldID, propertyID, value, type);
+        server.onCharacterSheetFieldUpdate(connectionID, field, newValue, propertyIndex, type);
     }
 }

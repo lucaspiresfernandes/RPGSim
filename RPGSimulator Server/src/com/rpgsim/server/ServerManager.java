@@ -20,6 +20,7 @@ import com.rpgsim.common.clientpackages.NetworkGameObjectTransformUpdate;
 import com.rpgsim.common.game.NetworkGameObject;
 import com.rpgsim.common.serverpackages.ServerPackage;
 import com.rpgsim.common.serverpackages.UpdateType;
+import com.rpgsim.common.sheets.UpdateField;
 import com.rpgsim.server.util.SheetManager;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -57,11 +58,12 @@ public class ServerManager extends Listener implements ServerActions
                 }
             }
         };
-        this.sheetFrame = new ServerSheetFrame(-1, this);
+        this.sheetFrame = new ServerSheetFrame(this);
         this.sheetFrame.setTitle(this.sheetFrame.getTitle() + " - Server");
         this.serverFrame = new ServerFrame(sheetFrame);
         this.serverFrame.addWindowListener(l);
         this.serverFrame.setVisible(true);
+        
         
         this.serverConfigurations = new ApplicationConfigurations(FileManager.app_dir + "data\\config.ini");
         
@@ -180,6 +182,7 @@ public class ServerManager extends Listener implements ServerActions
                         try
                         {
                             Account acc = accountManager.getRegisteredAccount(username, password);
+                            acc.setConnectionID(connectionID);
                             accountManager.setAccountActive(connectionID, acc, true);
                             server.sendToTCP(connectionID,
                                     new ConnectionRequestResponse(true, "", acc, SheetManager.getDefaultSheetModel(), 
@@ -221,6 +224,7 @@ public class ServerManager extends Listener implements ServerActions
                     try
                     {
                         Account acc = accountManager.registerNewAccount(connectionID, username, password, SheetManager.getDefaultSheetModel());
+                        acc.setConnectionID(connectionID);
                         accountManager.setAccountActive(connectionID, acc, true);
                         server.sendToTCP(connectionID,
                                 new ConnectionRequestResponse(true, "", acc, SheetManager.getDefaultSheetModel(), 
@@ -282,11 +286,22 @@ public class ServerManager extends Listener implements ServerActions
     }
 
     @Override
-    public void onCharacterSheetFieldUpdate(int connectionID, int fieldID, int propertyID, Object newValue, UpdateType type)
+    public void onCharacterSheetFieldUpdate(int connectionID, UpdateField field, Object newValue, int propertyIndex, UpdateType type)
     {
-        Account acc = accountManager.getActiveAccount(connectionID);
-        //sheetFrame.setPlayerSheet(connectionID, acc.getPlayerSheet());
-        //sheetFrame.onReceiveCharacterSheetUpdate(fieldID, propertyID, newValue, type);
+        switch (type)
+        {
+            case ADD:
+                sheetFrame.onSheetFieldAddReceived(connectionID, field, newValue, propertyIndex);
+                break;
+            case REMOVE:
+                sheetFrame.onSheetFieldRemoveReceived(connectionID, field, newValue, propertyIndex);
+                break;
+            case UPDATE:
+                sheetFrame.onSheetFieldUpdateReceived(connectionID, field, newValue, propertyIndex);
+                break;
+            default:
+                throw new AssertionError();
+        }
     }
     
 }

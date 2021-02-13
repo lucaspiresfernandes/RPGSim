@@ -41,7 +41,7 @@ public class AccountManager
                 if (model.getInfo().length != sheet.getInfo().length)
                 {
                     int oldLength = sheet.getInfo().length;
-                    sheet.setBasicInfo(Arrays.copyOf(sheet.getInfo(), model.getInfo().length));
+                    sheet.setInfo(Arrays.copyOf(sheet.getInfo(), model.getInfo().length));
                     if (oldLength < sheet.getInfo().length)
                     {
                         for (int i = oldLength; i < sheet.getInfo().length; i++)
@@ -60,7 +60,7 @@ public class AccountManager
                     {
                         for (int i = oldLength; i < sheet.getCurrentStats().length; i++)
                         {
-                            sheet.getCurrentStats()[i] = 0;
+                            sheet.getCurrentStats()[i] = "0";
                         }
                     }
                     
@@ -75,7 +75,7 @@ public class AccountManager
                     {
                         for (int i = oldLength; i < sheet.getMaxStats().length; i++)
                         {
-                            sheet.getMaxStats()[i] = 0;
+                            sheet.getMaxStats()[i] = "0";
                         }
                     }
                     changed = true;
@@ -89,7 +89,7 @@ public class AccountManager
                     {
                         for (int i = oldLength; i < sheet.getAttributes().length; i++)
                         {
-                            sheet.getAttributes()[i] = 0;
+                            sheet.getAttributes()[i] = "0";
                         }
                     }
                     
@@ -104,7 +104,7 @@ public class AccountManager
                     {
                         for (int i = oldLength; i < sheet.getSkills().length; i++)
                         {
-                            sheet.getSkills()[i] = 0;
+                            sheet.getSkills()[i] = "0";
                         }
                     }
                     

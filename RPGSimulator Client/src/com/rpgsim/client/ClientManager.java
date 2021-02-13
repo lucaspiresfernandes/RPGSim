@@ -19,6 +19,7 @@ import com.rpgsim.common.serverpackages.NetworkGameObjectStateUptadeRequest;
 import com.rpgsim.common.serverpackages.ServerPackage;
 import com.rpgsim.common.serverpackages.UpdateType;
 import com.rpgsim.common.sheets.SheetModel;
+import com.rpgsim.common.sheets.UpdateField;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -60,6 +61,7 @@ public class ClientManager extends Listener implements ClientActions
                 }
             }
         };
+        
         gameFrame = new GameFrame(this, l);
         game = gameFrame.getGame();
         
@@ -67,11 +69,6 @@ public class ClientManager extends Listener implements ClientActions
         
         client = new Client();
         client.getKryo().setRegistrationRequired(false);
-    }
-    
-    public int getConnectionID()
-    {
-        return client.getID();
     }
 
     public Account getAccount()
@@ -244,9 +241,9 @@ public class ClientManager extends Listener implements ClientActions
     }
 
     @Override
-    public void onCharacterSheetUpdate(int fieldID, int propertyID, Object value, UpdateType type)
+    public void onCharacterSheetUpdate(UpdateField field, Object newValue, int propertyIndex, UpdateType type)
     {
-        //game.getSheetFrame().onReceiveCharacterSheetUpdate(fieldID, propertyID, value, type);
+        game.getSheetFrame().onSheetFieldUpdate(field, newValue, propertyIndex, type);
     }
     
 }
