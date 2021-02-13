@@ -36,98 +36,37 @@ public class ServerSheetFrame extends SheetFrame
         }
         else
         {
-//            PlayerSheet svSheet = activeSheets.get(connectionID);
-//            if (sheet.getInfo() != null)
-//            {
-//                for (int i = 0; i < sheet.getInfo().length; i++)
-//                {
-//                    String info = sheet.getInfo()[i];
-//                    if (info != null)
-//                    {
-//                        svSheet.getInfo()[i] = info;
-//                    }
-//                }
-//            }
-//            
-//            if (sheet.getAbout() != null)
-//            {
-//                svSheet.setAbout(sheet.getAbout());
-//            }
-//            
-//            if (sheet.getExtras() != null)
-//            {
-//                svSheet.setExtras(sheet.getExtras());
-//            }
-//            
-//            if (sheet.getCurrentStats() != null)
-//            {
-//                for (int i = 0; i < sheet.getCurrentStats().length; i++)
-//                {
-//                    String stats = sheet.getCurrentStats()[i];
-//                    if (stats != null)
-//                    {
-//                        svSheet.getCurrentStats()[i] = stats;
-//                    }
-//                }
-//            }
-//            
-//            if (sheet.getMaxStats() != null)
-//            {
-//                for (int i = 0; i < sheet.getMaxStats().length; i++)
-//                {
-//                    String stats = sheet.getMaxStats()[i];
-//                    if (stats != null)
-//                    {
-//                        svSheet.getMaxStats()[i] = stats;
-//                    }
-//                }
-//            }
-//            
-//            if (sheet.getAttributes() != null)
-//            {
-//                for (int i = 0; i < sheet.getAttributes().length; i++)
-//                {
-//                    String attribute = sheet.getAttributes()[i];
-//                    if (attribute != null)
-//                    {
-//                        svSheet.getAttributes()[i] = attribute;
-//                    }
-//                }
-//            }
-//            
-//            if (sheet.getSkills() != null)
-//            {
-//                for (int i = 0; i < sheet.getSkills().length; i++)
-//                {
-//                    String skill = sheet.getSkills()[i];
-//                    if (skill != null)
-//                    {
-//                        svSheet.getSkills()[i] = skill;
-//                    }
-//                }
-//            }
-//            
-//            if (sheet.getEquipments() != null)
-//            {
-//                for (String[] equipment : sheet.getEquipments())
-//                {
-//                    if (svSheet.getEquipments().contains(equipment))
-//                    {
-//                        svSheet.getEquipments().set(svSheet.getEquipments().indexOf(equipment), equipment);
-//                    }
-//                }
-//            }
-//            
-//            if (sheet.getItems() != null)
-//            {
-//                for (String item : sheet.getItems())
-//                {
-//                    if (svSheet.getItems().contains(item))
-//                    {
-//                        svSheet.getItems().set(svSheet.getItems().indexOf(item), item);
-//                    }
-//                }
-//            }
+            PlayerSheet svSheet = activeSheets.get(connectionID);
+            switch (field)
+            {
+                case INFO:
+                    svSheet.getInfo()[propertyIndex] = (String) newValue;
+                    break;
+                case ABOUT:
+                    svSheet.setAbout((String) newValue);
+                    break;
+                case EXTRAS:
+                    svSheet.setExtras((String) newValue);
+                    break;
+                case CUR_STATS:
+                    svSheet.getCurrentStats()[propertyIndex] = (String) newValue;
+                    break;
+                case MAX_STATS:
+                    svSheet.getMaxStats()[propertyIndex] = (String) newValue;
+                    break;
+                case ATTRIBUTES:
+                    svSheet.getAttributes()[propertyIndex] = (String) newValue;
+                    break;
+                case SKILLS:
+                    svSheet.getSkills()[propertyIndex] = (String) newValue;
+                    break;
+                case EQUIPMENTS:
+                    svSheet.getEquipments().set(propertyIndex, (String[]) newValue);
+                    break;
+                case ITEMS:
+                    svSheet.getItems().set(propertyIndex, (String) newValue);
+                    break;
+            }
         }
     }
     
@@ -139,22 +78,16 @@ public class ServerSheetFrame extends SheetFrame
         }
         else
         {
-//            PlayerSheet svSheet = activeSheets.get(connectionID);
-//            if (sheet.getEquipments() != null)
-//            {
-//                for (String[] equipment : sheet.getEquipments())
-//                {
-//                    svSheet.getEquipments().add(equipment);
-//                }
-//            }
-//
-//            if (sheet.getItems() != null)
-//            {
-//                for (String item : sheet.getItems())
-//                {
-//                    svSheet.getItems().add(item);
-//                }
-//            }
+            PlayerSheet svSheet = activeSheets.get(connectionID);
+            switch (field)
+            {
+                case EQUIPMENTS:
+                    svSheet.getEquipments().add((String[]) newValue);
+                    break;
+                case ITEMS:
+                    svSheet.getItems().add((String) newValue);
+                    break;
+            }
         }
     }
     
@@ -166,22 +99,16 @@ public class ServerSheetFrame extends SheetFrame
         }
         else
         {
-//            PlayerSheet svSheet = activeSheets.get(connectionID);
-//            if (sheet.getEquipments() != null)
-//            {
-//                for (String[] equipment : sheet.getEquipments())
-//                {
-//                    svSheet.getEquipments().remove(equipment);
-//                }
-//            }
-//
-//            if (sheet.getItems() != null)
-//            {
-//                for (String item : sheet.getItems())
-//                {
-//                    svSheet.getItems().remove(item);
-//                }
-//            }
+            PlayerSheet svSheet = activeSheets.get(connectionID);
+            switch (field)
+            {    
+                case EQUIPMENTS:
+                    svSheet.getEquipments().remove(propertyIndex);
+                    break;
+                case ITEMS:
+                    svSheet.getItems().remove(propertyIndex);
+                    break;
+            }
         }
     }
 

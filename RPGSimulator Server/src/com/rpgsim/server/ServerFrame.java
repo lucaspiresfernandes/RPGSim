@@ -2,7 +2,6 @@ package com.rpgsim.server;
 
 import com.rpgsim.common.sheets.Account;
 import com.rpgsim.common.sheets.PlayerSheet;
-import com.rpgsim.common.sheets.graphics.SheetFrame;
 import com.rpgsim.server.util.SheetManager;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -11,11 +10,11 @@ import javax.swing.JOptionPane;
 
 public class ServerFrame extends javax.swing.JFrame
 {
-    private final SheetFrame sheetFrame;
+    private final ServerSheetFrame sheetFrame;
     private PlayerSheet playerSheet;
     private final DefaultListModel<Account> list = new DefaultListModel<>();
     
-    public ServerFrame(SheetFrame sheetFrame)
+    public ServerFrame(ServerSheetFrame sheetFrame)
     {
         initComponents();
         
@@ -59,6 +58,7 @@ public class ServerFrame extends javax.swing.JFrame
     public void addPlayer(Account acc)
     {
         list.addElement(acc);
+        sheetFrame.addActiveSheet(acc.getConnectionID(), acc.getPlayerSheet());
     }
     
     public void removePlayer(Account acc)
@@ -66,6 +66,7 @@ public class ServerFrame extends javax.swing.JFrame
         if (acc.getPlayerSheet().equals(playerSheet))
             sheetFrame.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
         list.removeElement(acc);
+        sheetFrame.removeActiveSheet(acc.getConnectionID());
     }
 
     /** This method is called from within the constructor to

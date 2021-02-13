@@ -20,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -45,11 +46,20 @@ public abstract class SheetFrame extends javax.swing.JFrame
     private JPanel pnlEquipmentFields;
     
     private JTextField[] txtInfo;
+    
+    private JProgressBar[] prgStats;
+    private JButton[] btnStatsUp;
+    private JButton[] btnStatsDown;
+    
     private JTextArea txaAbout, txaExtras;
+    
     private JTextField[] txtAttributes;
+    
     private JTextField[] txtSkills;
+    
     private final ArrayList<JEquipmentField> equipments = new ArrayList<>();
     private final JButton btnAddEquipment = new JButton("+");
+    
     private final ArrayList<JLabel> items = new ArrayList<>();
     private final JButton btnAddItem = new JButton("+");
     
@@ -96,6 +106,29 @@ public abstract class SheetFrame extends javax.swing.JFrame
     {
         this.sheet = sheet;
         this.connectionID = connectionID;
+        
+        for (int i = 0; i < txtInfo.length; i++)
+            txtInfo[i].setText(sheet.getInfo()[i]);
+        
+        txaAbout.setText(sheet.getAbout());
+        
+        txaExtras.setText(sheet.getExtras());
+        
+        for (int i = 0; i < txtAttributes.length; i++)
+            txtAttributes[i].setText(sheet.getAttributes()[i]);
+        
+        for (int i = 0; i < txtSkills.length; i++)
+            txtSkills[i].setText(sheet.getSkills()[i]);
+        
+        for (int i = 0; i < equipments.size(); i++)
+            removeEquipmentField(equipments.get(i));
+        for (int i = 0; i < sheet.getEquipments().size(); i++)
+            createEquipmentField(sheet.getEquipments().get(i));
+        
+        for (int i = 0; i < items.size(); i++)
+            removeItem(i);
+        for (int i = 0; i < sheet.getItems().size(); i++)
+            createItem(sheet.getItems().get(i));
     }
     
     public void networkUpdate(UpdateField field, Object newValue, int propertyIndex)
@@ -615,8 +648,9 @@ public abstract class SheetFrame extends javax.swing.JFrame
             String[] obj = new String[model.getEquipments().length];
             for (int i = 0; i < obj.length; i++)
                 obj[i] = "none";
+            obj[0] = "Equipment " + (equipments.size() + 1);
             JEquipmentField e = createEquipmentField(obj);
-            sheet.getEquipments().add(e.getEquipment());
+            sheet.getEquipments().add(obj);
             sendSheetUpdate(UpdateField.EQUIPMENTS, obj, equipments.indexOf(e), UpdateType.ADD);
         });
         pnlEquipments.add(btnAddEquipment);
@@ -649,7 +683,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
         btnAddItem.setPreferredSize(new Dimension(75, 25));
         btnAddItem.addActionListener(l ->
         {
-            String i = "New Item";
+            String i = "New Item " + (sheet.getItems().size() + 1);
             createItem(i);
             sheet.getItems().add(i);
             sendSheetUpdate(UpdateField.ITEMS, i, 0, UpdateType.ADD);
@@ -715,6 +749,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
         e.getRemoveButton().addActionListener(l ->
         {
             sendSheetUpdate(UpdateField.EQUIPMENTS, null, equipments.indexOf(e), UpdateType.REMOVE);
+            sheet.getEquipments().remove(e.getEquipment());
             removeEquipmentField(e);
         });
         
@@ -768,7 +803,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 {
                     sheet.getItems().remove(name);
                     sendSheetUpdate(UpdateField.ITEMS, null, items.indexOf(item), UpdateType.REMOVE);
-                    removeItem(item);
+                    removeItem(items.indexOf(item));
                 }
                 else
                 {
@@ -801,8 +836,6 @@ public abstract class SheetFrame extends javax.swing.JFrame
         int hGap = l.getHgap();
         int vGap = l.getVgap();
         JLabel item = items.get(index);
-        
-        sheet.getItems().remove(items.indexOf(item));
         
         items.remove(item);
         pnlItems.remove(item);

@@ -8,7 +8,6 @@ import com.rpgsim.common.game.Input;
 import com.rpgsim.common.game.KeyCode;
 import com.rpgsim.common.serverpackages.InstantiatePrefabRequest;
 import com.rpgsim.common.sheets.PlayerSheet;
-import com.rpgsim.common.sheets.graphics.SheetFrame;
 import com.rpgsim.common.Vector2;
 import com.rpgsim.common.sheets.SheetModel;
 import java.awt.Canvas;
@@ -101,11 +100,6 @@ public class ClientGame extends Canvas implements Runnable
             }
         };
         this.sheetFrame.addWindowListener(l);
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(ClientGame.class.getName()).log(Level.SEVERE, null, ex);
-        }
         client.sendPackage(new InstantiatePrefabRequest(Input.mousePosition(), PrefabID.MOUSE, client.getAccount().getConnectionID(), "data files\\images\\null.png"));
         gameRunning = true;
         requestFocus();
