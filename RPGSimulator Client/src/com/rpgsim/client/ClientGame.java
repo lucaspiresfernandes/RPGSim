@@ -1,5 +1,6 @@
 package com.rpgsim.client;
 
+import com.rpgsim.common.AsynTask;
 import com.rpgsim.common.Screen;
 import com.rpgsim.common.CommonConfigurations;
 import com.rpgsim.common.PrefabID;
@@ -73,7 +74,7 @@ public class ClientGame extends Canvas implements Runnable
     private void render()
     {
         screen.begin();
-        screen.drawString("FPS: " + deltaTime, new Vector2(10, 10));
+        screen.drawString("Delta: " + deltaTime, new Vector2(0, 10));
         scene.renderGameObjects(client.getAccount().getConnectionID(), screen);
         screen.end();
     }
@@ -90,7 +91,7 @@ public class ClientGame extends Canvas implements Runnable
         screen = new Screen(getBufferStrategy(), getWidth(), getHeight());
         
         this.sheetFrame = new ClientSheetFrame(client);
-        this.sheetFrame.load(client.getAccount().getConnectionID(), model, sheet);
+        this.sheetFrame.load(client.getAccount().getConnectionID(), model, sheet, true);
         WindowAdapter l = new WindowAdapter()
         {
             @Override
@@ -100,7 +101,7 @@ public class ClientGame extends Canvas implements Runnable
             }
         };
         this.sheetFrame.addWindowListener(l);
-        client.sendPackage(new InstantiatePrefabRequest(Input.mousePosition(), PrefabID.MOUSE, client.getAccount().getConnectionID(), "data files\\images\\null.png"));
+        client.sendPackage(new InstantiatePrefabRequest(Input.mousePosition(), PrefabID.MOUSE, client.getAccount().getConnectionID(), "data files\\images\\cursor.png"));
         gameRunning = true;
         requestFocus();
     }

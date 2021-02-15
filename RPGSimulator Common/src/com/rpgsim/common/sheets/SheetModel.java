@@ -5,29 +5,42 @@ import java.io.Serializable;
 public class SheetModel implements Serializable
 {
     private final String[] info;
-    private final String[] currentStats;
-    private final String[] maxStats;
+    private final String[] stats;
+    private final String[] statsColor;
     private final String[] attributes;
+    private final String[] attributesDiceNumbers;
     private final String[] skills;
+    private final String[] skillsDiceNumbers;
     private final String[] equipments;
 
     private SheetModel()
     {
         this.info = null;
-        this.currentStats = null;
-        this.maxStats = null;
+        this.stats = null;
+        this.statsColor = null;
         this.attributes = null;
+        this.attributesDiceNumbers = null;
         this.skills = null;
+        this.skillsDiceNumbers = null;
         this.equipments = null;
     }
 
-    public SheetModel(String[] info, String[] currentStats, String[] maxStats, String[] attributes, String[] skills, String[] equipments)
+    public SheetModel(String[] info, 
+            String[] stats, 
+            String[] statsColor, 
+            String[] attributes, 
+            String[] attributesDiceNumbers, 
+            String[] skills, 
+            String[] skillsDiceNumbers, 
+            String[] equipments)
     {
         this.info = info;
-        this.currentStats = currentStats;
-        this.maxStats = maxStats;
+        this.stats = stats;
+        this.statsColor = statsColor;
         this.attributes = attributes;
+        this.attributesDiceNumbers = attributesDiceNumbers;
         this.skills = skills;
+        this.skillsDiceNumbers = skillsDiceNumbers;
         this.equipments = equipments;
     }
 
@@ -36,14 +49,14 @@ public class SheetModel implements Serializable
         return info;
     }
 
-    public String[] getCurrentStats()
+    public String[] getStats()
     {
-        return currentStats;
+        return stats;
     }
 
-    public String[] getMaxStats()
+    public String[] getStatsColor()
     {
-        return maxStats;
+        return statsColor;
     }
 
     public String[] getAttributes()
@@ -51,9 +64,19 @@ public class SheetModel implements Serializable
         return attributes;
     }
 
+    public String[] getAttributesDiceNumbers()
+    {
+        return attributesDiceNumbers;
+    }
+
     public String[] getSkills()
     {
         return skills;
+    }
+
+    public String[] getSkillsDiceNumbers()
+    {
+        return skillsDiceNumbers;
     }
 
     public String[] getEquipments()

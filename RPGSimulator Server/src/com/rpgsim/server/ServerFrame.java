@@ -13,6 +13,7 @@ public class ServerFrame extends javax.swing.JFrame
     private final ServerSheetFrame sheetFrame;
     private PlayerSheet playerSheet;
     private final DefaultListModel<Account> list = new DefaultListModel<>();
+    private boolean loaded = false;
     
     public ServerFrame(ServerSheetFrame sheetFrame)
     {
@@ -47,10 +48,15 @@ public class ServerFrame extends javax.swing.JFrame
             
             Account acc = list.get(i);
             playerSheet = acc.getPlayerSheet();
-            if (sheetFrame.isLoaded())
+            
+            if (loaded)
                 sheetFrame.reload(acc.getConnectionID(), playerSheet);
             else
-                sheetFrame.load(acc.getConnectionID(), SheetManager.getDefaultSheetModel(), playerSheet);
+            {
+                sheetFrame.load(acc.getConnectionID(), SheetManager.getDefaultSheetModel(), playerSheet, false);
+                loaded = true;
+            }
+            
             sheetFrame.setVisible(true);
         });
     }

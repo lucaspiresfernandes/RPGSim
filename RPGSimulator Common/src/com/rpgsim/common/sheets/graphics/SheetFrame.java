@@ -1,22 +1,29 @@
 package com.rpgsim.common.sheets.graphics;
 
+import com.rpgsim.common.AsynTask;
+import com.rpgsim.common.FileManager;
 import com.rpgsim.common.serverpackages.UpdateType;
 import com.rpgsim.common.sheets.PlayerSheet;
 import com.rpgsim.common.sheets.SheetModel;
 import com.rpgsim.common.sheets.UpdateField;
 import java.awt.Color;
-import static java.awt.Component.CENTER_ALIGNMENT;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -47,6 +54,8 @@ public abstract class SheetFrame extends javax.swing.JFrame
     
     private JTextField[] txtInfo;
     
+    private JLabel avatarImage;
+    private boolean loadImage;
     private JProgressBar[] prgStats;
     private JButton[] btnStatsUp;
     private JButton[] btnStatsDown;
@@ -54,8 +63,10 @@ public abstract class SheetFrame extends javax.swing.JFrame
     private JTextArea txaAbout, txaExtras;
     
     private JTextField[] txtAttributes;
+    private JCheckBox[] chkAttributeMarked;
     
     private JTextField[] txtSkills;
+    private JCheckBox[] chkSkillMarked;
     
     private final ArrayList<JEquipmentField> equipments = new ArrayList<>();
     private final JButton btnAddEquipment = new JButton("+");
@@ -63,8 +74,13 @@ public abstract class SheetFrame extends javax.swing.JFrame
     private final ArrayList<JLabel> items = new ArrayList<>();
     private final JButton btnAddItem = new JButton("+");
     
-    private boolean loaded = false;
     private boolean localChange = false;
+    
+    //Rolling dices.
+    private final Random rand = new Random();
+    private int diceNumber, fieldNumber;
+    private JLabel lblDiceAnimation;
+    private JPanel pnlRoll;
     
     public SheetFrame()
     {
@@ -76,15 +92,21 @@ public abstract class SheetFrame extends javax.swing.JFrame
         getContentPane().add(scrMain);
     }
     
-    public void load(int connectionID, SheetModel model, PlayerSheet sheet)
+    public void load(int connectionID, SheetModel model, PlayerSheet sheet, boolean loadImage)
     {
         this.model = model;
         this.sheet = sheet;
         this.connectionID = connectionID;
+        this.loadImage = loadImage;
         
         txtInfo = new JTextField[sheet.getInfo().length];
         txtAttributes = new JTextField[sheet.getAttributes().length];
+        chkAttributeMarked = new JCheckBox[sheet.getAttributeMarked().length];
         txtSkills = new JTextField[sheet.getSkills().length];
+        chkSkillMarked = new JCheckBox[sheet.getSkillMarked().length];
+        prgStats = new JProgressBar[sheet.getCurrentStats().length];
+        btnStatsUp = new JButton[prgStats.length];
+        btnStatsDown = new JButton[prgStats.length];
         
         initInfoPanel();
         initStatsPanel();
@@ -94,12 +116,11 @@ public abstract class SheetFrame extends javax.swing.JFrame
         initSkillsPanel();
         initEquipmentsPanel();
         initItemsPanel();
+        initRollPanel();
         
         pnlMain.setPreferredSize(new Dimension(getWidth(), scrItems.getY() + scrItems.getHeight() + 50));
         pnlMain.setBackground(Color.BLACK);
         scrMain.getVerticalScrollBar().setUnitIncrement(40);
-        
-        loaded = true;
     }
     
     public void reload(int connectionID, PlayerSheet sheet)
@@ -110,18 +131,29 @@ public abstract class SheetFrame extends javax.swing.JFrame
         for (int i = 0; i < txtInfo.length; i++)
             txtInfo[i].setText(sheet.getInfo()[i]);
         
+        for (int i = 0; i < prgStats.length; i++)
+        {
+            prgStats[i].setValue(Integer.parseInt(sheet.getCurrentStats()[i]));
+            prgStats[i].setMaximum(Integer.parseInt(sheet.getMaxStats()[i]));
+            prgStats[i].setString(sheet.getCurrentStats()[i] + "/" + sheet.getMaxStats()[i]);
+        }
+        
         txaAbout.setText(sheet.getAbout());
         
         txaExtras.setText(sheet.getExtras());
         
         for (int i = 0; i < txtAttributes.length; i++)
             txtAttributes[i].setText(sheet.getAttributes()[i]);
+        for (int i = 0; i < chkAttributeMarked.length; i++)
+            chkAttributeMarked[i].setSelected(sheet.getAttributeMarked()[i]);
         
         for (int i = 0; i < txtSkills.length; i++)
             txtSkills[i].setText(sheet.getSkills()[i]);
+        for (int i = 0; i < chkSkillMarked.length; i++)
+            chkSkillMarked[i].setSelected(sheet.getSkillMarked()[i]);
         
         for (int i = 0; i < equipments.size(); i++)
-            removeEquipmentField(equipments.get(i));
+            removeEquipmentField(i);
         for (int i = 0; i < sheet.getEquipments().size(); i++)
             createEquipmentField(sheet.getEquipments().get(i));
         
@@ -137,36 +169,59 @@ public abstract class SheetFrame extends javax.swing.JFrame
         switch (field)
         {
             case INFO:
-                String info = (String) newValue;
-                sheet.getInfo()[propertyIndex] = info;
-                txtInfo[propertyIndex].setText(info);
+                String aux = (String) newValue;
+                sheet.getInfo()[propertyIndex] = aux;
+                txtInfo[propertyIndex].setText(aux);
                 break;
             case ABOUT:
-                sheet.setAbout((String) newValue);
-                System.out.println(sheet.getAbout());
-                txaAbout.setText((String) newValue);
+                aux = (String) newValue;
+                sheet.setAbout(aux);
+                txaAbout.setText(aux);
                 break;
             case EXTRAS:
-                sheet.setExtras((String) newValue);
-                txaExtras.setText((String) newValue);
+                aux = (String) newValue;
+                sheet.setExtras(aux);
+                txaExtras.setText(aux);
                 break;
             case CUR_STATS:
-//                tring stats = updatedSheet.getCurrentStats()[propertyIndex];
-//                sheet.getCurrentStats()[propertyIndex] = stats;
+                aux = (String) newValue;
+                int intAux = Integer.parseInt(aux);
+                sheet.getCurrentStats()[propertyIndex] = aux;
+                prgStats[propertyIndex].setValue(intAux);
+                prgStats[propertyIndex].setString(sheet.getCurrentStats()[propertyIndex] + "/" + sheet.getMaxStats()[propertyIndex]);
                 break;
             case MAX_STATS:
-    //            String stats = updatedSheet.getMaxStats()[propertyIndex];
-    //            sheet.getMaxStats()[propertyIndex] = stats;
+                aux = (String) newValue;
+                intAux = Integer.parseInt(aux);
+                
+                sheet.getMaxStats()[propertyIndex] = aux;
+                
+                if (intAux < prgStats[propertyIndex].getValue())
+                    sheet.getCurrentStats()[propertyIndex] = aux;
+                
+                prgStats[propertyIndex].setMaximum(intAux);
+                
+                prgStats[propertyIndex].setString(sheet.getCurrentStats()[propertyIndex] + "/" + sheet.getMaxStats()[propertyIndex]);
                 break;
             case ATTRIBUTES:
-                String attribute = (String) newValue;
-                sheet.getAttributes()[propertyIndex] = attribute;
-                txtAttributes[propertyIndex].setText(attribute);
+                aux = (String) newValue;
+                sheet.getAttributes()[propertyIndex] = aux;
+                txtAttributes[propertyIndex].setText(aux);
+                break;
+            case MARK_ATTRIBUTES:
+                boolean bAux = (boolean) newValue;
+                sheet.getAttributeMarked()[propertyIndex] = bAux;
+                chkAttributeMarked[propertyIndex].setSelected(bAux);
                 break;
             case SKILLS:
-                String skill = (String) newValue;
-                sheet.getSkills()[propertyIndex] = skill;
-                txtSkills[propertyIndex].setText(skill);
+                aux = (String) newValue;
+                sheet.getSkills()[propertyIndex] = aux;
+                txtSkills[propertyIndex].setText(aux);
+                break;
+            case MARK_SKILLS:
+                bAux = (boolean) newValue;
+                sheet.getSkillMarked()[propertyIndex] = bAux;
+                chkSkillMarked[propertyIndex].setSelected(bAux);
                 break;
             case EQUIPMENTS:
                 String[] equip = (String[]) newValue;
@@ -175,12 +230,10 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 repaint();
                 break;
             case ITEMS:
-                String item = (String) newValue;
-                items.get(propertyIndex).setText(item);
-                sheet.getItems().set(propertyIndex, item);
+                aux = (String) newValue;
+                items.get(propertyIndex).setText(aux);
+                sheet.getItems().set(propertyIndex, aux);
                 break;
-            default:
-                throw new AssertionError();
         }
     }
     
@@ -207,7 +260,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
         {
             case EQUIPMENTS:
                 sheet.getEquipments().remove(propertyIndex);
-                removeEquipmentField(equipments.get(propertyIndex));
+                removeEquipmentField(propertyIndex);
                 break;
             case ITEMS:
                 sheet.getItems().remove(propertyIndex);
@@ -224,11 +277,6 @@ public abstract class SheetFrame extends javax.swing.JFrame
     public int getConnectionID()
     {
         return connectionID;
-    }
-
-    public boolean isLoaded()
-    {
-        return loaded;
     }
     
     private void initInfoPanel()
@@ -277,7 +325,8 @@ public abstract class SheetFrame extends javax.swing.JFrame
                     localChange = true;
                 }
             });
-            txtInfo[i].getDocument().addDocumentListener(new SheetDocumentListener() {
+            txtInfo[i].getDocument().addDocumentListener(new SheetDocumentListener()
+            {
                 @Override
                 public void update()
                 {
@@ -309,9 +358,131 @@ public abstract class SheetFrame extends javax.swing.JFrame
         pnlStats.setLayout(null);
         pnlStats.setBounds(x, y, w, h);
         pnlStats.setBackground(Color.BLACK);
+        pnlStats.setBounds(x, y, getWidth() / 2 - 100, h);
         pnlMain.add(pnlStats);
         
-        pnlStats.setBounds(x, y, getWidth() / 2 - 100, h);
+        int iconW = 150;
+        int iconH = 150;
+        x = pnlStats.getWidth() / 2 - iconW / 2;
+        y = 50;
+        
+        if (loadImage)
+        {
+            ImageIcon icon = new ImageIcon(FileManager.app_dir + sheet.getAvatarRelativePath());
+            Image aux = icon.getImage().getScaledInstance(iconW, iconH, Image.SCALE_SMOOTH);
+            icon.setImage(aux);
+            avatarImage = new JLabel(icon);
+            avatarImage.setBounds(x, y, iconW, iconH);
+            pnlStats.add(avatarImage);
+        }
+        
+        x = 10;
+        y += iconH + 20;
+        w = pnlStats.getWidth() - x - 10;
+        h = 25;
+        
+        for (int i = 0; i < prgStats.length; i++)
+        {
+            JLabel desc = new JLabel(model.getStats()[i]);
+            desc.setFont(f12);
+            int lblH = desc.getFont().getSize();
+            desc.setForeground(Color.WHITE);
+            desc.setBounds(x, y - lblH - 5, getStringWidth(desc.getFont(), desc.getText()), lblH);
+            
+            prgStats[i] = new JProgressBar(0, Integer.parseInt(sheet.getMaxStats()[i]));
+            prgStats[i].setValue(Integer.parseInt(sheet.getCurrentStats()[i]));
+            prgStats[i].setBounds(x, y, w, h);
+            prgStats[i].setBackground(Color.BLACK);
+            prgStats[i].setForeground(new Color(Integer.parseInt(model.getStatsColor()[i], 16)));
+            prgStats[i].setStringPainted(true);
+            prgStats[i].setString(sheet.getCurrentStats()[i] + "/" + sheet.getMaxStats()[i]);
+            
+            final int ii = i;
+            prgStats[i].addMouseListener(new MouseAdapter()
+            {
+                @Override
+                public void mouseClicked(MouseEvent e)
+                {
+                    if (e.getClickCount() >= 2)
+                    {
+                        String value = JOptionPane.showInputDialog("Type in the new maximum value to this field.", prgStats[ii].getMaximum());
+                        
+                        if (value == null || value.isEmpty())
+                            return;
+                        
+                        try
+                        {
+                            int maxVal = Integer.parseInt(value);
+                            
+                            if (maxVal <= 0)
+                                return;
+                            
+                            int curVal = prgStats[ii].getValue();
+                            prgStats[ii].setMaximum(maxVal);
+                            sheet.getMaxStats()[ii] = value;
+                            
+                            if (maxVal < curVal)
+                                sheet.getCurrentStats()[ii] = Integer.toString(maxVal);
+                            
+                            prgStats[ii].setString(sheet.getCurrentStats()[ii] + "/" + sheet.getMaxStats()[ii]);
+                            sendSheetUpdate(UpdateField.MAX_STATS, value, ii, UpdateType.UPDATE);
+                        }
+                        catch (NumberFormatException ex)
+                        {
+                            JOptionPane.showMessageDialog(null, "Only numbers are allowed!");
+                        }
+                        
+                    }
+                }
+            });
+            
+            btnStatsUp[i] = new JButton("+");
+            btnStatsUp[i].setBounds(x, y + h + 10, 100, 20);
+            btnStatsUp[i].setBackground(Color.BLACK);
+            btnStatsUp[i].setForeground(Color.WHITE);
+            btnStatsUp[i].addActionListener(l -> 
+            {
+                int val = prgStats[ii].getValue();
+                int maxVal = prgStats[ii].getMaximum();
+                
+                if (++val > maxVal)
+                    return;
+                
+                String strVal = Integer.toString(val);
+                
+                prgStats[ii].setValue(val);
+                sheet.getCurrentStats()[ii] = strVal;
+                prgStats[ii].setString(strVal + "/" + sheet.getMaxStats()[ii]);
+                sendSheetUpdate(UpdateField.CUR_STATS, strVal, ii, UpdateType.UPDATE);
+            });
+            
+            btnStatsDown[i] = new JButton("-");
+            btnStatsDown[i].setBackground(Color.BLACK);
+            btnStatsDown[i].setForeground(Color.WHITE);
+            btnStatsDown[i].setBounds(x + w - 100, y + h + 10, 100, 20);
+            btnStatsDown[i].addActionListener(l -> 
+            {
+                int val = prgStats[ii].getValue();
+                
+                if (--val < 0)
+                    return;
+                
+                String strVal = Integer.toString(val);
+                
+                prgStats[ii].setValue(val);
+                sheet.getCurrentStats()[ii] = strVal;
+                prgStats[ii].setString(strVal + "/" + sheet.getMaxStats()[ii]);
+                sendSheetUpdate(UpdateField.CUR_STATS, strVal, ii, UpdateType.UPDATE);
+            });
+            
+            y += h + 60;
+            
+            pnlStats.add(desc);
+            pnlStats.add(prgStats[i]);
+            pnlStats.add(btnStatsUp[i]);
+            pnlStats.add(btnStatsDown[i]);
+        }
+        
     }
     
     private void initAboutPanel()
@@ -471,10 +642,37 @@ public abstract class SheetFrame extends javax.swing.JFrame
             miniAttr.setPreferredSize(new Dimension(pnlW, pnlH));
             miniAttr.setBackground(Color.BLACK);
             
+            chkAttributeMarked[i] = new JCheckBox("", sheet.getAttributeMarked()[i]);
+            chkAttributeMarked[i].setAlignmentX(CENTER_ALIGNMENT);
+            chkAttributeMarked[i].setBackground(Color.BLACK);
+            final int ii = i;
+            chkAttributeMarked[i].addActionListener(l ->
+            {
+                boolean val = chkAttributeMarked[ii].isSelected();
+                sheet.getAttributeMarked()[ii] = val;
+                sendSheetUpdate(UpdateField.MARK_ATTRIBUTES, val, ii, UpdateType.UPDATE);
+            });
+            
             lblAttributes[i].setFont(f12);
             lblAttributes[i].setBounds(0, 0, getStringWidth(lblAttributes[i].getFont(), lblAttributes[i].getText()), lblAttributes[i].getFont().getSize());
             lblAttributes[i].setForeground(Color.WHITE);
             lblAttributes[i].setAlignmentX(CENTER_ALIGNMENT);
+            lblAttributes[i].addMouseListener(new MouseAdapter()
+            {
+                @Override
+                public void mouseClicked(MouseEvent e)
+                {
+                    try
+                    {
+                        int val = Integer.parseInt(txtAttributes[ii].getText());
+                        showRollPopup(rand.nextInt(Integer.parseInt(model.getAttributesDiceNumbers()[ii]) + 1), val);
+                    }
+                    catch (NumberFormatException ex)
+                    {
+                        JOptionPane.showMessageDialog(null, "To roll a dice, please type in a number in the selected attribute.");
+                    }
+                }
+            });
             
             txtAttributes[i].setBackground(Color.BLACK);
             txtAttributes[i].setForeground(Color.WHITE);
@@ -482,7 +680,6 @@ public abstract class SheetFrame extends javax.swing.JFrame
             txtAttributes[i].setAlignmentX(CENTER_ALIGNMENT);
             txtAttributes[i].setHorizontalAlignment(SwingConstants.CENTER);
             txtAttributes[i].setFont(f);
-            final int ii = i;
             txtAttributes[i].addKeyListener(new KeyAdapter()
             {
                 @Override
@@ -505,6 +702,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 }
             });
             
+            miniAttr.add(chkAttributeMarked[i]);
             miniAttr.add(lblAttributes[i]);
             miniAttr.add(txtAttributes[i]);
             
@@ -550,10 +748,37 @@ public abstract class SheetFrame extends javax.swing.JFrame
             miniSkl.setPreferredSize(new Dimension(sklW, sklH));
             miniSkl.setBackground(Color.BLACK);
             
+            chkSkillMarked[i] = new JCheckBox("", sheet.getSkillMarked()[i]);
+            chkSkillMarked[i].setAlignmentX(CENTER_ALIGNMENT);
+            chkSkillMarked[i].setBackground(Color.BLACK);
+            final int ii = i;
+            chkSkillMarked[i].addActionListener(l ->
+            {
+                boolean val = chkSkillMarked[ii].isSelected();
+                sheet.getSkillMarked()[ii] = val;
+                sendSheetUpdate(UpdateField.MARK_SKILLS, val, ii, UpdateType.UPDATE);
+            });
+            
             lblSkills[i].setFont(f12);
             lblSkills[i].setBounds(0, 0, getStringWidth(lblSkills[i].getFont(), lblSkills[i].getText()), lblSkills[i].getFont().getSize());
             lblSkills[i].setForeground(Color.WHITE);
             lblSkills[i].setAlignmentX(CENTER_ALIGNMENT);
+            lblSkills[i].addMouseListener(new MouseAdapter()
+            {
+                @Override
+                public void mouseClicked(MouseEvent e)
+                {
+                    try
+                    {
+                        int val = Integer.parseInt(txtSkills[ii].getText());
+                        showRollPopup(rand.nextInt(Integer.parseInt(model.getSkillsDiceNumbers()[ii]) + 1), val);
+                    }
+                    catch (NumberFormatException ex)
+                    {
+                        JOptionPane.showMessageDialog(null, "To roll a dice, please type in a number in the selected attribute.");
+                    }
+                }
+            });
             
             txtSkills[i].setBackground(Color.BLACK);
             txtSkills[i].setForeground(Color.WHITE);
@@ -561,7 +786,6 @@ public abstract class SheetFrame extends javax.swing.JFrame
             txtSkills[i].setAlignmentX(CENTER_ALIGNMENT);
             txtSkills[i].setHorizontalAlignment(SwingConstants.CENTER);
             txtSkills[i].setFont(f);
-            final int ii = i;
             txtSkills[i].addKeyListener(new KeyAdapter()
             {
                 @Override
@@ -584,6 +808,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 }
             });
             
+            miniSkl.add(chkSkillMarked[i]);
             miniSkl.add(lblSkills[i]);
             miniSkl.add(txtSkills[i]);
             
@@ -750,7 +975,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
         {
             sendSheetUpdate(UpdateField.EQUIPMENTS, null, equipments.indexOf(e), UpdateType.REMOVE);
             sheet.getEquipments().remove(e.getEquipment());
-            removeEquipmentField(e);
+            removeEquipmentField(equipments.indexOf(e));
         });
         
         pnlEquipmentFields.setBounds(pnlEquipmentFields.getX(), 
@@ -762,10 +987,10 @@ public abstract class SheetFrame extends javax.swing.JFrame
         return e;
     }
     
-    private void removeEquipmentField(JEquipmentField equip)
+    private void removeEquipmentField(int index)
     {
-        equipments.remove(equip);
-        pnlEquipmentFields.remove(equip);
+        equipments.remove(index);
+        pnlEquipmentFields.remove(index);
         
         int hh = (f12.getSize() + 10) * equipments.size();
         pnlEquipmentFields.setBounds(pnlEquipmentFields.getX(), 
@@ -847,6 +1072,49 @@ public abstract class SheetFrame extends javax.swing.JFrame
         scrItems.revalidate();
     }
     
+    private void initRollPanel()
+    {
+        lblDiceAnimation = new JLabel(new ImageIcon(FileManager.app_dir + "data files\\images\\dice_roll.gif"));
+        lblDiceAnimation.setAlignmentX(CENTER_ALIGNMENT);
+        lblDiceAnimation.setAlignmentY(CENTER_ALIGNMENT);
+        pnlRoll = new JPanel()
+        {
+            @Override
+            protected void paintComponent(Graphics g)
+            {
+                super.paintComponent(g);
+                String desc;
+                
+                if (diceNumber <= fieldNumber * 0.2f)
+                {
+                    desc = "Extreme";
+                    g.setColor(new Color(0xFFD700).darker());
+                }
+                else if (diceNumber <= fieldNumber * 0.5f)
+                {
+                    desc = "Good";
+                    g.setColor(Color.GREEN.darker());
+                }
+                else if (diceNumber <= fieldNumber)
+                {
+                    desc = "Success";
+                    g.setColor(Color.BLACK);
+                }
+                else
+                {
+                    desc = "Fail";
+                    g.setColor(Color.RED.darker());
+                }
+                
+                g.setFont(f);
+                g.drawString(Integer.toString(diceNumber) + " - " + desc, 
+                        40, 
+                        20);
+            }
+        };
+        pnlRoll.add(lblDiceAnimation);
+    }
+    
     private int getStringWidth(Font font, String text)
     {
         return getFontMetrics(font).stringWidth(text);
@@ -876,6 +1144,13 @@ public abstract class SheetFrame extends javax.swing.JFrame
     }
     
     public abstract void sendSheetUpdate(UpdateField field, Object newValue, int propertyIndex, UpdateType type);
+    
+    public void showRollPopup(int diceNumber, int fieldNumber)
+    {
+        this.diceNumber = diceNumber;
+        this.fieldNumber = fieldNumber;
+        JOptionPane.showMessageDialog(this, pnlRoll, "Dice Result", JOptionPane.PLAIN_MESSAGE, new ImageIcon(FileManager.app_dir + "data files\\images\\diceicon.png"));
+    }
     
     /** This method is called from within the constructor to
      * initialize the form.

@@ -45,7 +45,7 @@ public class SheetManager
         builder.setPrettyPrinting();
         Gson gson = builder.create();
         
-        String[] basicInformations = new String[]
+        String[] info = new String[]
         {
             "Name",
             "Player",
@@ -69,19 +69,33 @@ public class SheetManager
             , "Luck"
             , "Move Rate"
         };
-
-        String[] currentStats = new String[]
+        
+        String[] attributesDiceNumbers = new String[]
         {
-            "Current HP"
-            , "Current Sanity"
-            , "Current MP"
+            "100"
+            , "100"
+            , "100"
+            , "100"
+            , "100"
+            , "100"
+            , "100"
+            , "100"
+            , "100"
+            , "100"
         };
 
-        String[] maxStats = new String[]
+        String[] stats = new String[]
         {
-            "Max HP"
-            , "Max Sanity"
-            , "Max MP"
+            "HP"
+            , "Sanity"
+            , "MP"
+        };
+
+        String[] statsColor = new String[]
+        {
+            "ff0000"
+            , "0000ff"
+            , "00ffff"
         };
 
         String[] skills = new String[]
@@ -131,6 +145,54 @@ public class SheetManager
                 , "Throw"
                 , "Track"
         };
+
+        String[] skillsDiceRolls = new String[]
+        {
+                "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+                , "100"
+        };
         
         String[] equipments = new String[]
         {
@@ -145,7 +207,7 @@ public class SheetManager
             "AoE"
         };
         
-        defaultSheetModel = new SheetModel(basicInformations, currentStats, maxStats, attributes, skills, equipments);
+        defaultSheetModel = new SheetModel(info, stats, statsColor, attributes, attributesDiceNumbers, skills, skillsDiceRolls, equipments);
         
         try (FileWriter file = new FileWriter(f))
         {

@@ -52,10 +52,10 @@ public class AccountManager
                     changed = true;
                 }
                 
-                if (model.getCurrentStats().length != sheet.getCurrentStats().length)
+                if (model.getStats().length != sheet.getCurrentStats().length)
                 {
                     int oldLength = sheet.getCurrentStats().length;
-                    sheet.setCurrentStats(Arrays.copyOf(sheet.getCurrentStats(), model.getCurrentStats().length));
+                    sheet.setCurrentStats(Arrays.copyOf(sheet.getCurrentStats(), model.getStats().length));
                     if (oldLength < sheet.getCurrentStats().length)
                     {
                         for (int i = oldLength; i < sheet.getCurrentStats().length; i++)
@@ -64,20 +64,6 @@ public class AccountManager
                         }
                     }
                     
-                    changed = true;
-                }
-                
-                if (model.getMaxStats().length != sheet.getMaxStats().length)
-                {
-                    int oldLength = sheet.getMaxStats().length;
-                    sheet.setMaxStats(Arrays.copyOf(sheet.getMaxStats(), model.getMaxStats().length));
-                    if (oldLength < sheet.getMaxStats().length)
-                    {
-                        for (int i = oldLength; i < sheet.getMaxStats().length; i++)
-                        {
-                            sheet.getMaxStats()[i] = "0";
-                        }
-                    }
                     changed = true;
                 }
                 

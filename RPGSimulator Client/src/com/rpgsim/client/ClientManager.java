@@ -1,5 +1,6 @@
 package com.rpgsim.client;
 
+import com.rpgsim.common.AsynTask;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;

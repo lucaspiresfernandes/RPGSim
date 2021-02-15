@@ -1,4 +1,4 @@
-package com.rpgsim.client;
+package com.rpgsim.common;
 
 public interface Task
 {

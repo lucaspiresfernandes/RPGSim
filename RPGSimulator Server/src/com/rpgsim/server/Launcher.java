@@ -62,13 +62,15 @@ public class Launcher
         return new DataFile[]
             {
             new DataFile("README.txt",
-                    " Welcome to RPG Simulator!\n"
-                    + " To configure your character sheet, you can access data/sheet.json.\n"
+                    "    Welcome to RPG Simulator!\n"
+                    + "    To configure your character sheet, you can access data/sheet.json.\n"
                     + "You can add, remove or edit data inside, but do not change description\n"
                     + "names. (it is bounded to the program code.)\n\n"
-                    + " Current Stats and Max Stats need to be in synchronization. It means\n"
-                    + "that if the first one is \"Current HP\", the other first also should be\n"
-                    + "\"Max HP\". Changing this rule may cause in strange bugs in your character sheet."),
+                    + "    Character avatar should be 150x150, or similar ratios, otherwise it might be displayed strangely.\n"
+                    + "To change it, just replace the file: data files\\images\\character.png.\n\n"
+                    + "    attributeRollDice and skillRollDice are used to determine with what \"dice\" you are rolling a specific\n"
+                    + "attribute or skill. For an example, you can change Strength roll if you modify the number that has the same\n"
+                    + "position as the attribute."),
                 new DataFile("data"),
                 new DataFile("data\\config.ini",
                         "TCPPort=7001\n"
