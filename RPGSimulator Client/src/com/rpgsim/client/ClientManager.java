@@ -1,6 +1,6 @@
 package com.rpgsim.client;
 
-import com.rpgsim.common.AsynTask;
+import com.rpgsim.common.AsyncTask;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -187,6 +187,7 @@ public class ClientManager extends Listener implements ClientActions
                 go = new NetworkGameObject(id, clientID, pID);
                 break;
         }
+        go.transform().position(position);
         asyncLoadImage(go, imageRelativePath);
         game.getScene().addGameObject(go);
     }
@@ -195,6 +196,9 @@ public class ClientManager extends Listener implements ClientActions
     public void updateNetworkGameObjectTransform(int id, Vector2 position, Vector2 scale, float rotation, boolean flipX, boolean flipY)
     {
         NetworkGameObject go = game.getScene().getGameObject(id);
+        
+        if (go == null)
+            return;
         
         if (go.isDirty())
         {
@@ -219,13 +223,16 @@ public class ClientManager extends Listener implements ClientActions
     @Override
     public void onNetworkGameObjectImageChange(int id, String relativePath)
     {
-        asyncLoadImage(game.getScene().getGameObject(id), relativePath);
+        NetworkGameObject go = game.getScene().getGameObject(id);
+        if (go == null)
+            return;
+        asyncLoadImage(go, relativePath);
     }
     
     public static void asyncLoadImage(NetworkGameObject obj, String relativePath)
     {
         obj.renderer().setImage(new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB));
-        AsynTask.executeAsyncTask("Async Image Load", () ->
+        AsyncTask.executeAsyncTask("Async Image Load", () ->
         {
             try
             {
@@ -245,6 +252,22 @@ public class ClientManager extends Listener implements ClientActions
     public void onCharacterSheetUpdate(UpdateField field, Object newValue, int propertyIndex, UpdateType type)
     {
         game.getSheetFrame().onSheetFieldUpdate(field, newValue, propertyIndex, type);
+    }
+
+    @Override
+    public void onBackgroundUpdate(String relativePath)
+    {
+        AsyncTask.executeAsyncTask("Update Background", () -> 
+        {
+            try
+            {
+                game.getScene().setBackground(ImageIO.read(new File(FileManager.app_dir + relativePath)));
+            }
+            catch (IOException ex)
+            {
+                Logger.getLogger(ClientManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
     }
     
 }

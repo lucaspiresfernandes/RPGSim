@@ -64,7 +64,7 @@ public class ServerSheetFrame extends SheetFrame
                     svSheet.getEquipments().set(propertyIndex, (String[]) newValue);
                     break;
                 case ITEMS:
-                    svSheet.getItems().set(propertyIndex, (String) newValue);
+                    svSheet.getItems().set(propertyIndex, (String[]) newValue);
                     break;
             }
         }
@@ -85,7 +85,7 @@ public class ServerSheetFrame extends SheetFrame
                     svSheet.getEquipments().add((String[]) newValue);
                     break;
                 case ITEMS:
-                    svSheet.getItems().add((String) newValue);
+                    svSheet.getItems().add((String[]) newValue);
                     break;
             }
         }

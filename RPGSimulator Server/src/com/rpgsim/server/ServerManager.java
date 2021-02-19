@@ -11,6 +11,7 @@ import com.rpgsim.common.FileManager;
 import com.rpgsim.common.PrefabID;
 import com.rpgsim.common.ServerActions;
 import com.rpgsim.common.Vector2;
+import com.rpgsim.common.clientpackages.BackgroundUpdateResponse;
 import com.rpgsim.common.clientpackages.ClientPackage;
 import com.rpgsim.common.clientpackages.ConnectionRequestResponse;
 import com.rpgsim.common.clientpackages.NetworkGameObjectDestroyResponse;
@@ -40,9 +41,10 @@ public class ServerManager extends Listener implements ServerActions
     private final ServerGame game;
     private final ServerSheetFrame sheetFrame;
     
-    
     //The window in which the server supervises client/user actions.
     private final ServerFrame serverFrame;
+    
+    private String backgroundPath;
     
     public ServerManager() throws IOException
     {
@@ -195,6 +197,8 @@ public class ServerManager extends Listener implements ServerActions
                                                 go.transform().position(),
                                                 go.getPrefabID(), go.renderer().getImagePath()));
                             }
+                            if (backgroundPath != null)
+                                server.sendToTCP(connectionID, new BackgroundUpdateResponse(backgroundPath));
                             serverFrame.addPlayer(acc);
                         }
                         catch (IOException ex)
@@ -235,6 +239,8 @@ public class ServerManager extends Listener implements ServerActions
                                             go.getClientID(),
                                             go.transform().position(),
                                             go.getPrefabID(), go.renderer().getImagePath()));
+                        if (backgroundPath != null)
+                            server.sendToTCP(connectionID, new BackgroundUpdateResponse(backgroundPath));
                         serverFrame.addPlayer(acc);
                     }
                     catch (IOException ex)
@@ -256,9 +262,7 @@ public class ServerManager extends Listener implements ServerActions
         go.transform().flipX(flipX);
         go.transform().flipY(flipY);
         
-        NetworkGameObjectTransformUpdate p = new NetworkGameObjectTransformUpdate(id, position, scale, rotation, flipX, flipY);
-        
-        server.sendToAllUDP(p);
+        sendAll(new NetworkGameObjectTransformUpdate(id, position, scale, rotation, flipX, flipY), false);
     }
     
     @Override
@@ -268,21 +272,21 @@ public class ServerManager extends Listener implements ServerActions
         go = new NetworkGameObject(ServerGame.getGameObjectID(), clientID, pID);
         go.renderer().setImagePath(imageRelativePath);
         game.getScene().addGameObject(go);
-        server.sendToAllTCP(new InstantiateNetworkGameObjectResponse(go.getObjectID(), go.getClientID(), position, pID, imageRelativePath));
+        sendAll(new InstantiateNetworkGameObjectResponse(go.getObjectID(), go.getClientID(), position, pID, imageRelativePath), true);
     }
 
     @Override
     public void onNetworkGameObjectImageUpdate(int id, String relativePath)
     {
         game.getScene().getGameObject(id).renderer().setImagePath(relativePath);
-        server.sendToAllTCP(new NetworkGameObjectImageUpdateResponse(id, relativePath));
+        sendAll(new NetworkGameObjectImageUpdateResponse(id, relativePath), true);
     }
 
     @Override
     public void onNetworkGameObjectDestroy(int id)
     {
         game.getScene().removeGameObject(id);
-        server.sendToAllTCP(new NetworkGameObjectDestroyResponse(id));
+        sendAll(new NetworkGameObjectDestroyResponse(id), true);
     }
 
     @Override
@@ -302,6 +306,23 @@ public class ServerManager extends Listener implements ServerActions
             default:
                 throw new AssertionError();
         }
+    }
+
+    @Override
+    public void onBackgroundUpdate(String relativePath)
+    {
+        backgroundPath = relativePath;
+        sendAll(new BackgroundUpdateResponse(relativePath), true);
+    }
+    
+    private void sendAll(ClientPackage p, boolean tcp)
+    {
+        if (tcp)
+            for (Account acc : accountManager.getActiveAccounts().values())
+                server.sendToTCP(acc.getConnectionID(), p);
+        else
+            for (Account acc : accountManager.getActiveAccounts().values())
+                server.sendToUDP(acc.getConnectionID(), p);
     }
     
 }

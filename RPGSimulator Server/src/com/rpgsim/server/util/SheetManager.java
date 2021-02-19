@@ -194,7 +194,7 @@ public class SheetManager
                 , "100"
         };
         
-        String[] equipments = new String[]
+        String[] equipmentDescriptions = new String[]
         {
             "Name      ",
             "Type ",
@@ -207,7 +207,14 @@ public class SheetManager
             "AoE"
         };
         
-        defaultSheetModel = new SheetModel(info, stats, statsColor, attributes, attributesDiceNumbers, skills, skillsDiceRolls, equipments);
+        String[] itemDescriptions = new String[]
+        {
+            "Name",
+            "Description   ",
+            "Weight"
+        };
+        
+        defaultSheetModel = new SheetModel(info, stats, statsColor, attributes, attributesDiceNumbers, skills, skillsDiceRolls, equipmentDescriptions, itemDescriptions);
         
         try (FileWriter file = new FileWriter(f))
         {

@@ -16,4 +16,6 @@ public interface ClientActions
     public void onNetworkGameObjectImageChange(int id, String image);
     
     public void onCharacterSheetUpdate(UpdateField field, Object newValue, int propertyIndex, UpdateType type);
+    
+    public void onBackgroundUpdate(String relativePath);
 }

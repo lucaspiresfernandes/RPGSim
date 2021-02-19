@@ -17,4 +17,6 @@ public interface ServerActions
     
     public void onCharacterSheetFieldUpdate(int connectionID, UpdateField field, Object newValue, int propertyIndex, UpdateType type);
     
+    public void onBackgroundUpdate(String relativePath);
+    
 }

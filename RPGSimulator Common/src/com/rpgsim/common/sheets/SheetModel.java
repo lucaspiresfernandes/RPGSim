@@ -11,7 +11,8 @@ public class SheetModel implements Serializable
     private final String[] attributesDiceNumbers;
     private final String[] skills;
     private final String[] skillsDiceNumbers;
-    private final String[] equipments;
+    private final String[] equipmentDescriptions;
+    private final String[] itemDescriptions;
 
     private SheetModel()
     {
@@ -22,7 +23,8 @@ public class SheetModel implements Serializable
         this.attributesDiceNumbers = null;
         this.skills = null;
         this.skillsDiceNumbers = null;
-        this.equipments = null;
+        this.equipmentDescriptions = null;
+        this.itemDescriptions = null;
     }
 
     public SheetModel(String[] info, 
@@ -32,7 +34,8 @@ public class SheetModel implements Serializable
             String[] attributesDiceNumbers, 
             String[] skills, 
             String[] skillsDiceNumbers, 
-            String[] equipments)
+            String[] equipmentDescriptions,
+            String[] itemDescriptions)
     {
         this.info = info;
         this.stats = stats;
@@ -41,7 +44,8 @@ public class SheetModel implements Serializable
         this.attributesDiceNumbers = attributesDiceNumbers;
         this.skills = skills;
         this.skillsDiceNumbers = skillsDiceNumbers;
-        this.equipments = equipments;
+        this.equipmentDescriptions = equipmentDescriptions;
+        this.itemDescriptions = itemDescriptions;
     }
 
     public String[] getInfo()
@@ -79,9 +83,14 @@ public class SheetModel implements Serializable
         return skillsDiceNumbers;
     }
 
-    public String[] getEquipments()
+    public String[] getEquipmentDescriptions()
     {
-        return equipments;
+        return equipmentDescriptions;
+    }
+
+    public String[] getItemDescriptions()
+    {
+        return itemDescriptions;
     }
     
 }

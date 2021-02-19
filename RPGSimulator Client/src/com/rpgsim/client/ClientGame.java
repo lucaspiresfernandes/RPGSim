@@ -1,6 +1,5 @@
 package com.rpgsim.client;
 
-import com.rpgsim.common.AsynTask;
 import com.rpgsim.common.Screen;
 import com.rpgsim.common.CommonConfigurations;
 import com.rpgsim.common.PrefabID;
@@ -17,7 +16,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 
 public class ClientGame extends Canvas implements Runnable
 {
@@ -30,12 +28,13 @@ public class ClientGame extends Canvas implements Runnable
     private final ClientManager client;
     
     private static Screen screen;
-    private final Input input;
+    private Input input;
     private final Physics physics;
     
     private final Scene scene;
     
     private ClientSheetFrame sheetFrame;
+    private final ObjectFrame objectFrame;
     
     private float deltaTime;
     
@@ -47,34 +46,36 @@ public class ClientGame extends Canvas implements Runnable
         this.client = manager;
         this.scene = new Scene();
         this.physics = new Physics(this.scene.getGameObjects());
-        
-        input = new Input();
-        super.addKeyListener(input);
-        super.addMouseListener(input);
-        super.addMouseMotionListener(input);
+        this.objectFrame = new ObjectFrame(client);
     }
     
     private void update(float dt)
     {
         deltaTime = dt;
+        
+        if (Input.getKey(KeyCode.W) && screen.getTransform().getTranslateY() < 0)
+            screen.getTransform().translate(0, 3);
+        else if (Input.getKey(KeyCode.S))
+            screen.getTransform().translate(0, -3);
+        
+        if (Input.getKey(KeyCode.A) && screen.getTransform().getTranslateX() < 0)
+            screen.getTransform().translate(3, 0);
+        else if (Input.getKey(KeyCode.D))
+            screen.getTransform().translate(-3, 0);
+        
         if (Input.getKeyDown(KeyCode.F1))
             sheetFrame.setVisible(true);
-        if (Input.getKeyDown(KeyCode.C))
-        {
-            AsynTask.executeAsyncTask("Object Insertion Task", () -> 
-            {
-                String imgName = JOptionPane.showInputDialog(null, "Input image name.", "Insertion", JOptionPane.QUESTION_MESSAGE);
-                String relativePath = "data files\\images\\" + imgName;
-                client.sendPackage(new InstantiatePrefabRequest(new Vector2(0, 0), PrefabID.DRAGGABLE_OBJECT, -1, relativePath));
-            });
-        }
+        
+        if (Input.getKeyDown(KeyCode.O))
+            objectFrame.open();
+        
         scene.updateGameObjects(client.getAccount().getConnectionID(), dt);
     }
     
     private void render()
     {
         screen.begin();
-        screen.drawString("Delta: " + deltaTime, new Vector2(0, 10));
+        scene.renderBackground(screen);
         scene.renderGameObjects(client.getAccount().getConnectionID(), screen);
         screen.end();
     }
@@ -90,6 +91,11 @@ public class ClientGame extends Canvas implements Runnable
         createBufferStrategy(3);
         screen = new Screen(getBufferStrategy(), getWidth(), getHeight());
         
+        input = new Input(screen.getTransform());
+        super.addKeyListener(input);
+        super.addMouseListener(input);
+        super.addMouseMotionListener(input);
+        
         this.sheetFrame = new ClientSheetFrame(client);
         this.sheetFrame.load(client.getAccount().getConnectionID(), model, sheet, true);
         WindowAdapter l = new WindowAdapter()
@@ -101,7 +107,7 @@ public class ClientGame extends Canvas implements Runnable
             }
         };
         this.sheetFrame.addWindowListener(l);
-        client.sendPackage(new InstantiatePrefabRequest(Input.mousePosition(), PrefabID.MOUSE, client.getAccount().getConnectionID(), "data files\\images\\cursor.png"));
+        client.sendPackage(new InstantiatePrefabRequest(Input.mousePosition(), PrefabID.MOUSE, client.getAccount().getConnectionID(), "data files\\objects\\cursor.png"));
         gameRunning = true;
         requestFocus();
     }
@@ -110,6 +116,7 @@ public class ClientGame extends Canvas implements Runnable
     {
         if (sheetFrame != null)
             sheetFrame.dispose();
+        objectFrame.dispose();
         gameRunning = false;
         networkRunning = false;
     }

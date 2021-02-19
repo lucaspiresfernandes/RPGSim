@@ -96,6 +96,45 @@ public class AccountManager
                     
                     changed = true;
                 }
+                
+                for (int i = 0; i < sheet.getEquipments().size(); i++)
+                {
+                    String[] equipment = sheet.getEquipments().get(i);
+                    if (equipment.length != model.getEquipmentDescriptions().length)
+                    {
+                        int oldLength = equipment.length;
+                        sheet.getEquipments().set(i, Arrays.copyOf(equipment, model.getEquipmentDescriptions().length));
+                        
+                        if (oldLength < model.getEquipmentDescriptions().length)
+                        {
+                            for (int j = oldLength; j < model.getEquipmentDescriptions().length; j++)
+                            {
+                                sheet.getEquipments().get(i)[j] = "none";
+                            }
+                        }
+                        changed = true;
+                    }
+                }
+                
+                for (int i = 0; i < sheet.getItems().size(); i++)
+                {
+                    String[] item = sheet.getItems().get(i);
+                    if (item.length != model.getItemDescriptions().length)
+                    {
+                        int oldLength = item.length;
+                        sheet.getItems().set(i, Arrays.copyOf(item, model.getItemDescriptions().length));
+                        
+                        if (oldLength < model.getItemDescriptions().length)
+                        {
+                            for (int j = oldLength; j < model.getItemDescriptions().length; j++)
+                            {
+                                sheet.getItems().get(i)[j] = "none";
+                            }
+                        }
+                        changed = true;
+                    }
+                }
+                
             }
             catch (ClassNotFoundException ex)
             {
@@ -172,6 +211,11 @@ public class AccountManager
     public Account getActiveAccount(int sessionID)
     {
         return activeAccounts.get(sessionID);
+    }
+
+    public HashMap<Integer, Account> getActiveAccounts()
+    {
+        return activeAccounts;
     }
 
     public void setAccountActive(int sessionID, Account acc, boolean active)

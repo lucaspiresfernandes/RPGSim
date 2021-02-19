@@ -1,11 +1,13 @@
 package com.rpgsim.common;
 
 import com.rpgsim.common.game.NetworkGameObject;
+import java.awt.Image;
 import java.util.Collection;
 import java.util.HashMap;
 
 public class Scene
 {
+    private Image background;
     private final HashMap<Integer, NetworkGameObject> gameObjects = new HashMap<>();
     
     public void addGameObject(NetworkGameObject go)
@@ -23,6 +25,13 @@ public class Scene
     {
         for (NetworkGameObject go : gameObjects.values())
             go.renderer().render(clientID, screen);
+    }
+    
+    public void renderBackground(Screen screen)
+    {
+        if (background == null)
+            return;
+        screen.drawImage(background, 0, 0);
     }
     
     public NetworkGameObject getGameObject(int id)
@@ -43,6 +52,16 @@ public class Scene
     public void removeGameObject(int id)
     {
         gameObjects.remove(id);
+    }
+
+    public Image getBackground()
+    {
+        return background;
+    }
+
+    public void setBackground(Image background)
+    {
+        this.background = background;
     }
     
 }

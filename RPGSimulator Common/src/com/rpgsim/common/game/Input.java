@@ -8,6 +8,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
+import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 
 public class Input implements KeyListener, MouseListener, MouseMotionListener, WindowFocusListener
@@ -22,6 +23,13 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, W
     
     private static boolean mouseMoved = false;
     private static boolean mouseDragging = false;
+    
+    private static AffineTransform screenTransform;
+
+    public Input(AffineTransform screenTransform)
+    {
+        Input.screenTransform = screenTransform;
+    }
     
     public static boolean getKey(KeyCode code)
     {
@@ -65,7 +73,7 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, W
     
     public static Vector2 mousePosition()
     {
-        return new Vector2(mouseX, mouseY);
+        return new Vector2(mouseX - screenTransform.getTranslateX(), mouseY - screenTransform.getTranslateY());
     }
     
     @Override

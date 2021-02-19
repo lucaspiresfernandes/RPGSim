@@ -26,17 +26,11 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Component id="scrPlayer" min="-2" pref="200" max="-2" attributes="0"/>
-                  <Group type="102" attributes="0">
-                      <Component id="btnKickPlayer" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="32767" attributes="0"/>
-                      <Component id="btnBanPlayer" min="-2" max="-2" attributes="0"/>
-                  </Group>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="scrPlayer" pref="347" max="32767" attributes="0"/>
+                  <Component id="btnOpenCharacterSheet" alignment="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="btnOpenCharacterSheet" min="-2" max="-2" attributes="0"/>
-              <EmptySpace pref="440" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -44,18 +38,9 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="scrPlayer" pref="546" max="32767" attributes="0"/>
-                  <Group type="102" attributes="0">
-                      <Component id="btnOpenCharacterSheet" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                  </Group>
-              </Group>
+              <Component id="scrPlayer" pref="546" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="btnKickPlayer" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="btnBanPlayer" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
+              <Component id="btnOpenCharacterSheet" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -81,16 +66,6 @@
         </Component>
       </SubComponents>
     </Container>
-    <Component class="javax.swing.JButton" name="btnKickPlayer">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Kick Player"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JButton" name="btnBanPlayer">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Ban Player"/>
-      </Properties>
-    </Component>
     <Component class="javax.swing.JButton" name="btnOpenCharacterSheet">
       <Properties>
         <Property name="text" type="java.lang.String" value="Open Character Sheet"/>

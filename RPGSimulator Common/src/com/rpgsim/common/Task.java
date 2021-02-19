@@ -2,5 +2,5 @@ package com.rpgsim.common;
 
 public interface Task
 {
-    public void invokeTask();
+    public void invoke();
 }

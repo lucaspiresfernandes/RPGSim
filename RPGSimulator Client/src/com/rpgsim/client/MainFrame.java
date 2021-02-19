@@ -107,18 +107,6 @@ public class MainFrame extends javax.swing.JFrame
     
     private void connect(String username, String password, ConnectionType type)
     {
-        ClientManager manager = new ClientManager(this, clientConfig);
-        try
-        {
-            manager.start(username, password, type);
-        }
-        catch (IOException ex)
-        {
-            manager.stop();
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-            JOptionPane.showMessageDialog(null, "The server seems to be down.");
-        }
-        
         boolean saveUsername = chkLogin.isSelected();
         boolean savePassword = chkPassword.isSelected();
         
@@ -143,6 +131,18 @@ public class MainFrame extends javax.swing.JFrame
         catch (IOException ex)
         {
             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        ClientManager manager = new ClientManager(this, clientConfig);
+        try
+        {
+            manager.start(username, password, type);
+        }
+        catch (IOException ex)
+        {
+            manager.stop();
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(null, "The server seems to be down.");
         }
     }
 

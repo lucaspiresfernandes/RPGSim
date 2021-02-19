@@ -1,6 +1,5 @@
 package com.rpgsim.common.sheets.graphics;
 
-import com.rpgsim.common.AsynTask;
 import com.rpgsim.common.FileManager;
 import com.rpgsim.common.serverpackages.UpdateType;
 import com.rpgsim.common.sheets.PlayerSheet;
@@ -18,8 +17,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -50,7 +47,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
     private final JPanel pnlMain;
     private SheetScrollPane scrSkills, scrEquipments, scrItems;
     private SheetPanel pnlInfo, pnlStats, pnlAbout, pnlExtras, pnlAttributes, pnlSkills, pnlEquipments, pnlItems;
-    private JPanel pnlEquipmentFields;
+    private JPanel pnlEquipmentFields, pnlItemFields;
     
     private JTextField[] txtInfo;
     
@@ -71,7 +68,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
     private final ArrayList<JEquipmentField> equipments = new ArrayList<>();
     private final JButton btnAddEquipment = new JButton("+");
     
-    private final ArrayList<JLabel> items = new ArrayList<>();
+    private final ArrayList<JItemField> items = new ArrayList<>();
     private final JButton btnAddItem = new JButton("+");
     
     private boolean localChange = false;
@@ -224,15 +221,16 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 chkSkillMarked[propertyIndex].setSelected(bAux);
                 break;
             case EQUIPMENTS:
-                String[] equip = (String[]) newValue;
-                sheet.getEquipments().set(propertyIndex, equip);
-                equipments.get(propertyIndex).setEquipment(equip);
+                String[] str = (String[]) newValue;
+                sheet.getEquipments().set(propertyIndex, str);
+                equipments.get(propertyIndex).setEquipment(str);
                 repaint();
                 break;
             case ITEMS:
-                aux = (String) newValue;
-                items.get(propertyIndex).setText(aux);
-                sheet.getItems().set(propertyIndex, aux);
+                str = (String[]) newValue;
+                sheet.getItems().set(propertyIndex, str);
+                items.get(propertyIndex).setItem(str);
+                repaint();
                 break;
         }
     }
@@ -247,9 +245,9 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 createEquipmentField(e);
                 break;
             case ITEMS:
-                String i = (String) newValue;
-                sheet.getItems().add(i);
-                createItem(i);
+                e = (String[]) newValue;
+                sheet.getItems().add(e);
+                createItem(e);
                 break;
         }
     }
@@ -614,10 +612,10 @@ public abstract class SheetFrame extends javax.swing.JFrame
     private void initAttributesPanel()
     {
         int x = pnlAbout.getX();
-        int y = pnlAbout.getY() + pnlAbout.getHeight() + 20;
+        int y = pnlAbout.getY() + pnlAbout.getHeight() + 50;
         int w = pnlExtras.getX() + pnlExtras.getWidth() - x;
         
-        int pnlW = 100;
+        int pnlW = 125;
         int pnlH = 75;
         int hGap = 25;
         int vGap = 50;
@@ -625,7 +623,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
         
         int h = numRow * pnlH + numRow * vGap + 20;
         
-        pnlAttributes = new SheetPanel("Attributes", f24, true);
+        pnlAttributes = new SheetPanel("Attributes", f24, false);
         pnlAttributes.setLayout(new FlowLayout(FlowLayout.CENTER, hGap, vGap));
         pnlAttributes.setBounds(x, y, w, h);
         pnlAttributes.setBackground(Color.BLACK);
@@ -713,10 +711,10 @@ public abstract class SheetFrame extends javax.swing.JFrame
     private void initSkillsPanel()
     {
         int x = pnlAttributes.getX();
-        int y = pnlAttributes.getY() + pnlAttributes.getHeight() + 30;
+        int y = pnlAttributes.getY() + pnlAttributes.getHeight() + 50;
         int w = pnlAttributes.getWidth();
         
-        int sklW = 100;
+        int sklW = 125;
         int sklH = 75;
         int hGap = 50;
         int vGap = 75;
@@ -819,7 +817,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
     private void initEquipmentsPanel()
     {
         int x = scrSkills.getX();
-        int y = scrSkills.getY() + scrSkills.getHeight() + 30;
+        int y = scrSkills.getY() + scrSkills.getHeight() + 50;
         int w = scrSkills.getWidth();
         int h = 200;
         
@@ -851,26 +849,26 @@ public abstract class SheetFrame extends javax.swing.JFrame
         
         pnlEquipments.setPreferredSize(new Dimension(scrSkills.getWidth(), pnlEquipmentFields.getY() + pnlEquipmentFields.getHeight() + 20));
         
-        JLabel[] desc = new JLabel[model.getEquipments().length];
+        JLabel[] desc = new JLabel[model.getEquipmentDescriptions().length];
         int[] positions = new int[desc.length];
         x = 60;
         for (int i = 0; i < desc.length; i++)
         {
-            desc[i] = new JLabel(model.getEquipments()[i]);
+            desc[i] = new JLabel(model.getEquipmentDescriptions()[i]);
             desc[i].setForeground(Color.WHITE);
             desc[i].setFont(f);
             desc[i].setBounds(x, 0, getStringWidth(desc[i].getFont(), desc[i].getText()), desc[i].getFont().getSize());
             positions[i] = x;
             pnlDescriptions.add(desc[i]);
-            x += desc[i].getWidth() + 60;
+            x += desc[i].getWidth() + 50;
         }
         
         btnAddEquipment.setBackground(Color.BLACK);
         btnAddEquipment.setForeground(Color.WHITE);
-        btnAddEquipment.setBounds(positions[positions.length - 1], 10, 50, 25);
+        btnAddEquipment.setBounds(1020, 10, 50, 25);
         btnAddEquipment.addActionListener(l ->
         {
-            String[] obj = new String[model.getEquipments().length];
+            String[] obj = new String[model.getEquipmentDescriptions().length];
             for (int i = 0; i < obj.length; i++)
                 obj[i] = "none";
             obj[0] = "Equipment " + (equipments.size() + 1);
@@ -888,33 +886,69 @@ public abstract class SheetFrame extends javax.swing.JFrame
     private void initItemsPanel()
     {
         int x = scrEquipments.getX();
-        int y = scrEquipments.getY() + scrEquipments.getHeight();
+        int y = scrEquipments.getY() + scrEquipments.getHeight() + 50;
         int w = scrEquipments.getWidth();
         int h = 200;
         
-        
         pnlItems = new SheetPanel("Items", f24, false);
-        pnlItems.setPreferredSize(new Dimension(scrSkills.getWidth(), 2000));
         pnlItems.setBackground(Color.BLACK);
-        pnlItems.setLayout(new FlowLayout(FlowLayout.LEADING, 50, 50));
+        pnlItems.setLayout(null);
         
         scrItems = new SheetScrollPane(pnlItems, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrItems.getVerticalScrollBar().setUnitIncrement(40);
         scrItems.setBounds(x, y, w, h);
         pnlMain.add(scrItems);
         
+        JPanel pnlDescriptions = new JPanel(null, false);
+        pnlDescriptions.setBounds(0, 50, scrItems.getWidth(), f.getSize());
+        pnlDescriptions.setBackground(Color.BLACK);
+        pnlItems.add(pnlDescriptions);
+        
+        x = pnlDescriptions.getX();
+        y = pnlDescriptions.getY() + pnlDescriptions.getHeight() + 10;
+        w = pnlDescriptions.getWidth();
+        h = f12.getSize() * sheet.getItems().size() + 10;
+        
+        pnlItemFields = new JPanel(null, false);
+        pnlItemFields.setLayout(new BoxLayout(pnlItemFields, BoxLayout.PAGE_AXIS));
+        pnlItemFields.setBounds(x, y, w, h);
+        pnlItemFields.setBackground(Color.BLACK);
+        
+        pnlItems.add(pnlItemFields);
+        pnlItems.setPreferredSize(new Dimension(scrEquipments.getWidth(), pnlItemFields.getY() + pnlItemFields.getHeight() + 20));
+        
+        pnlItemFields.setPreferredSize(new Dimension(scrItems.getWidth(), pnlItemFields.getY() + pnlItemFields.getHeight() + 20));
+        
+        JLabel[] desc = new JLabel[model.getItemDescriptions().length];
+        int[] positions = new int[desc.length];
+        x = 60;
+        for (int i = 0; i < desc.length; i++)
+        {
+            desc[i] = new JLabel(model.getItemDescriptions()[i]);
+            desc[i].setForeground(Color.WHITE);
+            desc[i].setFont(f);
+            desc[i].setBounds(x, 0, getStringWidth(desc[i].getFont(), desc[i].getText()), desc[i].getFont().getSize());
+            positions[i] = x;
+            pnlDescriptions.add(desc[i]);
+            x += desc[i].getWidth() + 50;
+        }
+        
         btnAddItem.setBackground(Color.BLACK);
         btnAddItem.setForeground(Color.WHITE);
-        btnAddItem.setPreferredSize(new Dimension(75, 25));
+        btnAddItem.setBounds(1020, 10, 50, 25);
         btnAddItem.addActionListener(l ->
         {
-            String i = "New Item " + (sheet.getItems().size() + 1);
-            createItem(i);
-            sheet.getItems().add(i);
-            sendSheetUpdate(UpdateField.ITEMS, i, 0, UpdateType.ADD);
+            String[] obj = new String[model.getItemDescriptions().length];
+            for (int i = 0; i < obj.length; i++)
+                obj[i] = "none";
+            obj[0] = "Item " + (items.size() + 1);
+            createItem(obj);
+            sheet.getItems().add(obj);
+            sendSheetUpdate(UpdateField.ITEMS, obj, 0, UpdateType.ADD);
         });
         pnlItems.add(btnAddItem);
         
+        JItemField.setPositions(positions);
         for (int i = 0; i < sheet.getItems().size(); i++)
             createItem(sheet.getItems().get(i));
     }
@@ -981,7 +1015,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
         pnlEquipmentFields.setBounds(pnlEquipmentFields.getX(), 
                 pnlEquipmentFields.getY(), 
                 pnlEquipmentFields.getWidth(), h);
-        pnlEquipments.setPreferredSize(new Dimension(getPreferredSize().width, pnlEquipmentFields.getY() + pnlEquipmentFields.getHeight() + 20));
+        pnlEquipments.setPreferredSize(new Dimension(pnlEquipments.getPreferredSize().width, pnlEquipmentFields.getY() + pnlEquipmentFields.getHeight() + 20));
         scrEquipments.revalidate();
         pnlEquipments.revalidate();
         return e;
@@ -1003,78 +1037,95 @@ public abstract class SheetFrame extends javax.swing.JFrame
         pnlEquipments.revalidate();
     }
     
-    private JLabel createItem(String name)
+    private JItemField createItem(String[] item)
     {
-        FlowLayout l = (FlowLayout) pnlItems.getLayout();
-        int hGap = l.getHgap();
-        int vGap = l.getVgap();
+        JItemField it = new JItemField(item);
+        it.setFont(f12);
+        it.setForeground(Color.WHITE);
         
-        JLabel item = new JLabel(name);
-        item.setFont(f);
-        item.setForeground(Color.WHITE);
-        item.setPreferredSize(new Dimension(getStringWidth(item.getFont(), name), item.getFont().getSize()));
-        
-        items.add(item);
-        pnlItems.add(item);
-        int numRow = (int) Math.ceil(items.size() / (scrItems.getWidth() / (item.getPreferredSize().width + hGap)));
-        int h = numRow * item.getPreferredSize().height + numRow * vGap + 20;
-        pnlItems.setPreferredSize(new Dimension(pnlItems.getPreferredSize().width, h));
-        item.addMouseListener(new MouseAdapter()
+        it.addMouseListener(new MouseAdapter()
         {
             @Override
-            public void mouseClicked(MouseEvent e)
+            public void mousePressed(MouseEvent ev)
             {
-                if (e.getButton() == MouseEvent.BUTTON3)
+                if (ev.getClickCount() < 2)
+                    return;
+                int selected = -1;
+                for (int i = 0; i < JItemField.getPositions().length; i++)
                 {
-                    sheet.getItems().remove(name);
-                    sendSheetUpdate(UpdateField.ITEMS, null, items.indexOf(item), UpdateType.REMOVE);
-                    removeItem(items.indexOf(item));
-                }
-                else
-                {
-                    if (e.getClickCount() == 2)
+                    int x = ev.getX();
+                    if (i < JItemField.getPositions().length - 1)
                     {
-                        String newVal = JOptionPane.showInputDialog("Please type in new value.", item.getText());
-                        
-                        if (newVal == null)
-                            return;
-                        
-                        sheet.getItems().set(sheet.getItems().indexOf(item.getText()), newVal);
-                        
-                        item.setText(newVal);
-                        item.setPreferredSize(new Dimension(getStringWidth(item.getFont(), item.getText()), item.getPreferredSize().height));
-                        sendSheetUpdate(UpdateField.ITEMS, newVal, items.indexOf(item), UpdateType.UPDATE);
+                        if (x > JItemField.getPositions()[i] && x < JItemField.getPositions()[i + 1])
+                        {
+                            selected = i;
+                        }
+                    }
+                    else if (x > JItemField.getPositions()[i])
+                    {
+                        selected = i;
                     }
                 }
+                
+                if (selected < 0)
+                    return;
+                
+                String a = JOptionPane.showInputDialog("Please type in new value.", it.getItem()[selected]);
+                
+                if (a == null)
+                    return;
+                
+                it.getItem()[selected] = a;
+                
+                int index = items.indexOf(it);
+                
+                sheet.getItems().set(index, it.getItem());
+                
+                sendSheetUpdate(UpdateField.ITEMS, it.getItem(), index, UpdateType.UPDATE);
+                
+                repaint();
             }
         });
         
-        pnlItems.revalidate();
-        pnlItems.repaint();
+        items.add(it);
+        pnlItemFields.add(it);
+        int h = (f12.getSize() + 10) * items.size();
+        it.getRemoveButton().addActionListener(l ->
+        {
+            int index = items.indexOf(it);
+            sendSheetUpdate(UpdateField.ITEMS, null, index, UpdateType.REMOVE);
+            sheet.getItems().remove(index);
+            removeItem(index);
+        });
+        
+        pnlItemFields.setBounds(pnlItemFields.getX(), 
+                pnlItemFields.getY(), 
+                pnlItemFields.getWidth(), h);
+        pnlItems.setPreferredSize(new Dimension(pnlItems.getPreferredSize().width, pnlItemFields.getY() + pnlItemFields.getHeight() + 20));
         scrItems.revalidate();
-        return item;
+        pnlItems.revalidate();
+        return it;
     }
     
     private void removeItem(int index)
     {
-        FlowLayout l = (FlowLayout) pnlItems.getLayout();
-        int hGap = l.getHgap();
-        int vGap = l.getVgap();
-        JLabel item = items.get(index);
+        items.remove(index);
+        pnlItemFields.remove(index);
         
-        items.remove(item);
-        pnlItems.remove(item);
-        int numRow = (int) Math.ceil(items.size() / (scrItems.getWidth() / (item.getPreferredSize().width + hGap)));
-        int h = numRow * item.getPreferredSize().height + numRow * vGap + 20;
-        pnlItems.setPreferredSize(new Dimension(pnlItems.getPreferredSize().width, h));
-        pnlItems.revalidate();
-        pnlItems.repaint();
+        int hh = (f12.getSize() + 10) * items.size();
+        pnlItemFields.setBounds(pnlItemFields.getX(), 
+            pnlItemFields.getY(), 
+            pnlItemFields.getWidth(), hh);
+
+        pnlItems.setPreferredSize(new Dimension(pnlItems.getPreferredSize().width, pnlItemFields.getY() + pnlItemFields.getHeight() + 20));
+
         scrItems.revalidate();
+        pnlItems.revalidate();
     }
     
     private void initRollPanel()
     {
-        lblDiceAnimation = new JLabel(new ImageIcon(FileManager.app_dir + "data files\\images\\dice_roll.gif"));
+        lblDiceAnimation = new JLabel(new ImageIcon(FileManager.app_dir + "data files\\objects\\dice_roll.gif"));
         lblDiceAnimation.setAlignmentX(CENTER_ALIGNMENT);
         lblDiceAnimation.setAlignmentY(CENTER_ALIGNMENT);
         pnlRoll = new JPanel()
@@ -1149,7 +1200,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
     {
         this.diceNumber = diceNumber;
         this.fieldNumber = fieldNumber;
-        JOptionPane.showMessageDialog(this, pnlRoll, "Dice Result", JOptionPane.PLAIN_MESSAGE, new ImageIcon(FileManager.app_dir + "data files\\images\\diceicon.png"));
+        JOptionPane.showMessageDialog(this, pnlRoll, "Dice Result", JOptionPane.PLAIN_MESSAGE, new ImageIcon(FileManager.app_dir + "data files\\objects\\diceicon.png"));
     }
     
     /** This method is called from within the constructor to

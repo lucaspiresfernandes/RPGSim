@@ -16,7 +16,7 @@ public class PlayerSheet implements Serializable
     private String[] skills;
     private boolean[] skillMarked;
     private ArrayList<String[]> equipments;
-    private ArrayList<String> items;
+    private ArrayList<String[]> items;
 
     private PlayerSheet() {}
     
@@ -29,7 +29,7 @@ public class PlayerSheet implements Serializable
         about = "";
         extras = "";
         
-        avatarRelativePath = "data files\\images\\character.png";
+        avatarRelativePath = "data files\\objects\\character.png";
         
         currentStats = new String[sheet.getStats().length];
         for (int i = 0; i < currentStats.length; i++)
@@ -167,12 +167,12 @@ public class PlayerSheet implements Serializable
         this.equipments = equipments;
     }
 
-    public ArrayList<String> getItems()
+    public ArrayList<String[]> getItems()
     {
         return items;
     }
 
-    public void setItems(ArrayList<String> items)
+    public void setItems(ArrayList<String[]> items)
     {
         this.items = items;
     }

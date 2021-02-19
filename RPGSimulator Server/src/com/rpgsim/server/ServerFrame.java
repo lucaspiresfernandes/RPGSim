@@ -86,18 +86,12 @@ public class ServerFrame extends javax.swing.JFrame
 
         scrPlayer = new javax.swing.JScrollPane();
         lstPlayer = new javax.swing.JList<>();
-        btnKickPlayer = new javax.swing.JButton();
-        btnBanPlayer = new javax.swing.JButton();
         btnOpenCharacterSheet = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("RPG Simulator Server");
 
         scrPlayer.setViewportView(lstPlayer);
-
-        btnKickPlayer.setText("Kick Player");
-
-        btnBanPlayer.setText("Ban Player");
 
         btnOpenCharacterSheet.setText("Open Character Sheet");
 
@@ -107,29 +101,18 @@ public class ServerFrame extends javax.swing.JFrame
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(scrPlayer, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnKickPlayer)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnBanPlayer)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnOpenCharacterSheet)
-                .addContainerGap(440, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(scrPlayer, javax.swing.GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE)
+                    .addComponent(btnOpenCharacterSheet, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(scrPlayer, javax.swing.GroupLayout.DEFAULT_SIZE, 546, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnOpenCharacterSheet)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addComponent(scrPlayer, javax.swing.GroupLayout.DEFAULT_SIZE, 546, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnKickPlayer)
-                    .addComponent(btnBanPlayer))
+                .addComponent(btnOpenCharacterSheet)
                 .addContainerGap())
         );
 
@@ -138,8 +121,6 @@ public class ServerFrame extends javax.swing.JFrame
     }// </editor-fold>//GEN-END:initComponents
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnBanPlayer;
-    private javax.swing.JButton btnKickPlayer;
     private javax.swing.JButton btnOpenCharacterSheet;
     private javax.swing.JList<Account> lstPlayer;
     private javax.swing.JScrollPane scrPlayer;

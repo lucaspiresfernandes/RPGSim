@@ -1,6 +1,5 @@
 package com.rpgsim.common;
 
-import com.rpgsim.common.game.Transform;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -13,8 +12,8 @@ public class Screen
     private final BufferStrategy bs;
     private final int screenWidth, screenHeight;
     private Graphics2D g;
+    private AffineTransform transform = new AffineTransform();
     
-    private final Transform transform = new Transform();
     
     public Screen(BufferStrategy bs, int screenWidth, int screenHeight)
     {
@@ -26,15 +25,22 @@ public class Screen
     public void begin()
     {
         g = (Graphics2D) bs.getDrawGraphics();
-        g.setColor(Color.GRAY);
-        g.fillRect(0, 0, screenWidth, screenHeight);
+        g.setTransform(transform);
         g.setColor(Color.BLACK);
+        int x = (int) transform.getTranslateX();
+        int y = (int) transform.getTranslateY();
+        g.fillRect(-x, -y, screenWidth - x, screenHeight - y);
     }
     
     public void end()
     {
         g.dispose();
         bs.show();
+    }
+
+    public boolean drawImage(Image img, int x, int y)
+    {
+        return g.drawImage(img, x, y, null);
     }
     
     public boolean drawImage(Image img, AffineTransform xform)
@@ -81,4 +87,15 @@ public class Screen
     {
         g.drawRect(x, y, width, height);
     }
+
+    public AffineTransform getTransform()
+    {
+        return transform;
+    }
+
+    public void setTransform(AffineTransform transform)
+    {
+        this.transform = transform;
+    }
+    
 }
