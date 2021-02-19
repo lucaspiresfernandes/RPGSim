@@ -2,9 +2,13 @@
  A Java simulator inspired by Cellbit's "Ordem Paranormal" series.
 
 Instructions:
-WASD - Move around
-F1 - Open character sheet
+
+WASD - Move around.
+
+F1 - Open character sheet.
+
 O - Open asset (or object) creation panel.
+
 
 Once you created an object, you can grab it and change its position, scale and rotation.
 
