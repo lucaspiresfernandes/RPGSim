@@ -38,13 +38,11 @@ public class ServerManager extends Listener implements ServerActions
     private final Server server;
     private final ApplicationConfigurations serverConfigurations;
     private final AccountManager accountManager;
-    private final ServerGame game;
+    private final ServerGame serverGame;
     private final ServerSheetFrame sheetFrame;
     
     //The window in which the server supervises client/user actions.
     private final ServerFrame serverFrame;
-    
-    private String backgroundPath;
     
     public ServerManager() throws IOException
     {
@@ -81,7 +79,7 @@ public class ServerManager extends Listener implements ServerActions
                     + "(They are either corrupted or not accessible).", "WARNING", JOptionPane.WARNING_MESSAGE);
         }
         
-        this.game = new ServerGame();
+        this.serverGame = new ServerGame();
         
         server = new Server();
         server.getKryo().setRegistrationRequired(false);
@@ -108,7 +106,7 @@ public class ServerManager extends Listener implements ServerActions
         }
         
         accountManager.setAccountActive(connection.getID(), accountManager.getActiveAccount(connection.getID()), false);
-        Iterator<NetworkGameObject> aux = new ArrayList<>(game.getScene().getGameObjects()).iterator();
+        Iterator<NetworkGameObject> aux = new ArrayList<>(serverGame.getScene().getGameObjects()).iterator();
         while (aux.hasNext())
         {
             NetworkGameObject go = aux.next();
@@ -189,7 +187,7 @@ public class ServerManager extends Listener implements ServerActions
                             server.sendToTCP(connectionID,
                                     new ConnectionRequestResponse(true, "", acc, SheetManager.getDefaultSheetModel(), 
                                             type));
-                            for (NetworkGameObject go : game.getScene().getGameObjects())
+                            for (NetworkGameObject go : serverGame.getScene().getGameObjects())
                             {
                                 server.sendToTCP(connectionID,
                                         new InstantiateNetworkGameObjectResponse(go.getObjectID(),
@@ -197,8 +195,8 @@ public class ServerManager extends Listener implements ServerActions
                                                 go.transform().position(),
                                                 go.getPrefabID(), go.renderer().getImagePath()));
                             }
-                            if (backgroundPath != null)
-                                server.sendToTCP(connectionID, new BackgroundUpdateResponse(backgroundPath));
+                            if (serverGame.getBackgroundPath() != null)
+                                server.sendToTCP(connectionID, new BackgroundUpdateResponse(serverGame.getBackgroundPath()));
                             serverFrame.addPlayer(acc);
                         }
                         catch (IOException ex)
@@ -233,14 +231,14 @@ public class ServerManager extends Listener implements ServerActions
                         server.sendToTCP(connectionID,
                                 new ConnectionRequestResponse(true, "", acc, SheetManager.getDefaultSheetModel(), 
                                         type));
-                        for (NetworkGameObject go : game.getScene().getGameObjects())
+                        for (NetworkGameObject go : serverGame.getScene().getGameObjects())
                             server.sendToTCP(connectionID,
                                     new InstantiateNetworkGameObjectResponse(go.getObjectID(),
                                             go.getClientID(),
                                             go.transform().position(),
                                             go.getPrefabID(), go.renderer().getImagePath()));
-                        if (backgroundPath != null)
-                            server.sendToTCP(connectionID, new BackgroundUpdateResponse(backgroundPath));
+                        if (serverGame.getBackgroundPath() != null)
+                            server.sendToTCP(connectionID, new BackgroundUpdateResponse(serverGame.getBackgroundPath()));
                         serverFrame.addPlayer(acc);
                     }
                     catch (IOException ex)
@@ -255,7 +253,7 @@ public class ServerManager extends Listener implements ServerActions
     @Override
     public void onNetworkGameObjectTransformUpdate(int id, Vector2 position, Vector2 scale, float rotation, boolean flipX, boolean flipY)
     {
-        NetworkGameObject go = game.getScene().getGameObject(id);
+        NetworkGameObject go = serverGame.getScene().getGameObject(id);
         go.transform().position(position);
         go.transform().scale(scale);
         go.transform().rotation(rotation);
@@ -271,21 +269,21 @@ public class ServerManager extends Listener implements ServerActions
         NetworkGameObject go;
         go = new NetworkGameObject(ServerGame.getGameObjectID(), clientID, pID);
         go.renderer().setImagePath(imageRelativePath);
-        game.getScene().addGameObject(go);
+        serverGame.getScene().addGameObject(go);
         sendAll(new InstantiateNetworkGameObjectResponse(go.getObjectID(), go.getClientID(), position, pID, imageRelativePath), true);
     }
 
     @Override
     public void onNetworkGameObjectImageUpdate(int id, String relativePath)
     {
-        game.getScene().getGameObject(id).renderer().setImagePath(relativePath);
+        serverGame.getScene().getGameObject(id).renderer().setImagePath(relativePath);
         sendAll(new NetworkGameObjectImageUpdateResponse(id, relativePath), true);
     }
 
     @Override
     public void onNetworkGameObjectDestroy(int id)
     {
-        game.getScene().removeGameObject(id);
+        serverGame.getScene().removeGameObject(id);
         sendAll(new NetworkGameObjectDestroyResponse(id), true);
     }
 
@@ -311,7 +309,7 @@ public class ServerManager extends Listener implements ServerActions
     @Override
     public void onBackgroundUpdate(String relativePath)
     {
-        backgroundPath = relativePath;
+        serverGame.setBackgroundPath(relativePath);
         sendAll(new BackgroundUpdateResponse(relativePath), true);
     }
     

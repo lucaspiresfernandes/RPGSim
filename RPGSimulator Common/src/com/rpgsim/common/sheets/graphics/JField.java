@@ -1,5 +1,6 @@
 package com.rpgsim.common.sheets.graphics;
 
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -7,15 +8,15 @@ import java.awt.RenderingHints;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 
-public class JItemField extends JComponent
+public class JField extends JComponent
 {
-    private static int[] positions;
-    private String[] item;
+    private int[] positions;
+    private String[] field;
     private final JButton btnRemove;
-    
-    public JItemField(String[] item)
+
+    public JField(String[] equipment)
     {
-        this.item = item;
+        this.field = equipment;
         this.btnRemove = new JButton("-");
         this.btnRemove.setBackground(Color.BLACK);
         this.btnRemove.setForeground(Color.WHITE);
@@ -25,31 +26,31 @@ public class JItemField extends JComponent
         
     }
 
-    public static void setPositions(int[] positions)
-    {
-        JItemField.positions = positions;
-    }
-
-    public static int[] getPositions()
+    public int[] getPositions()
     {
         return positions;
     }
 
+    public void setPositions(int[] positions)
+    {
+        this.positions = positions;
+    }
+    
     public JButton getRemoveButton()
     {
         return btnRemove;
     }
 
-    public String[] getItem()
+    public String[] getField()
     {
-        return item;
+        return field;
     }
 
-    public void setItem(String[] equipment)
+    public void setField(String[] field)
     {
-        this.item = equipment;
+        this.field = field;
     }
-    
+
     @Override
     public void paintComponent(Graphics g)
     {
@@ -60,8 +61,10 @@ public class JItemField extends JComponent
         g.setFont(getFont());
         g.setColor(getForeground());
         
-        for (int i = 0; i < item.length; i++)
-            g.drawString(item[i], positions[i], g.getFont().getSize());
+        for (int i = 0; i < field.length; i++)
+        {
+            g.drawString(field[i], positions[i], g.getFont().getSize());
+        }
     }
-
+    
 }

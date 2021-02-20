@@ -65,13 +65,15 @@ public abstract class SheetFrame extends javax.swing.JFrame
     private JTextField[] txtSkills;
     private JCheckBox[] chkSkillMarked;
     
-    private final ArrayList<JEquipmentField> equipments = new ArrayList<>();
+    private final ArrayList<JField> equipments = new ArrayList<>();
     private final JButton btnAddEquipment = new JButton("+");
     
-    private final ArrayList<JItemField> items = new ArrayList<>();
+    private final ArrayList<JField> items = new ArrayList<>();
     private final JButton btnAddItem = new JButton("+");
     
     private boolean localChange = false;
+    
+    private int[] equipmentPositions, itemPositions;
     
     //Rolling dices.
     private final Random rand = new Random();
@@ -223,13 +225,13 @@ public abstract class SheetFrame extends javax.swing.JFrame
             case EQUIPMENTS:
                 String[] str = (String[]) newValue;
                 sheet.getEquipments().set(propertyIndex, str);
-                equipments.get(propertyIndex).setEquipment(str);
+                equipments.get(propertyIndex).setField(str);
                 repaint();
                 break;
             case ITEMS:
                 str = (String[]) newValue;
                 sheet.getItems().set(propertyIndex, str);
-                items.get(propertyIndex).setItem(str);
+                items.get(propertyIndex).setField(str);
                 repaint();
                 break;
         }
@@ -850,7 +852,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
         pnlEquipments.setPreferredSize(new Dimension(scrSkills.getWidth(), pnlEquipmentFields.getY() + pnlEquipmentFields.getHeight() + 20));
         
         JLabel[] desc = new JLabel[model.getEquipmentDescriptions().length];
-        int[] positions = new int[desc.length];
+        equipmentPositions = new int[desc.length];
         x = 60;
         for (int i = 0; i < desc.length; i++)
         {
@@ -858,7 +860,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
             desc[i].setForeground(Color.WHITE);
             desc[i].setFont(f);
             desc[i].setBounds(x, 0, getStringWidth(desc[i].getFont(), desc[i].getText()), desc[i].getFont().getSize());
-            positions[i] = x;
+            equipmentPositions[i] = x;
             pnlDescriptions.add(desc[i]);
             x += desc[i].getWidth() + 50;
         }
@@ -872,13 +874,12 @@ public abstract class SheetFrame extends javax.swing.JFrame
             for (int i = 0; i < obj.length; i++)
                 obj[i] = "none";
             obj[0] = "Equipment " + (equipments.size() + 1);
-            JEquipmentField e = createEquipmentField(obj);
+            JField e = createEquipmentField(obj);
             sheet.getEquipments().add(obj);
             sendSheetUpdate(UpdateField.EQUIPMENTS, obj, equipments.indexOf(e), UpdateType.ADD);
         });
         pnlEquipments.add(btnAddEquipment);
         
-        JEquipmentField.setPositions(positions);
         for (int i = 0; i < sheet.getEquipments().size(); i++)
             createEquipmentField(sheet.getEquipments().get(i));
     }
@@ -920,7 +921,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
         pnlItemFields.setPreferredSize(new Dimension(scrItems.getWidth(), pnlItemFields.getY() + pnlItemFields.getHeight() + 20));
         
         JLabel[] desc = new JLabel[model.getItemDescriptions().length];
-        int[] positions = new int[desc.length];
+        itemPositions = new int[desc.length];
         x = 60;
         for (int i = 0; i < desc.length; i++)
         {
@@ -928,7 +929,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
             desc[i].setForeground(Color.WHITE);
             desc[i].setFont(f);
             desc[i].setBounds(x, 0, getStringWidth(desc[i].getFont(), desc[i].getText()), desc[i].getFont().getSize());
-            positions[i] = x;
+            itemPositions[i] = x;
             pnlDescriptions.add(desc[i]);
             x += desc[i].getWidth() + 50;
         }
@@ -948,14 +949,14 @@ public abstract class SheetFrame extends javax.swing.JFrame
         });
         pnlItems.add(btnAddItem);
         
-        JItemField.setPositions(positions);
         for (int i = 0; i < sheet.getItems().size(); i++)
             createItem(sheet.getItems().get(i));
     }
     
-    private JEquipmentField createEquipmentField(String[] equip)
+    private JField createEquipmentField(String[] equip)
     {
-        JEquipmentField e = new JEquipmentField(equip);
+        JField e = new JField(equip);
+        e.setPositions(equipmentPositions);
         e.setFont(f12);
         e.setForeground(Color.WHITE);
         e.addMouseListener(new MouseAdapter()
@@ -966,17 +967,17 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 if (ev.getClickCount() < 2)
                     return;
                 int selected = -1;
-                for (int i = 0; i < JEquipmentField.getPositions().length; i++)
+                for (int i = 0; i < equipmentPositions.length; i++)
                 {
                     int x = ev.getX();
-                    if (i < JEquipmentField.getPositions().length - 1)
+                    if (i < equipmentPositions.length - 1)
                     {
-                        if (x > JEquipmentField.getPositions()[i] && x < JEquipmentField.getPositions()[i + 1])
+                        if (x > equipmentPositions[i] && x < equipmentPositions[i + 1])
                         {
                             selected = i;
                         }
                     }
-                    else if (x > JEquipmentField.getPositions()[i])
+                    else if (x > equipmentPositions[i])
                     {
                         selected = i;
                     }
@@ -985,18 +986,18 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 if (selected < 0)
                     return;
                 
-                String a = JOptionPane.showInputDialog("Please type in new value.", e.getEquipment()[selected]);
+                String a = JOptionPane.showInputDialog("Please type in new value.", e.getField()[selected]);
                 
                 if (a == null)
                     return;
                 
-                e.getEquipment()[selected] = a;
+                e.getField()[selected] = a;
                 
                 int index = equipments.indexOf(e);
                 
-                sheet.getEquipments().set(index, e.getEquipment());
+                sheet.getEquipments().set(index, e.getField());
                 
-                sendSheetUpdate(UpdateField.EQUIPMENTS, e.getEquipment(), index, UpdateType.UPDATE);
+                sendSheetUpdate(UpdateField.EQUIPMENTS, e.getField(), index, UpdateType.UPDATE);
                 
                 repaint();
             }
@@ -1008,7 +1009,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
         e.getRemoveButton().addActionListener(l ->
         {
             sendSheetUpdate(UpdateField.EQUIPMENTS, null, equipments.indexOf(e), UpdateType.REMOVE);
-            sheet.getEquipments().remove(e.getEquipment());
+            sheet.getEquipments().remove(e.getField());
             removeEquipmentField(equipments.indexOf(e));
         });
         
@@ -1037,9 +1038,10 @@ public abstract class SheetFrame extends javax.swing.JFrame
         pnlEquipments.revalidate();
     }
     
-    private JItemField createItem(String[] item)
+    private JField createItem(String[] item)
     {
-        JItemField it = new JItemField(item);
+        JField it = new JField(item);
+        it.setPositions(itemPositions);
         it.setFont(f12);
         it.setForeground(Color.WHITE);
         
@@ -1051,17 +1053,17 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 if (ev.getClickCount() < 2)
                     return;
                 int selected = -1;
-                for (int i = 0; i < JItemField.getPositions().length; i++)
+                for (int i = 0; i < itemPositions.length; i++)
                 {
                     int x = ev.getX();
-                    if (i < JItemField.getPositions().length - 1)
+                    if (i < itemPositions.length - 1)
                     {
-                        if (x > JItemField.getPositions()[i] && x < JItemField.getPositions()[i + 1])
+                        if (x > itemPositions[i] && x < itemPositions[i + 1])
                         {
                             selected = i;
                         }
                     }
-                    else if (x > JItemField.getPositions()[i])
+                    else if (x > itemPositions[i])
                     {
                         selected = i;
                     }
@@ -1070,18 +1072,18 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 if (selected < 0)
                     return;
                 
-                String a = JOptionPane.showInputDialog("Please type in new value.", it.getItem()[selected]);
+                String a = JOptionPane.showInputDialog("Please type in new value.", it.getField()[selected]);
                 
                 if (a == null)
                     return;
                 
-                it.getItem()[selected] = a;
+                it.getField()[selected] = a;
                 
                 int index = items.indexOf(it);
                 
-                sheet.getItems().set(index, it.getItem());
+                sheet.getItems().set(index, it.getField());
                 
-                sendSheetUpdate(UpdateField.ITEMS, it.getItem(), index, UpdateType.UPDATE);
+                sendSheetUpdate(UpdateField.ITEMS, it.getField(), index, UpdateType.UPDATE);
                 
                 repaint();
             }
