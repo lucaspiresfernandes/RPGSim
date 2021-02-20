@@ -1,7 +1,15 @@
 # RPGSim
  A Java simulator inspired by Cellbit's "Ordem Paranormal" series.
 
-Instructions:
+- HOW TO RUN:
+WARNING: You must have JRE 8 or JDK 8 to run the program.
+
+- Client:
+In "RPGSimulator Client Placeholder Data Files", copy "data files" to "RPGSimulator Client\dist\" and run the .jar client file.
+- Server:
+Just run the .jar server in "RPGSimulator Server\dist\" and you are good to go ;)
+
+- INSTRUCTIONS:
 
 WASD - Move around.
 
