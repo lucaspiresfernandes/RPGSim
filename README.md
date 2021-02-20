@@ -9,9 +9,17 @@ WARNING: You must have JRE 8 or JDK 8 to run the program.
 
 In "RPGSimulator Client Placeholder Data Files", copy "data files" to "RPGSimulator Client\dist\" and run the .jar client file.
 
+It should appear like this:
+
+![alt text](https://i.imgur.com/X8pfCSX.png)
+
 - Server:
 
 Just run the .jar server in "RPGSimulator Server\dist\" and you are good to go ;)
+
+It should appear like this:
+
+![alt text](https://i.imgur.com/OLFbjK9.png)
 
 .
 
