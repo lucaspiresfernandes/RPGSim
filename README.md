@@ -19,6 +19,6 @@ Once you created an object, you can grab it and change its position, scale and r
 
 \- \+ - Scale the object.
 
-As for the server, it can watch over other players' sheet and change it.
+As for the server, it can watch over other players' sheet and change it. You can also roll attributes or skills by simply clicking on its name.
 
 This application still have a lot of bugs and optimizations to be made, so if you are interested in helping me, feel free to request a pull :)
