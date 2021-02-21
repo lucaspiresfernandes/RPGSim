@@ -28,6 +28,8 @@ public enum KeyCode
     X(0x58),
     Y(0x59),
     Z(0x5A),
+    NUM9(0x39),
+    NUM0(0x30),
     F1(0x70),
     EQUALS(0x3D),
     MINUS(0x2D),

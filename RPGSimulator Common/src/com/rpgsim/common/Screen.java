@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferStrategy;
 
@@ -13,7 +14,6 @@ public class Screen
     private final int screenWidth, screenHeight;
     private Graphics2D g;
     private AffineTransform transform = new AffineTransform();
-    
     
     public Screen(BufferStrategy bs, int screenWidth, int screenHeight)
     {
@@ -25,6 +25,7 @@ public class Screen
     public void begin()
     {
         g = (Graphics2D) bs.getDrawGraphics();
+        g.setRenderingHints(new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_DEFAULT));
         g.setTransform(transform);
         g.setColor(Color.BLACK);
         int x = (int) transform.getTranslateX();

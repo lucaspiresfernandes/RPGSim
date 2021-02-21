@@ -8,7 +8,6 @@ import com.rpgsim.common.game.Input;
 import com.rpgsim.common.game.KeyCode;
 import com.rpgsim.common.serverpackages.InstantiatePrefabRequest;
 import com.rpgsim.common.sheets.PlayerSheet;
-import com.rpgsim.common.Vector2;
 import com.rpgsim.common.sheets.SheetModel;
 import java.awt.Canvas;
 import java.awt.Color;
@@ -29,14 +28,11 @@ public class ClientGame extends Canvas implements Runnable
     
     private static Screen screen;
     private Input input;
-    private final Physics physics;
     
     private final Scene scene;
     
     private ClientSheetFrame sheetFrame;
     private final ObjectFrame objectFrame;
-    
-    private float deltaTime;
     
     public ClientGame(ClientManager manager, int width, int height)
     {
@@ -45,23 +41,20 @@ public class ClientGame extends Canvas implements Runnable
         
         this.client = manager;
         this.scene = new Scene();
-        this.physics = new Physics(this.scene.getGameObjects());
+        new Physics(this.scene.getGameObjects());
         this.objectFrame = new ObjectFrame(client);
     }
     
     private void update(float dt)
     {
-        deltaTime = dt;
-        
         if (Input.getKey(KeyCode.W) && screen.getTransform().getTranslateY() < 0)
-            screen.getTransform().translate(0, 3);
+            screen.getTransform().translate(0, 10);
         else if (Input.getKey(KeyCode.S))
-            screen.getTransform().translate(0, -3);
-        
+            screen.getTransform().translate(0, -10);
         if (Input.getKey(KeyCode.A) && screen.getTransform().getTranslateX() < 0)
-            screen.getTransform().translate(3, 0);
+            screen.getTransform().translate(10, 0);
         else if (Input.getKey(KeyCode.D))
-            screen.getTransform().translate(-3, 0);
+            screen.getTransform().translate(-10, 0);
         
         if (Input.getKeyDown(KeyCode.F1))
             sheetFrame.setVisible(true);

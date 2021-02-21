@@ -73,7 +73,8 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, W
     
     public static Vector2 mousePosition()
     {
-        return new Vector2(mouseX - screenTransform.getTranslateX(), mouseY - screenTransform.getTranslateY());
+        return new Vector2((mouseX - screenTransform.getTranslateX()) / screenTransform.getScaleX(), 
+                (mouseY - screenTransform.getTranslateY()) / screenTransform.getScaleY());
     }
     
     @Override
