@@ -7,11 +7,6 @@ import java.util.Collection;
 public class Physics
 {
     private static Collection<NetworkGameObject> objects;
-
-    public Physics(Collection<NetworkGameObject> objects)
-    {
-        Physics.objects = objects;
-    }
     
     public static NetworkGameObject getCollision(NetworkGameObject orig)
     {
@@ -29,6 +24,11 @@ public class Physics
             }
         }
         return obj;
+    }
+
+    public static void setObjects(Collection<NetworkGameObject> objects)
+    {
+        Physics.objects = objects;
     }
     
     

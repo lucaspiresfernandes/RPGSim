@@ -31,7 +31,7 @@ public class ClientGame extends Canvas implements Runnable
     
     private final Scene scene;
     
-    private ClientSheetFrame sheetFrame;
+    private final ClientSheetFrame sheetFrame;
     private final ObjectFrame objectFrame;
     
     public ClientGame(ClientManager manager, int width, int height)
@@ -41,8 +41,21 @@ public class ClientGame extends Canvas implements Runnable
         
         this.client = manager;
         this.scene = new Scene();
-        new Physics(this.scene.getGameObjects());
+        Physics.setObjects(this.scene.getGameObjects());
+        
+        this.sheetFrame = new ClientSheetFrame(client);
         this.objectFrame = new ObjectFrame(client);
+        
+        WindowAdapter l = new WindowAdapter()
+        {
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+                requestFocus();
+            }
+        };
+        this.sheetFrame.addWindowListener(l);
+        this.objectFrame.addWindowListener(l);
     }
     
     private void update(float dt)
@@ -85,21 +98,13 @@ public class ClientGame extends Canvas implements Runnable
         screen = new Screen(getBufferStrategy(), getWidth(), getHeight());
         
         input = new Input(screen.getTransform());
-        super.addKeyListener(input);
-        super.addMouseListener(input);
-        super.addMouseMotionListener(input);
+        addKeyListener(input);
+        addMouseListener(input);
+        addMouseMotionListener(input);
+        addFocusListener(input);
         
-        this.sheetFrame = new ClientSheetFrame(client);
         this.sheetFrame.load(client.getAccount().getConnectionID(), model, sheet, true);
-        WindowAdapter l = new WindowAdapter()
-        {
-            @Override
-            public void windowClosing(WindowEvent e)
-            {
-                requestFocus();
-            }
-        };
-        this.sheetFrame.addWindowListener(l);
+        
         client.sendPackage(new InstantiatePrefabRequest(Input.mousePosition(), PrefabID.MOUSE, client.getAccount().getConnectionID(), "data files\\objects\\cursor.png"));
         gameRunning = true;
         requestFocus();
@@ -107,8 +112,7 @@ public class ClientGame extends Canvas implements Runnable
 
     public void stop()
     {
-        if (sheetFrame != null)
-            sheetFrame.dispose();
+        sheetFrame.dispose();
         objectFrame.dispose();
         gameRunning = false;
         networkRunning = false;
@@ -178,11 +182,6 @@ public class ClientGame extends Canvas implements Runnable
     public ClientSheetFrame getSheetFrame()
     {
         return sheetFrame;
-    }
-    
-    public Input getInput()
-    {
-        return input;
     }
 
     public Scene getScene()

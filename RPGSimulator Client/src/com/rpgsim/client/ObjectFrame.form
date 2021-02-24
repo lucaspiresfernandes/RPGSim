@@ -97,7 +97,8 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="scrList" pref="576" max="32767" attributes="0"/>
                           <Group type="102" alignment="1" attributes="0">
-                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                              <Component id="btnBack" min="-2" pref="100" max="-2" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
                               <Component id="btnSelect" min="-2" pref="100" max="-2" attributes="0"/>
                           </Group>
                       </Group>
@@ -111,7 +112,10 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="scrList" pref="246" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="btnSelect" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="btnSelect" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="btnBack" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -140,6 +144,11 @@
             <Component class="javax.swing.JButton" name="btnSelect">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Select"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="btnBack">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Back"/>
               </Properties>
             </Component>
           </SubComponents>

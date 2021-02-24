@@ -49,16 +49,16 @@ public class ServerSheetFrame extends SheetFrame
                     svSheet.setExtras((String) newValue);
                     break;
                 case CUR_STATS:
-                    svSheet.getCurrentStats()[propertyIndex] = (String) newValue;
+                    svSheet.getCurrentStats()[propertyIndex] = (int) newValue;
                     break;
                 case MAX_STATS:
-                    svSheet.getMaxStats()[propertyIndex] = (String) newValue;
+                    svSheet.getMaxStats()[propertyIndex] = (int) newValue;
                     break;
                 case ATTRIBUTES:
-                    svSheet.getAttributes()[propertyIndex] = (String) newValue;
+                    svSheet.getAttributes()[propertyIndex] = (int) newValue;
                     break;
                 case SKILLS:
-                    svSheet.getSkills()[propertyIndex] = (String) newValue;
+                    svSheet.getSkills()[propertyIndex] = (int) newValue;
                     break;
                 case EQUIPMENTS:
                     svSheet.getEquipments().set(propertyIndex, (String[]) newValue);

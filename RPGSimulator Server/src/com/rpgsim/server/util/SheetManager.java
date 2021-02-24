@@ -1,8 +1,10 @@
 package com.rpgsim.server.util;
 
+import com.rpgsim.common.sheets.DiceField;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.rpgsim.common.FileManager;
+import com.rpgsim.common.sheets.ColorField;
 import com.rpgsim.common.sheets.SheetModel;
 import java.io.File;
 import java.io.FileReader;
@@ -56,165 +58,98 @@ public class SheetManager
             "Birthplace"
         };
 
-        String[] attributes = new String[]
+        DiceField[] attributes = new DiceField[]
         {
-            "Strength"
-            , "Dexterity"
-            , "Intelligence"
-            , "Constituition"
-            , "Appeal"
-            , "Power"
-            , "Size"
-            , "Education"
-            , "Luck"
-            , "Move Rate"
-        };
-        
-        String[] attributesDiceNumbers = new String[]
-        {
-            "100"
-            , "100"
-            , "100"
-            , "100"
-            , "100"
-            , "100"
-            , "100"
-            , "100"
-            , "100"
-            , "100"
+            new DiceField("Strength", 100),
+            new DiceField("Dexterity", 100),
+            new DiceField("Power", 100),
+            new DiceField("Constituition", 100),
+            new DiceField("Appeal", 100),
+            new DiceField("Education", 100),
+            new DiceField("Size", 100),
+            new DiceField("Inteligence", 100),
+            new DiceField("Damage Bonus", 100),
+            new DiceField("Build", 100),
+            new DiceField("Build", 100),
+            new DiceField("Move Rate", 100),
+            new DiceField("Maximum Load", 100)
         };
 
-        String[] stats = new String[]
+        ColorField[] stats = new ColorField[]
         {
-            "HP"
-            , "Sanity"
-            , "MP"
+            new ColorField("HP", 0xff0000),
+            new ColorField("Sanity", 0x0000ff),
+            new ColorField("MP", 0x00ffff)
         };
 
-        String[] statsColor = new String[]
+        DiceField[] skills = new DiceField[]
         {
-            "ff0000"
-            , "0000ff"
-            , "00ffff"
-        };
-
-        String[] skills = new String[]
-        {
-                "Accounting"
-                , "Antrhopology"
-                , "Appraise"
-                , "Archaeology"
-                , "Art/Craft"
-                , "Charm"
-                , "Climb"
-                , "Computer Use"
-                , "Disguise"
-                , "Dodge"
-                , "Drive Auto"
-                , "Elec Repair"
-                , "Electronics"
-                , "Fast Talk"
-                , "Fighting"
-                , "Firearms(Handgun)"
-                , "Firearms(Rifle)"
-                , "First Aid"
-                , "History"
-                , "Intimidate"
-                , "Jump"
-                , "Language"
-                , "Law"
-                , "Library Use"
-                , "Listen"
-                , "Locksmith"
-                , "Mech Repair"
-                , "Medicine"
-                , "Natural World"
-                , "Navigate"
-                , "Occult"
-                , "Op. Hv. Machine"
-                , "Persuade"
-                , "Pilot"
-                , "Psychology"
-                , "Psychoanalysis"
-                , "Science"
-                , "Sleight Of Hand"
-                , "Spot Hidden"
-                , "Stealth"
-                , "Survival"
-                , "Swim"
-                , "Throw"
-                , "Track"
-        };
-
-        String[] skillsDiceRolls = new String[]
-        {
-                "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
-                , "100"
+            new DiceField("Accounting", 100),
+            new DiceField("Antrhopology", 100),
+            new DiceField("Appraise", 100),
+            new DiceField("Archaeology", 100),
+            new DiceField("Specialization: Art/Craft", 100),
+            new DiceField("Charm", 100),
+            new DiceField("Climb", 100),
+            new DiceField("Computer Use", 100),
+            new DiceField("Credit Rating", 100),
+            new DiceField("Cthulhu Mythos", 100),
+            new DiceField("Disguise", 100),
+            new DiceField("Dodge", 100),
+            new DiceField("Drive Auto", 100),
+            new DiceField("Elec Repair", 100),
+            new DiceField("Electronics", 100),
+            new DiceField("Fast Talk", 100),
+            new DiceField("Specialization: Fighting", 100),
+            new DiceField("Specialization: Firearms", 100),
+            new DiceField("First Aid", 100),
+            new DiceField("History", 100),
+            new DiceField("Intimidate", 100),
+            new DiceField("Jump", 100),
+            new DiceField("Language (Other)", 100),
+            new DiceField("Language (Own)", 100),
+            new DiceField("Law", 100),
+            new DiceField("Library Use", 100),
+            new DiceField("Listen", 100),
+            new DiceField("Locksmith", 100),
+            new DiceField("Mech Repair", 100),
+            new DiceField("Medicine", 100),
+            new DiceField("Natural World", 100),
+            new DiceField("Navigate", 100),
+            new DiceField("Occult", 100),
+            new DiceField("Op. Hv. Machine", 100),
+            new DiceField("Persuade", 100),
+            new DiceField("Specialization: Pilot", 100),
+            new DiceField("Psychology", 100),
+            new DiceField("Psychoanalysis", 100),
+            new DiceField("Specialization: Science", 100),
+            new DiceField("Sleight Of Hand", 100),
+            new DiceField("Spot Hidden", 100),
+            new DiceField("Stealth", 100),
+            new DiceField("Specialization: Survival", 100),
+            new DiceField("Swim", 100),
+            new DiceField("Throw", 100),
+            new DiceField("Track", 100)
         };
         
         String[] equipmentDescriptions = new String[]
         {
-            "Name      ",
-            "Type ",
+            "Name",
+            "Skill",
             "Damage",
-            "Cur. Ammo",
-            "Max. Ammo",
-            "Attacks",
-            "Range",
-            "Broken",
-            "AoE"
+            "Range", 
+            "Uses per round",
+            "Ammo",
+            "Malfunction"
         };
         
         String[] itemDescriptions = new String[]
         {
             "Name",
-            "Description   ",
             "Weight"
         };
         
-        defaultSheetModel = new SheetModel(info, stats, statsColor, attributes, attributesDiceNumbers, skills, skillsDiceRolls, equipmentDescriptions, itemDescriptions);
+        defaultSheetModel = new SheetModel(info, stats, attributes, skills, equipmentDescriptions, itemDescriptions);
         
         try (FileWriter file = new FileWriter(f))
         {

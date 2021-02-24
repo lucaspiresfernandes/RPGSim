@@ -1,17 +1,17 @@
 package com.rpgsim.common.game;
 
 import com.rpgsim.common.Vector2;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 
-public class Input implements KeyListener, MouseListener, MouseMotionListener, WindowFocusListener
+public class Input implements KeyListener, MouseListener, MouseMotionListener, FocusListener
 {
     private static final ArrayList<Integer> pressedKeys = new ArrayList<>();
     private static final ArrayList<Integer> heldKeys = new ArrayList<>();
@@ -134,10 +134,10 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, W
     }
     
     @Override
-    public void windowGainedFocus(WindowEvent e) {}
+    public void focusGained(FocusEvent e) {}
 
     @Override
-    public void windowLostFocus(WindowEvent e)
+    public void focusLost(FocusEvent e)
     {
         heldButtons.clear();
         heldKeys.clear();

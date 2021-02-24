@@ -22,6 +22,11 @@ public class SheetScrollPane extends JScrollPane
     private static final int SB_SIZE = 5;
     private static final Color THUMB_COLOR = Color.LIGHT_GRAY;
 
+    public SheetScrollPane()
+    {
+        this(null);
+    }
+    
     public SheetScrollPane(Component view) {
         this(view, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED);
     }

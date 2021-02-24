@@ -78,6 +78,11 @@ public class ObjectFrame extends javax.swing.JFrame
             
             dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
         });
+        
+        btnBack.addActionListener(l ->
+        {
+            cards.show(pnlMain, "options");
+        });
     }
     
     public void open()
@@ -103,6 +108,7 @@ public class ObjectFrame extends javax.swing.JFrame
         scrList = new javax.swing.JScrollPane();
         lstFiles = new javax.swing.JList<>();
         btnSelect = new javax.swing.JButton();
+        btnBack = new javax.swing.JButton();
 
         setTitle("Object Creation");
 
@@ -139,6 +145,8 @@ public class ObjectFrame extends javax.swing.JFrame
 
         btnSelect.setText("Select");
 
+        btnBack.setText("Back");
+
         javax.swing.GroupLayout pnlSelectLayout = new javax.swing.GroupLayout(pnlSelect);
         pnlSelect.setLayout(pnlSelectLayout);
         pnlSelectLayout.setHorizontalGroup(
@@ -148,7 +156,8 @@ public class ObjectFrame extends javax.swing.JFrame
                 .addGroup(pnlSelectLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(scrList, javax.swing.GroupLayout.DEFAULT_SIZE, 576, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlSelectLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnBack, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
@@ -158,7 +167,9 @@ public class ObjectFrame extends javax.swing.JFrame
                 .addContainerGap()
                 .addComponent(scrList, javax.swing.GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSelect)
+                .addGroup(pnlSelectLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnSelect)
+                    .addComponent(btnBack))
                 .addContainerGap())
         );
 
@@ -180,6 +191,7 @@ public class ObjectFrame extends javax.swing.JFrame
     }// </editor-fold>//GEN-END:initComponents
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBack;
     private javax.swing.JButton btnBackground;
     private javax.swing.JButton btnObject;
     private javax.swing.JButton btnSelect;

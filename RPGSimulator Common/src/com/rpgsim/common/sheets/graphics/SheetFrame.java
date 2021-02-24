@@ -15,8 +15,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Random;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -25,7 +25,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -39,15 +38,8 @@ public abstract class SheetFrame extends javax.swing.JFrame
     private SheetModel model;
     private PlayerSheet sheet;
     
-    private final Font f = new Font("Comic Sans MS", Font.PLAIN, 16);
-    private final Font f12 = f.deriveFont(12f);
-    private final Font f24 = f.deriveFont(24f);
-    
-    private final SheetScrollPane scrMain;
-    private final JPanel pnlMain;
-    private SheetScrollPane scrSkills, scrEquipments, scrItems;
-    private SheetPanel pnlInfo, pnlStats, pnlAbout, pnlExtras, pnlAttributes, pnlSkills, pnlEquipments, pnlItems;
-    private JPanel pnlEquipmentFields, pnlItemFields;
+    private final Font f = new Font("Times New Roman", Font.PLAIN, 16);
+    private final Font f14 = f.deriveFont(14f);
     
     private JTextField[] txtInfo;
     
@@ -56,8 +48,6 @@ public abstract class SheetFrame extends javax.swing.JFrame
     private JProgressBar[] prgStats;
     private JButton[] btnStatsUp;
     private JButton[] btnStatsDown;
-    
-    private JTextArea txaAbout, txaExtras;
     
     private JTextField[] txtAttributes;
     private JCheckBox[] chkAttributeMarked;
@@ -73,53 +63,12 @@ public abstract class SheetFrame extends javax.swing.JFrame
     
     private boolean localChange = false;
     
-    private int[] equipmentPositions, itemPositions;
-    
-    //Rolling dices.
-    private final Random rand = new Random();
-    private int diceNumber, fieldNumber;
-    private JLabel lblDiceAnimation;
-    private JPanel pnlRoll;
+    private final SecureRandom rand = new SecureRandom();
     
     public SheetFrame()
     {
         initComponents();
-        
-        pnlMain = new JPanel(null, false);
-        scrMain = new SheetScrollPane(pnlMain);
-        scrMain.setBounds(0, 0, getWidth(), getHeight());
-        getContentPane().add(scrMain);
-    }
-    
-    public void load(int connectionID, SheetModel model, PlayerSheet sheet, boolean loadImage)
-    {
-        this.model = model;
-        this.sheet = sheet;
-        this.connectionID = connectionID;
-        this.loadImage = loadImage;
-        
-        txtInfo = new JTextField[sheet.getInfo().length];
-        txtAttributes = new JTextField[sheet.getAttributes().length];
-        chkAttributeMarked = new JCheckBox[sheet.getAttributeMarked().length];
-        txtSkills = new JTextField[sheet.getSkills().length];
-        chkSkillMarked = new JCheckBox[sheet.getSkillMarked().length];
-        prgStats = new JProgressBar[sheet.getCurrentStats().length];
-        btnStatsUp = new JButton[prgStats.length];
-        btnStatsDown = new JButton[prgStats.length];
-        
-        initInfoPanel();
-        initStatsPanel();
-        initAboutPanel();
-        initExtrasPanel();
-        initAttributesPanel();
-        initSkillsPanel();
-        initEquipmentsPanel();
-        initItemsPanel();
-        initRollPanel();
-        
-        pnlMain.setPreferredSize(new Dimension(getWidth(), scrItems.getY() + scrItems.getHeight() + 50));
-        pnlMain.setBackground(Color.BLACK);
-        scrMain.getVerticalScrollBar().setUnitIncrement(40);
+        scrMain.getVerticalScrollBar().setUnitIncrement(30);
     }
     
     public void reload(int connectionID, PlayerSheet sheet)
@@ -132,8 +81,8 @@ public abstract class SheetFrame extends javax.swing.JFrame
         
         for (int i = 0; i < prgStats.length; i++)
         {
-            prgStats[i].setValue(Integer.parseInt(sheet.getCurrentStats()[i]));
-            prgStats[i].setMaximum(Integer.parseInt(sheet.getMaxStats()[i]));
+            prgStats[i].setValue(sheet.getCurrentStats()[i]);
+            prgStats[i].setMaximum(sheet.getMaxStats()[i]);
             prgStats[i].setString(sheet.getCurrentStats()[i] + "/" + sheet.getMaxStats()[i]);
         }
         
@@ -142,12 +91,12 @@ public abstract class SheetFrame extends javax.swing.JFrame
         txaExtras.setText(sheet.getExtras());
         
         for (int i = 0; i < txtAttributes.length; i++)
-            txtAttributes[i].setText(sheet.getAttributes()[i]);
+            txtAttributes[i].setText(Integer.toString(sheet.getAttributes()[i]));
         for (int i = 0; i < chkAttributeMarked.length; i++)
             chkAttributeMarked[i].setSelected(sheet.getAttributeMarked()[i]);
         
         for (int i = 0; i < txtSkills.length; i++)
-            txtSkills[i].setText(sheet.getSkills()[i]);
+            txtSkills[i].setText(Integer.toString(sheet.getSkills()[i]));
         for (int i = 0; i < chkSkillMarked.length; i++)
             chkSkillMarked[i].setSelected(sheet.getSkillMarked()[i]);
         
@@ -159,7 +108,33 @@ public abstract class SheetFrame extends javax.swing.JFrame
         for (int i = 0; i < items.size(); i++)
             removeItem(i);
         for (int i = 0; i < sheet.getItems().size(); i++)
-            createItem(sheet.getItems().get(i));
+            createItemField(sheet.getItems().get(i));
+    }
+    
+    public void load(int connectionID, SheetModel model, PlayerSheet sheet, boolean loadImage)
+    {
+        this.connectionID = connectionID;
+        this.model = model;
+        this.sheet = sheet;
+        this.loadImage = loadImage;
+        
+        txtInfo = new JTextField[sheet.getInfo().length];
+        txtAttributes = new JTextField[sheet.getAttributes().length];
+        chkAttributeMarked = new JCheckBox[sheet.getAttributeMarked().length];
+        txtSkills = new JTextField[sheet.getSkills().length];
+        chkSkillMarked = new JCheckBox[sheet.getSkillMarked().length];
+        prgStats = new JProgressBar[sheet.getCurrentStats().length];
+        btnStatsUp = new JButton[prgStats.length];
+        btnStatsDown = new JButton[prgStats.length];
+        
+        loadInfo();
+        loadStats();
+        loadAbout();
+        loadExtras();
+        loadAttributes();
+        loadSkills();
+        loadEquipments();
+        loadItems();
     }
     
     public void networkUpdate(UpdateField field, Object newValue, int propertyIndex)
@@ -183,29 +158,27 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 txaExtras.setText(aux);
                 break;
             case CUR_STATS:
-                aux = (String) newValue;
-                int intAux = Integer.parseInt(aux);
-                sheet.getCurrentStats()[propertyIndex] = aux;
+                int intAux = (int) newValue;
+                sheet.getCurrentStats()[propertyIndex] = intAux;
                 prgStats[propertyIndex].setValue(intAux);
                 prgStats[propertyIndex].setString(sheet.getCurrentStats()[propertyIndex] + "/" + sheet.getMaxStats()[propertyIndex]);
                 break;
             case MAX_STATS:
-                aux = (String) newValue;
-                intAux = Integer.parseInt(aux);
+                intAux = (int) newValue;
                 
-                sheet.getMaxStats()[propertyIndex] = aux;
+                sheet.getMaxStats()[propertyIndex] = intAux;
                 
                 if (intAux < prgStats[propertyIndex].getValue())
-                    sheet.getCurrentStats()[propertyIndex] = aux;
+                    sheet.getCurrentStats()[propertyIndex] = intAux;
                 
                 prgStats[propertyIndex].setMaximum(intAux);
                 
                 prgStats[propertyIndex].setString(sheet.getCurrentStats()[propertyIndex] + "/" + sheet.getMaxStats()[propertyIndex]);
                 break;
             case ATTRIBUTES:
-                aux = (String) newValue;
-                sheet.getAttributes()[propertyIndex] = aux;
-                txtAttributes[propertyIndex].setText(aux);
+                intAux = (int) newValue;
+                sheet.getAttributes()[propertyIndex] = intAux;
+                txtAttributes[propertyIndex].setText(Integer.toString(intAux));
                 break;
             case MARK_ATTRIBUTES:
                 boolean bAux = (boolean) newValue;
@@ -213,9 +186,9 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 chkAttributeMarked[propertyIndex].setSelected(bAux);
                 break;
             case SKILLS:
-                aux = (String) newValue;
-                sheet.getSkills()[propertyIndex] = aux;
-                txtSkills[propertyIndex].setText(aux);
+                intAux = (int) newValue;
+                sheet.getSkills()[propertyIndex] = intAux;
+                txtSkills[propertyIndex].setText(Integer.toString(intAux));
                 break;
             case MARK_SKILLS:
                 bAux = (boolean) newValue;
@@ -225,13 +198,17 @@ public abstract class SheetFrame extends javax.swing.JFrame
             case EQUIPMENTS:
                 String[] str = (String[]) newValue;
                 sheet.getEquipments().set(propertyIndex, str);
-                equipments.get(propertyIndex).setField(str);
+                JLabel[] lbl = equipments.get(propertyIndex).getProperties();
+                for (int i = 0; i < lbl.length; i++)
+                    lbl[i].setText(str[i]);
                 repaint();
                 break;
             case ITEMS:
                 str = (String[]) newValue;
                 sheet.getItems().set(propertyIndex, str);
-                items.get(propertyIndex).setField(str);
+                lbl = items.get(propertyIndex).getProperties();
+                for (int i = 0; i < lbl.length; i++)
+                    lbl[i].setText(str[i]);
                 repaint();
                 break;
         }
@@ -249,7 +226,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
             case ITEMS:
                 e = (String[]) newValue;
                 sheet.getItems().add(e);
-                createItem(e);
+                createItemField(e);
                 break;
         }
     }
@@ -268,54 +245,28 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 break;
         }
     }
-
-    public PlayerSheet getSheet()
-    {
-        return sheet;
-    }
-
-    public int getConnectionID()
-    {
-        return connectionID;
-    }
     
-    private void initInfoPanel()
+    private void loadInfo()
     {
-        int x = 100;
-        int y = 10;
-        int w = getWidth() / 2 - x;
-        
-        int lines = sheet.getInfo().length;
-        int gap = 40;
-        
-        int txtGap = 10;
-        
-        int h = lines * f.getSize() + lines * txtGap + lines * gap;
-        
-        pnlInfo = new SheetPanel("Character Information", f24, true);
-        pnlInfo.setLayout(null);
-        pnlInfo.setBounds(x, y, w, h);
-        pnlInfo.setBackground(Color.BLACK);
-        
-        x = 15;
-        y = 55;
-        w = pnlInfo.getWidth() - x -  20;
-        
-        JLabel[] lblInfo = new JLabel[model.getInfo().length];
+        int w = pnlInfoContent.getWidth();
+        int infoH = 0;
+        scrInfo.getVerticalScrollBar().setUnitIncrement(40);
         
         for (int i = 0; i < txtInfo.length; i++)
         {
-            lblInfo[i] = new JLabel(model.getInfo()[i]);
-            lblInfo[i].setFont(f);
-            lblInfo[i].setBounds(x, y, getStringWidth(lblInfo[i].getFont(), lblInfo[i].getText()), lblInfo[i].getFont().getSize());
-            lblInfo[i].setForeground(Color.WHITE);
+            JPanel content = new JPanel(null, false);
+            content.setBackground(Color.BLACK);
+            JLabel lblInfoDesc = new JLabel(model.getInfo()[i]);
+            lblInfoDesc.setFont(f);
+            lblInfoDesc.setBounds(0, 0, getStringWidth(lblInfoDesc.getFont(), lblInfoDesc.getText()), lblInfoDesc.getFont().getSize());
+            lblInfoDesc.setForeground(Color.WHITE);
             
             txtInfo[i] = new JTextField(sheet.getInfo()[i]);
-            txtInfo[i].setBounds(x, y, w, h);
+            txtInfo[i].setBounds(0, lblInfoDesc.getHeight() + 5, w, 20);
             txtInfo[i].setBackground(Color.BLACK);
             txtInfo[i].setForeground(Color.WHITE);
             txtInfo[i].setBorder(new MatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
-            txtInfo[i].setBounds(x, y + lblInfo[i].getHeight() + txtGap, pnlInfo.getWidth() - x - 30, 20);
+            
             final int ii = i;
             txtInfo[i].addKeyListener(new KeyAdapter()
             {
@@ -339,64 +290,48 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 }
             });
             
-            pnlInfo.add(lblInfo[i]);
-            pnlInfo.add(txtInfo[i]);
-            
-            y += lblInfo[i].getHeight() + gap;
+            int h = txtInfo[i].getY() + txtInfo[i].getHeight();
+            infoH += h;
+            content.setPreferredSize(new Dimension(w, h));
+            content.add(lblInfoDesc);
+            content.add(txtInfo[i]);
+            pnlInfoContent.add(content);
         }
-        pnlMain.add(pnlInfo);
+        pnlInfo.setPreferredSize(new Dimension(pnlInfo.getPreferredSize().width, infoH + 50));
     }
     
-    private void initStatsPanel()
+    private void loadStats()
     {
-        int x = pnlInfo.getX() + pnlInfo.getWidth()+ 20;
-        int y = 10;
-        int w = getWidth() / 2 - x;
-        int h = pnlInfo.getHeight();
-        
-        pnlStats = new SheetPanel("Stats", f24, true);
-        pnlStats.setLayout(null);
-        pnlStats.setBounds(x, y, w, h);
-        pnlStats.setBackground(Color.BLACK);
-        pnlStats.setBounds(x, y, getWidth() / 2 - 100, h);
-        pnlMain.add(pnlStats);
-        
-        int iconW = 150;
-        int iconH = 150;
-        x = pnlStats.getWidth() / 2 - iconW / 2;
-        y = 50;
-        
         if (loadImage)
         {
+            int iconW = 150;
+            int iconH = 150;
             ImageIcon icon = new ImageIcon(FileManager.app_dir + sheet.getAvatarRelativePath());
             Image aux = icon.getImage().getScaledInstance(iconW, iconH, Image.SCALE_SMOOTH);
             icon.setImage(aux);
             avatarImage = new JLabel(icon);
-            avatarImage.setBounds(x, y, iconW, iconH);
-            pnlStats.add(avatarImage);
+            avatarImage.setPreferredSize(new Dimension(iconW, iconH));
+            pnlStatsContent.add(avatarImage);
         }
-        
-        x = 10;
-        y += iconH + 20;
-        w = pnlStats.getWidth() - x - 10;
-        h = 25;
         
         for (int i = 0; i < prgStats.length; i++)
         {
-            JLabel desc = new JLabel(model.getStats()[i]);
-            desc.setFont(f12);
+            JPanel content = new JPanel(null, false);
+            content.setBackground(Color.BLACK);
+            
+            JLabel desc = new JLabel(model.getStats()[i].getName());
+            desc.setFont(f14);
             int lblH = desc.getFont().getSize();
             desc.setForeground(Color.WHITE);
-            desc.setBounds(x, y - lblH - 5, getStringWidth(desc.getFont(), desc.getText()), lblH);
+            desc.setBounds(0, 0, getStringWidth(desc.getFont(), desc.getText()), lblH);
             
-            prgStats[i] = new JProgressBar(0, Integer.parseInt(sheet.getMaxStats()[i]));
-            prgStats[i].setValue(Integer.parseInt(sheet.getCurrentStats()[i]));
-            prgStats[i].setBounds(x, y, w, h);
+            prgStats[i] = new JProgressBar(0, sheet.getMaxStats()[i]);
+            prgStats[i].setValue(sheet.getCurrentStats()[i]);
+            prgStats[i].setBounds(0, desc.getHeight() + 5, pnlStatsContent.getWidth(), 25);
             prgStats[i].setBackground(Color.BLACK);
-            prgStats[i].setForeground(new Color(Integer.parseInt(model.getStatsColor()[i], 16)));
+            prgStats[i].setForeground(new Color(model.getStats()[i].getColor()));
             prgStats[i].setStringPainted(true);
             prgStats[i].setString(sheet.getCurrentStats()[i] + "/" + sheet.getMaxStats()[i]);
-            
             final int ii = i;
             prgStats[i].addMouseListener(new MouseAdapter()
             {
@@ -419,13 +354,13 @@ public abstract class SheetFrame extends javax.swing.JFrame
                             
                             int curVal = prgStats[ii].getValue();
                             prgStats[ii].setMaximum(maxVal);
-                            sheet.getMaxStats()[ii] = value;
+                            sheet.getMaxStats()[ii] = Integer.parseInt(value);
                             
                             if (maxVal < curVal)
-                                sheet.getCurrentStats()[ii] = Integer.toString(maxVal);
+                                sheet.getCurrentStats()[ii] = maxVal;
                             
                             prgStats[ii].setString(sheet.getCurrentStats()[ii] + "/" + sheet.getMaxStats()[ii]);
-                            sendSheetUpdate(UpdateField.MAX_STATS, value, ii, UpdateType.UPDATE);
+                            sendSheetUpdate(UpdateField.MAX_STATS, maxVal, ii, UpdateType.UPDATE);
                         }
                         catch (NumberFormatException ex)
                         {
@@ -437,7 +372,8 @@ public abstract class SheetFrame extends javax.swing.JFrame
             });
             
             btnStatsUp[i] = new JButton("+");
-            btnStatsUp[i].setBounds(x, y + h + 10, 100, 20);
+            btnStatsUp[i].setBounds(0, 
+                    prgStats[i].getY() + prgStats[i].getHeight() + 10, 100, 20);
             btnStatsUp[i].setBackground(Color.BLACK);
             btnStatsUp[i].setForeground(Color.WHITE);
             btnStatsUp[i].addActionListener(l -> 
@@ -448,18 +384,17 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 if (++val > maxVal)
                     return;
                 
-                String strVal = Integer.toString(val);
-                
                 prgStats[ii].setValue(val);
-                sheet.getCurrentStats()[ii] = strVal;
-                prgStats[ii].setString(strVal + "/" + sheet.getMaxStats()[ii]);
-                sendSheetUpdate(UpdateField.CUR_STATS, strVal, ii, UpdateType.UPDATE);
+                sheet.getCurrentStats()[ii] = val;
+                prgStats[ii].setString(val + "/" + sheet.getMaxStats()[ii]);
+                sendSheetUpdate(UpdateField.CUR_STATS, val, ii, UpdateType.UPDATE);
             });
             
             btnStatsDown[i] = new JButton("-");
             btnStatsDown[i].setBackground(Color.BLACK);
             btnStatsDown[i].setForeground(Color.WHITE);
-            btnStatsDown[i].setBounds(x + w - 100, y + h + 10, 100, 20);
+            btnStatsDown[i].setBounds(prgStats[i].getX() + prgStats[i].getWidth()- 100, 
+                    prgStats[i].getY() + prgStats[i].getHeight() + 10, 100, 20);
             btnStatsDown[i].addActionListener(l -> 
             {
                 int val = prgStats[ii].getValue();
@@ -467,54 +402,26 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 if (--val < 0)
                     return;
                 
-                String strVal = Integer.toString(val);
-                
                 prgStats[ii].setValue(val);
-                sheet.getCurrentStats()[ii] = strVal;
-                prgStats[ii].setString(strVal + "/" + sheet.getMaxStats()[ii]);
-                sendSheetUpdate(UpdateField.CUR_STATS, strVal, ii, UpdateType.UPDATE);
+                sheet.getCurrentStats()[ii] = val;
+                prgStats[ii].setString(val + "/" + sheet.getMaxStats()[ii]);
+                sendSheetUpdate(UpdateField.CUR_STATS, val, ii, UpdateType.UPDATE);
             });
             
-            y += h + 60;
+            content.add(desc);
+            content.add(prgStats[i]);
+            content.add(btnStatsUp[i]);
+            content.add(btnStatsDown[i]);
             
-            pnlStats.add(desc);
-            pnlStats.add(prgStats[i]);
-            pnlStats.add(btnStatsUp[i]);
-            pnlStats.add(btnStatsDown[i]);
+            pnlStatsContent.add(content);
         }
+        
         
     }
     
-    private void initAboutPanel()
+    private void loadAbout()
     {
-        int x = pnlInfo.getX();
-        int y = pnlInfo.getY() + pnlInfo.getHeight() + 20;
-        int w = pnlInfo.getWidth();
-        int txtH = 250;
-        int h = txtH + 60;
-        
-        pnlAbout = new SheetPanel("About", f24, true);
-        pnlAbout.setLayout(null);
-        pnlAbout.setBounds(x, y, w, h);
-        pnlAbout.setBackground(Color.BLACK);
-        pnlMain.add(pnlAbout);
-        
-        txaAbout = new JTextArea(sheet.getAbout())
-        {
-            @Override
-            protected void paintComponent(Graphics g)
-            {
-                super.paintComponent(g);
-                if (this.getText().isEmpty())
-                {
-                    g.setColor(Color.GRAY);
-                    g.setFont(f);
-                    g.drawString("Write about your character's likes, dislikes, dreams, etc.", 
-                        getInsets().left, g.getFontMetrics().getMaxAscent() + getInsets().top);
-                }
-            }
-        };
-        
+        //TODO: String serialization too large problem.
         txaAbout.addKeyListener(new KeyAdapter()
         {
             @Override
@@ -539,45 +446,10 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 sendSheetUpdate(UpdateField.ABOUT, txaAbout.getText(), 0, UpdateType.UPDATE);
             }
         });
-        
-        txaAbout.setBackground(Color.DARK_GRAY);
-        txaAbout.setForeground(Color.WHITE);
-        txaAbout.setFont(f);
-        txaAbout.setBounds(10, 50, pnlAbout.getWidth() - 20, txtH);
-        txaAbout.setLineWrap(true);
-        pnlAbout.add(txaAbout);
     }
     
-    private void initExtrasPanel()
+    private void loadExtras()
     {
-        int x = pnlStats.getX();
-        int y = pnlStats.getY() + pnlStats.getHeight() + 20;
-        int w = pnlStats.getWidth();
-        int txtH = 250;
-        int h = txtH + 60;
-        
-        pnlExtras = new SheetPanel("Extras", f24, true);
-        pnlExtras.setLayout(null);
-        pnlExtras.setBounds(x, y, w, h);
-        pnlExtras.setBackground(Color.BLACK);
-        pnlMain.add(pnlExtras);
-        
-        txaExtras = new JTextArea(sheet.getExtras())
-        {
-            @Override
-            protected void paintComponent(Graphics g)
-            {
-                super.paintComponent(g);
-                if (this.getText().isEmpty())
-                {
-                    g.setColor(Color.GRAY);
-                    g.setFont(f);
-                    g.drawString("You can write anything you want here. (Notes, extra informations...)", 
-                        getInsets().left, g.getFontMetrics().getMaxAscent() + getInsets().top);
-                }
-            }
-        };
-        
         txaExtras.addKeyListener(new KeyAdapter()
         {
             @Override
@@ -602,50 +474,39 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 sendSheetUpdate(UpdateField.EXTRAS, txaExtras.getText(), 0, UpdateType.UPDATE);
             }
         });
-        
-        txaExtras.setBackground(Color.DARK_GRAY);
-        txaExtras.setForeground(Color.WHITE);
-        txaExtras.setFont(f);
-        txaExtras.setBounds(10, 50, pnlExtras.getWidth() - 20, txtH);
-        txaExtras.setLineWrap(true);
-        pnlExtras.add(txaExtras);
     }
     
-    private void initAttributesPanel()
+    private void loadAttributes()
     {
-        int x = pnlAbout.getX();
-        int y = pnlAbout.getY() + pnlAbout.getHeight() + 50;
-        int w = pnlExtras.getX() + pnlExtras.getWidth() - x;
+        scrAttributes.getVerticalScrollBar().setUnitIncrement(30);
         
-        int pnlW = 125;
+        FlowLayout layout = (FlowLayout) pnlAttributesContent.getLayout();
+        
+        int pnlW = 175;
         int pnlH = 75;
-        int hGap = 25;
-        int vGap = 50;
-        int numRow = (int) Math.ceil(model.getAttributes().length / (w / (pnlW + hGap)));
+        int hGap = layout.getHgap();
+        int vGap = layout.getVgap();
+        int numRow = (int) Math.ceil(model.getAttributes().length / (pnlAttributesContent.getWidth() / (pnlW + hGap)));
         
-        int h = numRow * pnlH + numRow * vGap + 20;
+        int height = numRow * pnlH + numRow * vGap + 20;
         
-        pnlAttributes = new SheetPanel("Attributes", f24, false);
-        pnlAttributes.setLayout(new FlowLayout(FlowLayout.CENTER, hGap, vGap));
-        pnlAttributes.setBounds(x, y, w, h);
-        pnlAttributes.setBackground(Color.BLACK);
-        pnlMain.add(pnlAttributes);
+        pnlAttributesContent.setSize(pnlAttributesContent.getWidth(), height);
+        pnlAttributes.setPreferredSize(new Dimension(pnlAttributes.getPreferredSize().width, pnlAttributes.getPreferredSize().height + height));
         
-        JLabel[] lblAttributes = new JLabel[model.getAttributes().length];
-        for (int i = 0; i < lblAttributes.length; i++)
+        for (int i = 0; i < model.getAttributes().length; i++)
         {
-            lblAttributes[i] = new JLabel(model.getAttributes()[i]);
-            txtAttributes[i] = new JTextField(sheet.getAttributes()[i] + "");
+            JLabel lblAttributeDesc = new JLabel(model.getAttributes()[i].getName());
+            txtAttributes[i] = new JTextField(Integer.toString(sheet.getAttributes()[i]));
             
-            JPanel miniAttr = new JPanel(null, false);
-            miniAttr.setLayout(new BoxLayout(miniAttr, BoxLayout.PAGE_AXIS));
-            miniAttr.setPreferredSize(new Dimension(pnlW, pnlH));
-            miniAttr.setBackground(Color.BLACK);
+            JPanel content = new JPanel(null, false);
+            content.setLayout(new BoxLayout(content, BoxLayout.PAGE_AXIS));
+            content.setPreferredSize(new Dimension(pnlW, pnlH));
+            content.setBackground(Color.BLACK);
+            final int ii = i;
             
             chkAttributeMarked[i] = new JCheckBox("", sheet.getAttributeMarked()[i]);
             chkAttributeMarked[i].setAlignmentX(CENTER_ALIGNMENT);
             chkAttributeMarked[i].setBackground(Color.BLACK);
-            final int ii = i;
             chkAttributeMarked[i].addActionListener(l ->
             {
                 boolean val = chkAttributeMarked[ii].isSelected();
@@ -653,19 +514,22 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 sendSheetUpdate(UpdateField.MARK_ATTRIBUTES, val, ii, UpdateType.UPDATE);
             });
             
-            lblAttributes[i].setFont(f12);
-            lblAttributes[i].setBounds(0, 0, getStringWidth(lblAttributes[i].getFont(), lblAttributes[i].getText()), lblAttributes[i].getFont().getSize());
-            lblAttributes[i].setForeground(Color.WHITE);
-            lblAttributes[i].setAlignmentX(CENTER_ALIGNMENT);
-            lblAttributes[i].addMouseListener(new MouseAdapter()
+            lblAttributeDesc.setFont(f14);
+            lblAttributeDesc.setBounds(0, 0, getStringWidth(lblAttributeDesc.getFont(), lblAttributeDesc.getText()), lblAttributeDesc.getFont().getSize());
+            lblAttributeDesc.setForeground(Color.WHITE);
+            lblAttributeDesc.setAlignmentX(CENTER_ALIGNMENT);
+            lblAttributeDesc.addMouseListener(new MouseAdapter()
             {
                 @Override
                 public void mouseClicked(MouseEvent e)
                 {
                     try
                     {
+                        int dice = rand.nextInt(model.getAttributes()[ii].getDiceNum() + 1);
+                        
                         int val = Integer.parseInt(txtAttributes[ii].getText());
-                        showRollPopup(rand.nextInt(Integer.parseInt(model.getAttributesDiceNumbers()[ii]) + 1), val);
+                        
+                        System.out.println(dice + " - " + val);
                     }
                     catch (NumberFormatException ex)
                     {
@@ -683,9 +547,12 @@ public abstract class SheetFrame extends javax.swing.JFrame
             txtAttributes[i].addKeyListener(new KeyAdapter()
             {
                 @Override
-                public void keyPressed(KeyEvent e)
+                public void keyTyped(KeyEvent e)
                 {
-                    localChange = true;
+                    if (!Character.isDigit(e.getKeyChar()))
+                        e.consume();
+                    else
+                        localChange = true;
                 }
             });
             txtAttributes[i].getDocument().addDocumentListener(new SheetDocumentListener()
@@ -693,65 +560,57 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 @Override
                 public void update()
                 {
-                    if (!localChange)
+                    if (!localChange || txtAttributes[ii].getText().isEmpty())
                         return;
                     
-                    sheet.getAttributes()[ii] = txtAttributes[ii].getText();
+                    int attr = Integer.parseInt(txtAttributes[ii].getText());
                     
-                    sendSheetUpdate(UpdateField.ATTRIBUTES, txtAttributes[ii].getText(), ii, UpdateType.UPDATE);
+                    sheet.getAttributes()[ii] = attr;
+                    
+                    sendSheetUpdate(UpdateField.ATTRIBUTES, attr, ii, UpdateType.UPDATE);
                 }
             });
             
-            miniAttr.add(chkAttributeMarked[i]);
-            miniAttr.add(lblAttributes[i]);
-            miniAttr.add(txtAttributes[i]);
+            content.add(chkAttributeMarked[i]);
+            content.add(lblAttributeDesc);
+            content.add(txtAttributes[i]);
             
-            pnlAttributes.add(miniAttr);
+            pnlAttributesContent.add(content);
         }
+        
     }
     
-    private void initSkillsPanel()
+    private void loadSkills()
     {
-        int x = pnlAttributes.getX();
-        int y = pnlAttributes.getY() + pnlAttributes.getHeight() + 50;
-        int w = pnlAttributes.getWidth();
+        scrSkills.getVerticalScrollBar().setUnitIncrement(30);
         
-        int sklW = 125;
-        int sklH = 75;
-        int hGap = 50;
-        int vGap = 75;
-        int numRow = (int) Math.ceil(model.getSkills().length / (w / (sklW + hGap)));
+        FlowLayout layout = (FlowLayout) pnlSkillsContent.getLayout();
         
-        int h = numRow * sklH + numRow * vGap + 20;
+        int pnlW = 175;
+        int pnlH = 75;
+        int hGap = layout.getHgap();
+        int vGap = layout.getVgap();
+        int numRow = (int) Math.ceil(model.getSkills().length / (pnlSkillsContent.getWidth() / (pnlW + hGap)));
         
-        pnlSkills = new SheetPanel("Skills", f24, false);
-        pnlSkills.setBackground(Color.BLACK);
-        pnlSkills.setLayout(new FlowLayout(FlowLayout.CENTER, hGap, vGap));
-        pnlSkills.setPreferredSize(new Dimension(w, h));
+        int height = numRow * pnlH + numRow * vGap + 20;
         
-        scrSkills = new SheetScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrSkills.getVerticalScrollBar().setBackground(Color.BLACK);
-        scrSkills.setBounds(x, y, w, 450);
-        scrSkills.setViewportView(pnlSkills);
-        scrSkills.getVerticalScrollBar().setUnitIncrement(40);
+        pnlSkillsContent.setSize(pnlSkillsContent.getWidth(), height);
+        pnlSkills.setPreferredSize(new Dimension(pnlSkills.getPreferredSize().width, pnlSkills.getPreferredSize().height + height));
         
-        pnlMain.add(scrSkills);
-        
-        JLabel[] lblSkills = new JLabel[model.getSkills().length];
-        for (int i = 0; i < lblSkills.length; i++)
+        for (int i = 0; i < model.getSkills().length; i++)
         {
-            lblSkills[i] = new JLabel(model.getSkills()[i]);
-            txtSkills[i] = new JTextField(sheet.getSkills()[i] + "");
+            JLabel lblSkillDesc = new JLabel(model.getSkills()[i].getName());
+            txtSkills[i] = new JTextField(Integer.toString(sheet.getSkills()[i]));
             
-            JPanel miniSkl = new JPanel(null, false);
-            miniSkl.setLayout(new BoxLayout(miniSkl, BoxLayout.PAGE_AXIS));
-            miniSkl.setPreferredSize(new Dimension(sklW, sklH));
-            miniSkl.setBackground(Color.BLACK);
+            JPanel content = new JPanel(null, false);
+            content.setLayout(new BoxLayout(content, BoxLayout.PAGE_AXIS));
+            content.setPreferredSize(new Dimension(pnlW, pnlH));
+            content.setBackground(Color.BLACK);
+            final int ii = i;
             
             chkSkillMarked[i] = new JCheckBox("", sheet.getSkillMarked()[i]);
             chkSkillMarked[i].setAlignmentX(CENTER_ALIGNMENT);
             chkSkillMarked[i].setBackground(Color.BLACK);
-            final int ii = i;
             chkSkillMarked[i].addActionListener(l ->
             {
                 boolean val = chkSkillMarked[ii].isSelected();
@@ -759,19 +618,22 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 sendSheetUpdate(UpdateField.MARK_SKILLS, val, ii, UpdateType.UPDATE);
             });
             
-            lblSkills[i].setFont(f12);
-            lblSkills[i].setBounds(0, 0, getStringWidth(lblSkills[i].getFont(), lblSkills[i].getText()), lblSkills[i].getFont().getSize());
-            lblSkills[i].setForeground(Color.WHITE);
-            lblSkills[i].setAlignmentX(CENTER_ALIGNMENT);
-            lblSkills[i].addMouseListener(new MouseAdapter()
+            lblSkillDesc.setFont(f14);
+            lblSkillDesc.setBounds(0, 0, getStringWidth(lblSkillDesc.getFont(), lblSkillDesc.getText()), lblSkillDesc.getFont().getSize());
+            lblSkillDesc.setForeground(Color.WHITE);
+            lblSkillDesc.setAlignmentX(CENTER_ALIGNMENT);
+            lblSkillDesc.addMouseListener(new MouseAdapter()
             {
                 @Override
                 public void mouseClicked(MouseEvent e)
                 {
                     try
                     {
+                        int dice = rand.nextInt(model.getSkills()[ii].getDiceNum() + 1);
+                        
                         int val = Integer.parseInt(txtSkills[ii].getText());
-                        showRollPopup(rand.nextInt(Integer.parseInt(model.getSkillsDiceNumbers()[ii]) + 1), val);
+                        
+                        System.out.println(dice + " - " + val);
                     }
                     catch (NumberFormatException ex)
                     {
@@ -789,9 +651,12 @@ public abstract class SheetFrame extends javax.swing.JFrame
             txtSkills[i].addKeyListener(new KeyAdapter()
             {
                 @Override
-                public void keyPressed(KeyEvent e)
+                public void keyTyped(KeyEvent e)
                 {
-                    localChange = true;
+                    if (!Character.isDigit(e.getKeyChar()))
+                        e.consume();
+                    else
+                        localChange = true;
                 }
             });
             txtSkills[i].getDocument().addDocumentListener(new SheetDocumentListener()
@@ -799,75 +664,41 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 @Override
                 public void update()
                 {
-                    if (!localChange)
+                    if (!localChange || txtSkills[ii].getText().isEmpty())
                         return;
                     
-                    sheet.getSkills()[ii] = txtSkills[ii].getText();
+                    int attr = Integer.parseInt(txtSkills[ii].getText());
                     
-                    sendSheetUpdate(UpdateField.SKILLS, txtSkills[ii].getText(),ii, UpdateType.UPDATE);
+                    sheet.getSkills()[ii] = attr;
+                    
+                    sendSheetUpdate(UpdateField.SKILLS, attr, ii, UpdateType.UPDATE);
                 }
             });
             
-            miniSkl.add(chkSkillMarked[i]);
-            miniSkl.add(lblSkills[i]);
-            miniSkl.add(txtSkills[i]);
+            content.add(chkSkillMarked[i]);
+            content.add(lblSkillDesc);
+            content.add(txtSkills[i]);
             
-            pnlSkills.add(miniSkl);
+            pnlSkillsContent.add(content);
         }
     }
     
-    private void initEquipmentsPanel()
+    private void loadEquipments()
     {
-        int x = scrSkills.getX();
-        int y = scrSkills.getY() + scrSkills.getHeight() + 50;
-        int w = scrSkills.getWidth();
-        int h = 200;
+        scrEquipments.getVerticalScrollBar().setUnitIncrement(30);
         
-        pnlEquipments = new SheetPanel("Equipments", f24, false);
-        pnlEquipments.setBackground(Color.BLACK);
-        pnlEquipments.setLayout(null);
-        
-        scrEquipments = new SheetScrollPane(pnlEquipments, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrEquipments.getVerticalScrollBar().setUnitIncrement(40);
-        scrEquipments.getHorizontalScrollBar().setUnitIncrement(40);
-        scrEquipments.setBounds(x, y, w, h);
-        pnlMain.add(scrEquipments);
-        
-        JPanel pnlDescriptions = new JPanel(null, false);
-        pnlDescriptions.setBounds(0, 50, scrEquipments.getWidth(), f.getSize());
-        pnlDescriptions.setBackground(Color.BLACK);
-        pnlEquipments.add(pnlDescriptions);
-        
-        x = pnlDescriptions.getX();
-        y = pnlDescriptions.getY() + pnlDescriptions.getHeight() + 10;
-        w = pnlDescriptions.getWidth();
-        h = f12.getSize() * sheet.getEquipments().size() + 10;
-        
-        pnlEquipmentFields = new JPanel(null, false);
-        pnlEquipmentFields.setLayout(new BoxLayout(pnlEquipmentFields, BoxLayout.PAGE_AXIS));
-        pnlEquipmentFields.setBounds(x, y, w, h);
-        pnlEquipmentFields.setBackground(Color.BLACK);
-        pnlEquipments.add(pnlEquipmentFields);
-        
-        pnlEquipments.setPreferredSize(new Dimension(scrSkills.getWidth(), pnlEquipmentFields.getY() + pnlEquipmentFields.getHeight() + 20));
-        
-        JLabel[] desc = new JLabel[model.getEquipmentDescriptions().length];
-        equipmentPositions = new int[desc.length];
-        x = 60;
-        for (int i = 0; i < desc.length; i++)
+        for (int i = 0; i < model.getEquipmentDescriptions().length; i++)
         {
-            desc[i] = new JLabel(model.getEquipmentDescriptions()[i]);
-            desc[i].setForeground(Color.WHITE);
-            desc[i].setFont(f);
-            desc[i].setBounds(x, 0, getStringWidth(desc[i].getFont(), desc[i].getText()), desc[i].getFont().getSize());
-            equipmentPositions[i] = x;
-            pnlDescriptions.add(desc[i]);
-            x += desc[i].getWidth() + 50;
+            JLabel desc = new JLabel(model.getEquipmentDescriptions()[i]);
+            desc.setForeground(Color.WHITE);
+            desc.setFont(f);
+            desc.setPreferredSize(new Dimension(getStringWidth(desc.getFont(), desc.getText()), desc.getFont().getSize()));
+            pnlEquipmentsDescription.add(desc);
         }
         
         btnAddEquipment.setBackground(Color.BLACK);
         btnAddEquipment.setForeground(Color.WHITE);
-        btnAddEquipment.setBounds(1020, 10, 50, 25);
+        btnAddEquipment.setPreferredSize(new Dimension(50, 25));
         btnAddEquipment.addActionListener(l ->
         {
             String[] obj = new String[model.getEquipmentDescriptions().length];
@@ -878,300 +709,702 @@ public abstract class SheetFrame extends javax.swing.JFrame
             sheet.getEquipments().add(obj);
             sendSheetUpdate(UpdateField.EQUIPMENTS, obj, equipments.indexOf(e), UpdateType.ADD);
         });
-        pnlEquipments.add(btnAddEquipment);
+        pnlEquipmentsDescription.add(btnAddEquipment);
         
         for (int i = 0; i < sheet.getEquipments().size(); i++)
             createEquipmentField(sheet.getEquipments().get(i));
     }
     
-    private void initItemsPanel()
+    private void loadItems()
     {
-        int x = scrEquipments.getX();
-        int y = scrEquipments.getY() + scrEquipments.getHeight() + 50;
-        int w = scrEquipments.getWidth();
-        int h = 200;
+        scrItems.getVerticalScrollBar().setUnitIncrement(30);
         
-        pnlItems = new SheetPanel("Items", f24, false);
-        pnlItems.setBackground(Color.BLACK);
-        pnlItems.setLayout(null);
-        
-        scrItems = new SheetScrollPane(pnlItems, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrItems.getVerticalScrollBar().setUnitIncrement(40);
-        scrItems.setBounds(x, y, w, h);
-        pnlMain.add(scrItems);
-        
-        JPanel pnlDescriptions = new JPanel(null, false);
-        pnlDescriptions.setBounds(0, 50, scrItems.getWidth(), f.getSize());
-        pnlDescriptions.setBackground(Color.BLACK);
-        pnlItems.add(pnlDescriptions);
-        
-        x = pnlDescriptions.getX();
-        y = pnlDescriptions.getY() + pnlDescriptions.getHeight() + 10;
-        w = pnlDescriptions.getWidth();
-        h = f12.getSize() * sheet.getItems().size() + 10;
-        
-        pnlItemFields = new JPanel(null, false);
-        pnlItemFields.setLayout(new BoxLayout(pnlItemFields, BoxLayout.PAGE_AXIS));
-        pnlItemFields.setBounds(x, y, w, h);
-        pnlItemFields.setBackground(Color.BLACK);
-        
-        pnlItems.add(pnlItemFields);
-        pnlItems.setPreferredSize(new Dimension(scrEquipments.getWidth(), pnlItemFields.getY() + pnlItemFields.getHeight() + 20));
-        
-        pnlItemFields.setPreferredSize(new Dimension(scrItems.getWidth(), pnlItemFields.getY() + pnlItemFields.getHeight() + 20));
-        
-        JLabel[] desc = new JLabel[model.getItemDescriptions().length];
-        itemPositions = new int[desc.length];
-        x = 60;
-        for (int i = 0; i < desc.length; i++)
+        for (int i = 0; i < model.getItemDescriptions().length; i++)
         {
-            desc[i] = new JLabel(model.getItemDescriptions()[i]);
-            desc[i].setForeground(Color.WHITE);
-            desc[i].setFont(f);
-            desc[i].setBounds(x, 0, getStringWidth(desc[i].getFont(), desc[i].getText()), desc[i].getFont().getSize());
-            itemPositions[i] = x;
-            pnlDescriptions.add(desc[i]);
-            x += desc[i].getWidth() + 50;
+            JLabel desc = new JLabel(model.getItemDescriptions()[i]);
+            desc.setForeground(Color.WHITE);
+            desc.setFont(f);
+            desc.setPreferredSize(new Dimension(getStringWidth(desc.getFont(), desc.getText()), desc.getFont().getSize()));
+            pnlItemsDescription.add(desc);
         }
         
         btnAddItem.setBackground(Color.BLACK);
         btnAddItem.setForeground(Color.WHITE);
-        btnAddItem.setBounds(1020, 10, 50, 25);
+        btnAddItem.setPreferredSize(new Dimension(50, 25));
         btnAddItem.addActionListener(l ->
         {
             String[] obj = new String[model.getItemDescriptions().length];
             for (int i = 0; i < obj.length; i++)
                 obj[i] = "none";
             obj[0] = "Item " + (items.size() + 1);
-            createItem(obj);
+            JField e = createItemField(obj);
             sheet.getItems().add(obj);
-            sendSheetUpdate(UpdateField.ITEMS, obj, 0, UpdateType.ADD);
+            sendSheetUpdate(UpdateField.ITEMS, obj, items.indexOf(e), UpdateType.ADD);
         });
-        pnlItems.add(btnAddItem);
+        pnlItemsDescription.add(btnAddItem);
         
         for (int i = 0; i < sheet.getItems().size(); i++)
-            createItem(sheet.getItems().get(i));
+            createItemField(sheet.getItems().get(i));
     }
     
-    private JField createEquipmentField(String[] equip)
-    {
-        JField e = new JField(equip);
-        e.setPositions(equipmentPositions);
-        e.setFont(f12);
-        e.setForeground(Color.WHITE);
-        e.addMouseListener(new MouseAdapter()
-        {
-            @Override
-            public void mousePressed(MouseEvent ev)
-            {
-                if (ev.getClickCount() < 2)
-                    return;
-                int selected = -1;
-                for (int i = 0; i < equipmentPositions.length; i++)
-                {
-                    int x = ev.getX();
-                    if (i < equipmentPositions.length - 1)
-                    {
-                        if (x > equipmentPositions[i] && x < equipmentPositions[i + 1])
-                        {
-                            selected = i;
-                        }
-                    }
-                    else if (x > equipmentPositions[i])
-                    {
-                        selected = i;
-                    }
-                }
-                
-                if (selected < 0)
-                    return;
-                
-                String a = JOptionPane.showInputDialog("Please type in new value.", e.getField()[selected]);
-                
-                if (a == null)
-                    return;
-                
-                e.getField()[selected] = a;
-                
-                int index = equipments.indexOf(e);
-                
-                sheet.getEquipments().set(index, e.getField());
-                
-                sendSheetUpdate(UpdateField.EQUIPMENTS, e.getField(), index, UpdateType.UPDATE);
-                
-                repaint();
-            }
-        });
-        
-        equipments.add(e);
-        pnlEquipmentFields.add(e);
-        int h = (f12.getSize() + 10) * equipments.size();
-        e.getRemoveButton().addActionListener(l ->
-        {
-            sendSheetUpdate(UpdateField.EQUIPMENTS, null, equipments.indexOf(e), UpdateType.REMOVE);
-            sheet.getEquipments().remove(e.getField());
-            removeEquipmentField(equipments.indexOf(e));
-        });
-        
-        pnlEquipmentFields.setBounds(pnlEquipmentFields.getX(), 
-                pnlEquipmentFields.getY(), 
-                pnlEquipmentFields.getWidth(), h);
-        pnlEquipments.setPreferredSize(new Dimension(pnlEquipments.getPreferredSize().width, pnlEquipmentFields.getY() + pnlEquipmentFields.getHeight() + 20));
-        scrEquipments.revalidate();
-        pnlEquipments.revalidate();
-        return e;
-    }
-    
-    private void removeEquipmentField(int index)
-    {
-        equipments.remove(index);
-        pnlEquipmentFields.remove(index);
-        
-        int hh = (f12.getSize() + 10) * equipments.size();
-        pnlEquipmentFields.setBounds(pnlEquipmentFields.getX(), 
-            pnlEquipmentFields.getY(), 
-            pnlEquipmentFields.getWidth(), hh);
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
 
-        pnlEquipments.setPreferredSize(new Dimension(pnlEquipments.getPreferredSize().width, pnlEquipmentFields.getY() + pnlEquipmentFields.getHeight() + 20));
-
-        scrEquipments.revalidate();
-        pnlEquipments.revalidate();
-    }
-    
-    private JField createItem(String[] item)
-    {
-        JField it = new JField(item);
-        it.setPositions(itemPositions);
-        it.setFont(f12);
-        it.setForeground(Color.WHITE);
-        
-        it.addMouseListener(new MouseAdapter()
-        {
-            @Override
-            public void mousePressed(MouseEvent ev)
-            {
-                if (ev.getClickCount() < 2)
-                    return;
-                int selected = -1;
-                for (int i = 0; i < itemPositions.length; i++)
-                {
-                    int x = ev.getX();
-                    if (i < itemPositions.length - 1)
-                    {
-                        if (x > itemPositions[i] && x < itemPositions[i + 1])
-                        {
-                            selected = i;
-                        }
-                    }
-                    else if (x > itemPositions[i])
-                    {
-                        selected = i;
-                    }
-                }
-                
-                if (selected < 0)
-                    return;
-                
-                String a = JOptionPane.showInputDialog("Please type in new value.", it.getField()[selected]);
-                
-                if (a == null)
-                    return;
-                
-                it.getField()[selected] = a;
-                
-                int index = items.indexOf(it);
-                
-                sheet.getItems().set(index, it.getField());
-                
-                sendSheetUpdate(UpdateField.ITEMS, it.getField(), index, UpdateType.UPDATE);
-                
-                repaint();
-            }
-        });
-        
-        items.add(it);
-        pnlItemFields.add(it);
-        int h = (f12.getSize() + 10) * items.size();
-        it.getRemoveButton().addActionListener(l ->
-        {
-            int index = items.indexOf(it);
-            sendSheetUpdate(UpdateField.ITEMS, null, index, UpdateType.REMOVE);
-            sheet.getItems().remove(index);
-            removeItem(index);
-        });
-        
-        pnlItemFields.setBounds(pnlItemFields.getX(), 
-                pnlItemFields.getY(), 
-                pnlItemFields.getWidth(), h);
-        pnlItems.setPreferredSize(new Dimension(pnlItems.getPreferredSize().width, pnlItemFields.getY() + pnlItemFields.getHeight() + 20));
-        scrItems.revalidate();
-        pnlItems.revalidate();
-        return it;
-    }
-    
-    private void removeItem(int index)
-    {
-        items.remove(index);
-        pnlItemFields.remove(index);
-        
-        int hh = (f12.getSize() + 10) * items.size();
-        pnlItemFields.setBounds(pnlItemFields.getX(), 
-            pnlItemFields.getY(), 
-            pnlItemFields.getWidth(), hh);
-
-        pnlItems.setPreferredSize(new Dimension(pnlItems.getPreferredSize().width, pnlItemFields.getY() + pnlItemFields.getHeight() + 20));
-
-        scrItems.revalidate();
-        pnlItems.revalidate();
-    }
-    
-    private void initRollPanel()
-    {
-        lblDiceAnimation = new JLabel(new ImageIcon(FileManager.app_dir + "data files\\objects\\dice_roll.gif"));
-        lblDiceAnimation.setAlignmentX(CENTER_ALIGNMENT);
-        lblDiceAnimation.setAlignmentY(CENTER_ALIGNMENT);
-        pnlRoll = new JPanel()
+        scrMain = new SheetScrollPane();
+        ;
+        pnlMain = new javax.swing.JPanel();
+        scrInfo = new SheetScrollPane();
+        pnlInfo = new javax.swing.JPanel();
+        lblInfo = new javax.swing.JLabel();
+        pnlInfoContent = new javax.swing.JPanel();
+        scrStats = new SheetScrollPane();
+        ;
+        pnlStats = new javax.swing.JPanel();
+        lblStats = new javax.swing.JLabel();
+        pnlStatsContent = new javax.swing.JPanel();
+        pnlAbout = new javax.swing.JPanel();
+        scrAbout = new javax.swing.JScrollPane();
+        txaAbout = new JTextArea()
         {
             @Override
             protected void paintComponent(Graphics g)
             {
                 super.paintComponent(g);
-                String desc;
-                
-                if (diceNumber <= fieldNumber * 0.2f)
+                if (this.getText().isEmpty())
                 {
-                    desc = "Extreme";
-                    g.setColor(new Color(0xFFD700).darker());
+                    g.setColor(Color.GRAY);
+                    g.setFont(f);
+                    g.drawString("Write about your character's likes, dislikes, dreams, etc.", 
+                        getInsets().left, g.getFontMetrics().getMaxAscent() + getInsets().top);
                 }
-                else if (diceNumber <= fieldNumber * 0.5f)
-                {
-                    desc = "Good";
-                    g.setColor(Color.GREEN.darker());
-                }
-                else if (diceNumber <= fieldNumber)
-                {
-                    desc = "Success";
-                    g.setColor(Color.BLACK);
-                }
-                else
-                {
-                    desc = "Fail";
-                    g.setColor(Color.RED.darker());
-                }
-                
-                g.setFont(f);
-                g.drawString(Integer.toString(diceNumber) + " - " + desc, 
-                        40, 
-                        20);
             }
         };
-        pnlRoll.add(lblDiceAnimation);
+        lblAbout = new javax.swing.JLabel();
+        pnlExtras = new javax.swing.JPanel();
+        scrExtras = new javax.swing.JScrollPane();
+        txaExtras = new JTextArea()
+        {
+            @Override
+            protected void paintComponent(Graphics g)
+            {
+                super.paintComponent(g);
+                if (this.getText().isEmpty())
+                {
+                    g.setColor(Color.GRAY);
+                    g.setFont(f);
+                    g.drawString("You can write anything you want here. (Notes, extra informations...)",
+                        getInsets().left, g.getFontMetrics().getMaxAscent() + getInsets().top);
+                }
+            }
+        };
+        lblExtras = new javax.swing.JLabel();
+        scrAttributes = new SheetScrollPane();
+        ;
+        pnlAttributes = new javax.swing.JPanel();
+        lblAttributes = new javax.swing.JLabel();
+        pnlAttributesContent = new javax.swing.JPanel();
+        scrSkills = new SheetScrollPane();
+        ;
+        pnlSkills = new javax.swing.JPanel();
+        lblSkills = new javax.swing.JLabel();
+        pnlSkillsContent = new javax.swing.JPanel();
+        scrEquipments = new SheetScrollPane();
+        ;
+        pnlEquipments = new javax.swing.JPanel();
+        lblEquipments = new javax.swing.JLabel();
+        pnlEquipmentsDescription = new javax.swing.JPanel();
+        pnlEquipmentsContent = new javax.swing.JPanel();
+        scrItems = new SheetScrollPane();
+        ;
+        pnlItems = new javax.swing.JPanel();
+        lblItems = new javax.swing.JLabel();
+        pnlItemsDescription = new javax.swing.JPanel();
+        pnlItemsContent = new javax.swing.JPanel();
+
+        setTitle("Character Sheet");
+
+        pnlMain.setBackground(new java.awt.Color(0, 0, 0));
+        pnlMain.setPreferredSize(new java.awt.Dimension(1260, 2256));
+
+        pnlInfo.setBackground(new java.awt.Color(0, 0, 0));
+        pnlInfo.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(102, 102, 102)));
+        pnlInfo.setPreferredSize(new java.awt.Dimension(550, 523));
+
+        lblInfo.setFont(new java.awt.Font("Times New Roman", 0, 24)); // NOI18N
+        lblInfo.setForeground(new java.awt.Color(255, 255, 255));
+        lblInfo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblInfo.setText("Character Informations");
+
+        pnlInfoContent.setBackground(new java.awt.Color(0, 0, 0));
+        pnlInfoContent.setLayout(new javax.swing.BoxLayout(pnlInfoContent, javax.swing.BoxLayout.Y_AXIS));
+
+        javax.swing.GroupLayout pnlInfoLayout = new javax.swing.GroupLayout(pnlInfo);
+        pnlInfo.setLayout(pnlInfoLayout);
+        pnlInfoLayout.setHorizontalGroup(
+            pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlInfoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlInfoLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(lblInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 526, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(pnlInfoContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        pnlInfoLayout.setVerticalGroup(
+            pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlInfoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblInfo)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlInfoContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        scrInfo.setViewportView(pnlInfo);
+
+        pnlStats.setBackground(new java.awt.Color(0, 0, 0));
+        pnlStats.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(102, 102, 102)));
+        pnlStats.setPreferredSize(new java.awt.Dimension(490, 510));
+
+        lblStats.setFont(new java.awt.Font("Times New Roman", 0, 24)); // NOI18N
+        lblStats.setForeground(new java.awt.Color(255, 255, 255));
+        lblStats.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblStats.setText("Stats");
+
+        pnlStatsContent.setBackground(new java.awt.Color(0, 0, 0));
+        pnlStatsContent.setLayout(new javax.swing.BoxLayout(pnlStatsContent, javax.swing.BoxLayout.Y_AXIS));
+
+        javax.swing.GroupLayout pnlStatsLayout = new javax.swing.GroupLayout(pnlStats);
+        pnlStats.setLayout(pnlStatsLayout);
+        pnlStatsLayout.setHorizontalGroup(
+            pnlStatsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlStatsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlStatsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pnlStatsContent, javax.swing.GroupLayout.DEFAULT_SIZE, 472, Short.MAX_VALUE)
+                    .addComponent(lblStats, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        pnlStatsLayout.setVerticalGroup(
+            pnlStatsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlStatsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblStats)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlStatsContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        scrStats.setViewportView(pnlStats);
+
+        pnlAbout.setBackground(new java.awt.Color(0, 0, 0));
+        pnlAbout.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(102, 102, 102)));
+
+        txaAbout.setBackground(new java.awt.Color(102, 102, 102));
+        txaAbout.setColumns(20);
+        txaAbout.setForeground(new java.awt.Color(255, 255, 255));
+        txaAbout.setLineWrap(true);
+        txaAbout.setRows(5);
+        scrAbout.setViewportView(txaAbout);
+
+        lblAbout.setFont(new java.awt.Font("Times New Roman", 0, 24)); // NOI18N
+        lblAbout.setForeground(new java.awt.Color(255, 255, 255));
+        lblAbout.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblAbout.setText("About");
+
+        javax.swing.GroupLayout pnlAboutLayout = new javax.swing.GroupLayout(pnlAbout);
+        pnlAbout.setLayout(pnlAboutLayout);
+        pnlAboutLayout.setHorizontalGroup(
+            pnlAboutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlAboutLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlAboutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(scrAbout)
+                    .addComponent(lblAbout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        pnlAboutLayout.setVerticalGroup(
+            pnlAboutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlAboutLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblAbout)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(scrAbout, javax.swing.GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        pnlExtras.setBackground(new java.awt.Color(0, 0, 0));
+        pnlExtras.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(102, 102, 102)));
+
+        txaExtras.setBackground(new java.awt.Color(102, 102, 102));
+        txaExtras.setColumns(20);
+        txaExtras.setForeground(new java.awt.Color(255, 255, 255));
+        txaExtras.setLineWrap(true);
+        txaExtras.setRows(5);
+        scrExtras.setViewportView(txaExtras);
+
+        lblExtras.setFont(new java.awt.Font("Times New Roman", 0, 24)); // NOI18N
+        lblExtras.setForeground(new java.awt.Color(255, 255, 255));
+        lblExtras.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblExtras.setText("Extras");
+
+        javax.swing.GroupLayout pnlExtrasLayout = new javax.swing.GroupLayout(pnlExtras);
+        pnlExtras.setLayout(pnlExtrasLayout);
+        pnlExtrasLayout.setHorizontalGroup(
+            pnlExtrasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlExtrasLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlExtrasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(scrExtras, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(lblExtras, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        pnlExtrasLayout.setVerticalGroup(
+            pnlExtrasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlExtrasLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblExtras)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(scrExtras, javax.swing.GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        scrAttributes.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(102, 102, 102)));
+
+        pnlAttributes.setBackground(new java.awt.Color(0, 0, 0));
+        pnlAttributes.setPreferredSize(new java.awt.Dimension(1050, 247));
+
+        lblAttributes.setFont(new java.awt.Font("Times New Roman", 0, 24)); // NOI18N
+        lblAttributes.setForeground(new java.awt.Color(255, 255, 255));
+        lblAttributes.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblAttributes.setText("Attributes");
+
+        pnlAttributesContent.setBackground(new java.awt.Color(0, 0, 0));
+        pnlAttributesContent.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 25, 50));
+
+        javax.swing.GroupLayout pnlAttributesLayout = new javax.swing.GroupLayout(pnlAttributes);
+        pnlAttributes.setLayout(pnlAttributesLayout);
+        pnlAttributesLayout.setHorizontalGroup(
+            pnlAttributesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlAttributesLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlAttributesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(pnlAttributesContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblAttributes, javax.swing.GroupLayout.DEFAULT_SIZE, 1034, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        pnlAttributesLayout.setVerticalGroup(
+            pnlAttributesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlAttributesLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblAttributes)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlAttributesContent, javax.swing.GroupLayout.DEFAULT_SIZE, 202, Short.MAX_VALUE))
+        );
+
+        scrAttributes.setViewportView(pnlAttributes);
+
+        scrSkills.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(102, 102, 102)));
+
+        pnlSkills.setBackground(new java.awt.Color(0, 0, 0));
+        pnlSkills.setPreferredSize(new java.awt.Dimension(1050, 200));
+
+        lblSkills.setFont(new java.awt.Font("Times New Roman", 0, 24)); // NOI18N
+        lblSkills.setForeground(new java.awt.Color(255, 255, 255));
+        lblSkills.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblSkills.setText("Skills");
+
+        pnlSkillsContent.setBackground(new java.awt.Color(0, 0, 0));
+        pnlSkillsContent.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 25, 50));
+
+        javax.swing.GroupLayout pnlSkillsLayout = new javax.swing.GroupLayout(pnlSkills);
+        pnlSkills.setLayout(pnlSkillsLayout);
+        pnlSkillsLayout.setHorizontalGroup(
+            pnlSkillsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlSkillsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlSkillsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblSkills, javax.swing.GroupLayout.DEFAULT_SIZE, 1034, Short.MAX_VALUE)
+                    .addGroup(pnlSkillsLayout.createSequentialGroup()
+                        .addComponent(pnlSkillsContent, javax.swing.GroupLayout.PREFERRED_SIZE, 1022, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        pnlSkillsLayout.setVerticalGroup(
+            pnlSkillsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlSkillsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblSkills)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlSkillsContent, javax.swing.GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE))
+        );
+
+        scrSkills.setViewportView(pnlSkills);
+
+        pnlEquipments.setBackground(new java.awt.Color(0, 0, 0));
+        pnlEquipments.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(102, 102, 102)));
+        pnlEquipments.setPreferredSize(new java.awt.Dimension(1000, 240));
+        pnlEquipments.setRequestFocusEnabled(false);
+
+        lblEquipments.setFont(new java.awt.Font("Times New Roman", 0, 24)); // NOI18N
+        lblEquipments.setForeground(new java.awt.Color(255, 255, 255));
+        lblEquipments.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblEquipments.setText("Equipments");
+
+        pnlEquipmentsDescription.setBackground(new java.awt.Color(0, 0, 0));
+        pnlEquipmentsDescription.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEADING, 60, 0));
+
+        pnlEquipmentsContent.setBackground(new java.awt.Color(0, 0, 0));
+        pnlEquipmentsContent.setLayout(new javax.swing.BoxLayout(pnlEquipmentsContent, javax.swing.BoxLayout.Y_AXIS));
+
+        javax.swing.GroupLayout pnlEquipmentsLayout = new javax.swing.GroupLayout(pnlEquipments);
+        pnlEquipments.setLayout(pnlEquipmentsLayout);
+        pnlEquipmentsLayout.setHorizontalGroup(
+            pnlEquipmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlEquipmentsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlEquipmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pnlEquipmentsContent, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblEquipments, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 1031, Short.MAX_VALUE)
+                    .addComponent(pnlEquipmentsDescription, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        pnlEquipmentsLayout.setVerticalGroup(
+            pnlEquipmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlEquipmentsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblEquipments)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlEquipmentsDescription, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlEquipmentsContent, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE))
+        );
+
+        scrEquipments.setViewportView(pnlEquipments);
+
+        pnlItems.setBackground(new java.awt.Color(0, 0, 0));
+        pnlItems.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(102, 102, 102)));
+        pnlItems.setPreferredSize(new java.awt.Dimension(1000, 240));
+
+        lblItems.setFont(new java.awt.Font("Times New Roman", 0, 24)); // NOI18N
+        lblItems.setForeground(new java.awt.Color(255, 255, 255));
+        lblItems.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblItems.setText("Items");
+
+        pnlItemsDescription.setBackground(new java.awt.Color(0, 0, 0));
+        pnlItemsDescription.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEADING, 100, 0));
+
+        pnlItemsContent.setBackground(new java.awt.Color(0, 0, 0));
+        pnlItemsContent.setLayout(new javax.swing.BoxLayout(pnlItemsContent, javax.swing.BoxLayout.Y_AXIS));
+
+        javax.swing.GroupLayout pnlItemsLayout = new javax.swing.GroupLayout(pnlItems);
+        pnlItems.setLayout(pnlItemsLayout);
+        pnlItemsLayout.setHorizontalGroup(
+            pnlItemsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlItemsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlItemsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pnlItemsContent, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblItems, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 1031, Short.MAX_VALUE)
+                    .addComponent(pnlItemsDescription, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        pnlItemsLayout.setVerticalGroup(
+            pnlItemsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlItemsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblItems)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlItemsDescription, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlItemsContent, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE))
+        );
+
+        scrItems.setViewportView(pnlItems);
+
+        javax.swing.GroupLayout pnlMainLayout = new javax.swing.GroupLayout(pnlMain);
+        pnlMain.setLayout(pnlMainLayout);
+        pnlMainLayout.setHorizontalGroup(
+            pnlMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlMainLayout.createSequentialGroup()
+                .addGap(100, 100, 100)
+                .addGroup(pnlMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(scrAttributes, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 1060, Short.MAX_VALUE)
+                    .addComponent(scrItems, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(scrEquipments, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlMainLayout.createSequentialGroup()
+                        .addGroup(pnlMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(pnlAbout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(scrInfo))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pnlMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(pnlExtras, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(scrStats)))
+                    .addComponent(scrSkills, javax.swing.GroupLayout.Alignment.LEADING))
+                .addGap(100, 100, 100))
+        );
+        pnlMainLayout.setVerticalGroup(
+            pnlMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlMainLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(scrStats, javax.swing.GroupLayout.DEFAULT_SIZE, 595, Short.MAX_VALUE)
+                    .addComponent(scrInfo))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pnlAbout, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pnlExtras, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(scrAttributes, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(scrSkills, javax.swing.GroupLayout.PREFERRED_SIZE, 507, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(scrEquipments, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(scrItems, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
+        scrMain.setViewportView(pnlMain);
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(scrMain, javax.swing.GroupLayout.DEFAULT_SIZE, 1280, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(scrMain, javax.swing.GroupLayout.DEFAULT_SIZE, 720, Short.MAX_VALUE)
+        );
+
+        pack();
+        setLocationRelativeTo(null);
+    }// </editor-fold>//GEN-END:initComponents
+    
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel lblAbout;
+    private javax.swing.JLabel lblAttributes;
+    private javax.swing.JLabel lblEquipments;
+    private javax.swing.JLabel lblExtras;
+    private javax.swing.JLabel lblInfo;
+    private javax.swing.JLabel lblItems;
+    private javax.swing.JLabel lblSkills;
+    private javax.swing.JLabel lblStats;
+    private javax.swing.JPanel pnlAbout;
+    private javax.swing.JPanel pnlAttributes;
+    private javax.swing.JPanel pnlAttributesContent;
+    private javax.swing.JPanel pnlEquipments;
+    private javax.swing.JPanel pnlEquipmentsContent;
+    private javax.swing.JPanel pnlEquipmentsDescription;
+    private javax.swing.JPanel pnlExtras;
+    private javax.swing.JPanel pnlInfo;
+    private javax.swing.JPanel pnlInfoContent;
+    private javax.swing.JPanel pnlItems;
+    private javax.swing.JPanel pnlItemsContent;
+    private javax.swing.JPanel pnlItemsDescription;
+    private javax.swing.JPanel pnlMain;
+    private javax.swing.JPanel pnlSkills;
+    private javax.swing.JPanel pnlSkillsContent;
+    private javax.swing.JPanel pnlStats;
+    private javax.swing.JPanel pnlStatsContent;
+    private javax.swing.JScrollPane scrAbout;
+    private javax.swing.JScrollPane scrAttributes;
+    private javax.swing.JScrollPane scrEquipments;
+    private javax.swing.JScrollPane scrExtras;
+    private javax.swing.JScrollPane scrInfo;
+    private javax.swing.JScrollPane scrItems;
+    private javax.swing.JScrollPane scrMain;
+    private javax.swing.JScrollPane scrSkills;
+    private javax.swing.JScrollPane scrStats;
+    private javax.swing.JTextArea txaAbout;
+    private javax.swing.JTextArea txaExtras;
+    // End of variables declaration//GEN-END:variables
+    
+    
+    private JField createEquipmentField(String[] equip)
+    {
+        FlowLayout layout = new FlowLayout(FlowLayout.LEADING, ((FlowLayout)pnlEquipmentsDescription.getLayout()).getHgap(), 0);
+        JField field = new JField(layout, false);
+        field.setBackground(Color.BLACK);
+        
+        JLabel[] labels = new JLabel[equip.length];
+        for (int i = 0; i < equip.length; i++)
+        {
+            String str = equip[i];
+            JLabel lbl = new JLabel(str);
+            lbl.setForeground(Color.WHITE);
+            labels[i] = lbl;
+            
+            final int ii = i;
+            lbl.addMouseListener(new MouseAdapter()
+            {
+                @Override
+                public void mouseClicked(MouseEvent e)
+                {
+                    if (e.getClickCount() < 2)
+                        return;
+                    
+                    String newVal = JOptionPane.showInputDialog("Please type in new value.", lbl.getText());
+                
+                    if (newVal == null)
+                        return;
+
+                    lbl.setText(newVal);
+
+                    int equipIndex = equipments.indexOf(field);
+                    
+                    sheet.getEquipments().get(equipIndex)[ii] = newVal;
+
+                    sendSheetUpdate(UpdateField.EQUIPMENTS, sheet.getEquipments().get(equipIndex), equipIndex, UpdateType.UPDATE);
+
+                    repaint();
+                }
+            });
+            
+            field.add(lbl);
+        }
+        field.setProperties(labels);
+        
+        JButton remove = new JButton("-");
+        remove.setBackground(Color.BLACK);
+        remove.setForeground(Color.WHITE);
+        remove.setPreferredSize(new Dimension(50, 15));
+        remove.addActionListener(l ->
+        {
+            int index = equipments.indexOf(field);
+            sendSheetUpdate(UpdateField.EQUIPMENTS, null, index, UpdateType.REMOVE);
+            sheet.getEquipments().remove(equip);
+            removeEquipmentField(index);
+        });
+        field.add(remove);
+        
+        equipments.add(field);
+        
+        pnlEquipmentsContent.add(field);
+        int h = (f14.getSize() + 10) * equipments.size();
+        
+        pnlEquipmentsContent.setBounds(pnlEquipmentsContent.getX(), 
+                pnlEquipmentsContent.getY(), 
+                pnlEquipmentsContent.getWidth(), h);
+        pnlEquipments.setPreferredSize(new Dimension(pnlEquipments.getPreferredSize().width, pnlEquipmentsContent.getY() + pnlEquipmentsContent.getHeight() + 20));
+        scrEquipments.revalidate();
+        pnlEquipments.revalidate();
+        
+        return field;
+    }
+    
+    private void removeEquipmentField(int index)
+    {
+        equipments.remove(index);
+        pnlEquipmentsContent.remove(index);
+        
+        int hh = (f14.getSize() + 10) * equipments.size();
+        pnlEquipmentsContent.setBounds(pnlEquipmentsContent.getX(), 
+            pnlEquipmentsContent.getY(), 
+            pnlEquipmentsContent.getWidth(), hh);
+
+        pnlEquipments.setPreferredSize(new Dimension(pnlEquipments.getPreferredSize().width, pnlEquipmentsContent.getY() + pnlEquipmentsContent.getHeight() + 20));
+
+        scrEquipments.revalidate();
+        pnlEquipments.revalidate();
+    }
+    
+    private JField createItemField(String[] item)
+    {
+        FlowLayout layout = new FlowLayout(FlowLayout.LEADING, ((FlowLayout)pnlItemsDescription.getLayout()).getHgap(), 0);
+        JField field = new JField(layout, false);
+        field.setBackground(Color.BLACK);
+        
+        JLabel[] labels = new JLabel[item.length];
+        for (int i = 0; i < item.length; i++)
+        {
+            String str = item[i];
+            JLabel lbl = new JLabel(str);
+            lbl.setForeground(Color.WHITE);
+            labels[i] = lbl;
+            
+            final int ii = i;
+            lbl.addMouseListener(new MouseAdapter()
+            {
+                @Override
+                public void mouseClicked(MouseEvent e)
+                {
+                    if (e.getClickCount() < 2)
+                        return;
+                    
+                    String newVal = JOptionPane.showInputDialog("Please type in new value.", lbl.getText());
+                
+                    if (newVal == null)
+                        return;
+
+                    lbl.setText(newVal);
+
+                    int itemIndex = items.indexOf(field);
+                    
+                    sheet.getItems().get(itemIndex)[ii] = newVal;
+
+                    sendSheetUpdate(UpdateField.ITEMS, sheet.getItems().get(itemIndex), itemIndex, UpdateType.UPDATE);
+
+                    repaint();
+                }
+            });
+            
+            field.add(lbl);
+        }
+        field.setProperties(labels);
+        
+        JButton remove = new JButton("-");
+        remove.setBackground(Color.BLACK);
+        remove.setForeground(Color.WHITE);
+        remove.setPreferredSize(new Dimension(50, 15));
+        remove.addActionListener(l ->
+        {
+            int index = items.indexOf(field);
+            sendSheetUpdate(UpdateField.ITEMS, null, index, UpdateType.REMOVE);
+            sheet.getEquipments().remove(item);
+            removeItem(index);
+        });
+        field.add(remove);
+        
+        items.add(field);
+        
+        pnlItemsContent.add(field);
+        int h = (f14.getSize() + 10) * items.size();
+        
+        pnlItemsContent.setBounds(pnlItemsContent.getX(), 
+                pnlItemsContent.getY(), 
+                pnlItemsContent.getWidth(), h);
+        pnlItems.setPreferredSize(new Dimension(pnlItems.getPreferredSize().width, pnlItemsContent.getY() + pnlItemsContent.getHeight() + 20));
+        scrItems.revalidate();
+        pnlItems.revalidate();
+        
+        return field;
+    }
+    
+    private void removeItem(int index)
+    {
+        items.remove(index);
+        pnlItemsContent.remove(index);
+        
+        int hh = (f14.getSize() + 10) * items.size();
+        pnlItemsContent.setBounds(pnlItemsContent.getX(), 
+            pnlItemsContent.getY(), 
+            pnlItemsContent.getWidth(), hh);
+
+        pnlItems.setPreferredSize(new Dimension(pnlItems.getPreferredSize().width, pnlItemsContent.getY() + pnlItemsContent.getHeight() + 20));
+
+        scrItems.revalidate();
+        pnlItems.revalidate();
     }
     
     private int getStringWidth(Font font, String text)
     {
         return getFontMetrics(font).stringWidth(text);
     }
+    
+    public abstract void sendSheetUpdate(UpdateField field, Object newValue, int propertyIndex, UpdateType type);
+    
     
     private abstract class SheetDocumentListener implements DocumentListener
     {
@@ -1196,45 +1429,14 @@ public abstract class SheetFrame extends javax.swing.JFrame
         public abstract void update();
     }
     
-    public abstract void sendSheetUpdate(UpdateField field, Object newValue, int propertyIndex, UpdateType type);
-    
-    public void showRollPopup(int diceNumber, int fieldNumber)
+    public PlayerSheet getSheet()
     {
-        this.diceNumber = diceNumber;
-        this.fieldNumber = fieldNumber;
-        JOptionPane.showMessageDialog(this, pnlRoll, "Dice Result", JOptionPane.PLAIN_MESSAGE, new ImageIcon(FileManager.app_dir + "data files\\objects\\diceicon.png"));
+        return sheet;
     }
-    
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
-     */
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
 
-        setTitle("RPG Simulator Sheet");
-        setResizable(false);
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1280, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 720, Short.MAX_VALUE)
-        );
-
-        pack();
-        setLocationRelativeTo(null);
-    }// </editor-fold>//GEN-END:initComponents
-
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    // End of variables declaration//GEN-END:variables
-
+    public int getConnectionID()
+    {
+        return connectionID;
+    }
     
 }

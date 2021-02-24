@@ -60,7 +60,7 @@ public class AccountManager
                     {
                         for (int i = oldLength; i < sheet.getCurrentStats().length; i++)
                         {
-                            sheet.getCurrentStats()[i] = "0";
+                            sheet.getCurrentStats()[i] = 0;
                         }
                     }
                     
@@ -75,7 +75,7 @@ public class AccountManager
                     {
                         for (int i = oldLength; i < sheet.getAttributes().length; i++)
                         {
-                            sheet.getAttributes()[i] = "0";
+                            sheet.getAttributes()[i] = 0;
                         }
                     }
                     
@@ -90,7 +90,7 @@ public class AccountManager
                     {
                         for (int i = oldLength; i < sheet.getSkills().length; i++)
                         {
-                            sheet.getSkills()[i] = "0";
+                            sheet.getSkills()[i] = 0;
                         }
                     }
                     

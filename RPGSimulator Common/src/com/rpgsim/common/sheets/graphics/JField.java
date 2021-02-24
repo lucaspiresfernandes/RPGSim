@@ -1,70 +1,37 @@
 package com.rpgsim.common.sheets.graphics;
 
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import javax.swing.JButton;
-import javax.swing.JComponent;
+import java.awt.LayoutManager;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
-public class JField extends JComponent
+public class JField extends JPanel
 {
-    private int[] positions;
-    private String[] field;
-    private final JButton btnRemove;
+    private JLabel[] properties;
 
-    public JField(String[] equipment)
+    public JField(LayoutManager layout, boolean isDoubleBuffered)
     {
-        this.field = equipment;
-        this.btnRemove = new JButton("-");
-        this.btnRemove.setBackground(Color.BLACK);
-        this.btnRemove.setForeground(Color.WHITE);
-        this.btnRemove.setBounds(5, 1, 50, 15);
-        this.btnRemove.setVerticalAlignment(JButton.CENTER);
-        this.add(btnRemove);
-        
+        super(layout, isDoubleBuffered);
     }
 
-    public int[] getPositions()
+    public JField(LayoutManager layout)
     {
-        return positions;
+        super(layout);
     }
 
-    public void setPositions(int[] positions)
+    public JField(boolean isDoubleBuffered)
     {
-        this.positions = positions;
-    }
-    
-    public JButton getRemoveButton()
-    {
-        return btnRemove;
+        super(isDoubleBuffered);
     }
 
-    public String[] getField()
+    public JLabel[] getProperties()
     {
-        return field;
+        return properties;
     }
 
-    public void setField(String[] field)
+    public void setProperties(JLabel[] properties)
     {
-        this.field = field;
-    }
-
-    @Override
-    public void paintComponent(Graphics g)
-    {
-        super.paintComponent(g);
-        RenderingHints h = new RenderingHints(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-        ((Graphics2D)g).setRenderingHints(h);
-        
-        g.setFont(getFont());
-        g.setColor(getForeground());
-        
-        for (int i = 0; i < field.length; i++)
-        {
-            g.drawString(field[i], positions[i], g.getFont().getSize());
-        }
+        this.properties = properties;
     }
     
 }

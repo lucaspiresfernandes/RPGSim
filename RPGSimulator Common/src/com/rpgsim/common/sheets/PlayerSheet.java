@@ -9,11 +9,11 @@ public class PlayerSheet implements Serializable
     private String about;
     private String extras;
     private String avatarRelativePath;
-    private String[] currentStats;
-    private String[] maxStats;
-    private String[] attributes;
+    private int[] currentStats;
+    private int[] maxStats;
+    private int[] attributes;
     private boolean[] attributeMarked;
-    private String[] skills;
+    private int[] skills;
     private boolean[] skillMarked;
     private ArrayList<String[]> equipments;
     private ArrayList<String[]> items;
@@ -31,24 +31,24 @@ public class PlayerSheet implements Serializable
         
         avatarRelativePath = "data files\\objects\\character.png";
         
-        currentStats = new String[sheet.getStats().length];
+        currentStats = new int[sheet.getStats().length];
         for (int i = 0; i < currentStats.length; i++)
-            currentStats[i] = "0";
+            currentStats[i] = 0;
         
-        maxStats = new String[sheet.getStats().length];
+        maxStats = new int[sheet.getStats().length];
         for (int i = 0; i < maxStats.length; i++)
-            maxStats[i] = "0";
+            maxStats[i] = 0;
         
-        attributes = new String[sheet.getAttributes().length];
+        attributes = new int[sheet.getAttributes().length];
         for (int i = 0; i < attributes.length; i++)
-            attributes[i] = "0";
+            attributes[i] = 0;
         attributeMarked = new boolean[attributes.length];
         for (int i = 0; i < attributeMarked.length; i++)
             attributeMarked[i] = false;
         
-        skills = new String[sheet.getSkills().length];
+        skills = new int[sheet.getSkills().length];
         for (int i = 0; i < skills.length; i++)
-            skills[i] = "0";
+            skills[i] = 0;
         skillMarked = new boolean[skills.length];
         for (int i = 0; i < skillMarked.length; i++)
             skillMarked[i] = false;
@@ -87,7 +87,7 @@ public class PlayerSheet implements Serializable
         this.extras = extras;
     }
 
-    public String[] getCurrentStats()
+    public int[] getCurrentStats()
     {
         return currentStats;
     }
@@ -102,27 +102,27 @@ public class PlayerSheet implements Serializable
         this.avatarRelativePath = avatarRelativePath;
     }
     
-    public void setCurrentStats(String[] currentStats)
+    public void setCurrentStats(int[] currentStats)
     {
         this.currentStats = currentStats;
     }
 
-    public String[] getMaxStats()
+    public int[] getMaxStats()
     {
         return maxStats;
     }
 
-    public void setMaxStats(String[] maxStats)
+    public void setMaxStats(int[] maxStats)
     {
         this.maxStats = maxStats;
     }
 
-    public String[] getAttributes()
+    public int[] getAttributes()
     {
         return attributes;
     }
 
-    public void setAttributes(String[] attributes)
+    public void setAttributes(int[] attributes)
     {
         this.attributes = attributes;
     }
@@ -137,12 +137,12 @@ public class PlayerSheet implements Serializable
         this.attributeMarked = attributeMarked;
     }
 
-    public String[] getSkills()
+    public int[] getSkills()
     {
         return skills;
     }
 
-    public void setSkills(String[] skills)
+    public void setSkills(int[] skills)
     {
         this.skills = skills;
     }

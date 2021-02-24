@@ -27,7 +27,6 @@ public class GameFrame extends JFrame
         super.getContentPane().setCursor(blankCursor);
         
         this.game = new ClientGame(manager, super.getWidth(), super.getHeight());
-        super.addWindowFocusListener(this.game.getInput());
         super.getContentPane().add(game);
     }
     
