@@ -68,7 +68,7 @@ public class ClientManager extends Listener implements ClientActions
         
         this.clientConfig = clientConfig;
         
-        client = new Client();
+        client = new Client(16384, 16384);
         client.getKryo().setRegistrationRequired(false);
     }
 

@@ -6,15 +6,13 @@ import java.util.ArrayList;
 public class PlayerSheet implements Serializable
 {
     private String[] info;
-    private String about;
-    private String extras;
     private String avatarRelativePath;
     private int[] currentStats;
     private int[] maxStats;
     private int[] attributes;
-    private boolean[] attributeMarked;
+    private boolean[] attributesMarked;
     private int[] skills;
-    private boolean[] skillMarked;
+    private boolean[] skillsMarked;
     private ArrayList<String[]> equipments;
     private ArrayList<String[]> items;
 
@@ -25,9 +23,6 @@ public class PlayerSheet implements Serializable
         info = new String[sheet.getInfo().length];
         for (int i = 0; i < info.length; i++)
             info[i] = "none";
-        
-        about = "";
-        extras = "";
         
         avatarRelativePath = "data files\\objects\\character.png";
         
@@ -42,16 +37,18 @@ public class PlayerSheet implements Serializable
         attributes = new int[sheet.getAttributes().length];
         for (int i = 0; i < attributes.length; i++)
             attributes[i] = 0;
-        attributeMarked = new boolean[attributes.length];
-        for (int i = 0; i < attributeMarked.length; i++)
-            attributeMarked[i] = false;
+        
+        attributesMarked = new boolean[sheet.getAttributes().length];
+        for (int i = 0; i < attributesMarked.length; i++)
+            attributesMarked[i] = false;
         
         skills = new int[sheet.getSkills().length];
         for (int i = 0; i < skills.length; i++)
-            skills[i] = 0;
-        skillMarked = new boolean[skills.length];
-        for (int i = 0; i < skillMarked.length; i++)
-            skillMarked[i] = false;
+            skills[i] =0;
+        
+        skillsMarked = new boolean[sheet.getSkills().length];
+        for (int i = 0; i < skillsMarked.length; i++)
+            skillsMarked[i] = false;
         
         equipments = new ArrayList<>();
         items = new ArrayList<>();
@@ -65,26 +62,6 @@ public class PlayerSheet implements Serializable
     public void setInfo(String[] info)
     {
         this.info = info;
-    }
-
-    public String getAbout()
-    {
-        return about;
-    }
-
-    public void setAbout(String about)
-    {
-        this.about = about;
-    }
-
-    public String getExtras()
-    {
-        return extras;
-    }
-
-    public void setExtras(String extras)
-    {
-        this.extras = extras;
     }
 
     public int[] getCurrentStats()
@@ -127,14 +104,14 @@ public class PlayerSheet implements Serializable
         this.attributes = attributes;
     }
 
-    public boolean[] getAttributeMarked()
+    public boolean[] getAttributesMarked()
     {
-        return attributeMarked;
+        return attributesMarked;
     }
 
-    public void setAttributeMarked(boolean[] attributeMarked)
+    public void setAttributesMarked(boolean[] attributesMarked)
     {
-        this.attributeMarked = attributeMarked;
+        this.attributesMarked = attributesMarked;
     }
 
     public int[] getSkills()
@@ -147,14 +124,14 @@ public class PlayerSheet implements Serializable
         this.skills = skills;
     }
 
-    public boolean[] getSkillMarked()
+    public boolean[] getSkillsMarked()
     {
-        return skillMarked;
+        return skillsMarked;
     }
 
-    public void setSkillMarked(boolean[] skillMarked)
+    public void setSkillsMarked(boolean[] skillsMarked)
     {
-        this.skillMarked = skillMarked;
+        this.skillsMarked = skillsMarked;
     }
     
     public ArrayList<String[]> getEquipments()

@@ -3,6 +3,7 @@ package com.rpgsim.server.util;
 import com.rpgsim.common.sheets.Account;
 import com.rpgsim.common.FileManager;
 import com.rpgsim.common.sheets.PlayerSheet;
+import com.rpgsim.common.sheets.SheetDiceField;
 import com.rpgsim.common.sheets.SheetModel;
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,46 +55,22 @@ public class AccountManager
                 
                 if (model.getStats().length != sheet.getCurrentStats().length)
                 {
-                    int oldLength = sheet.getCurrentStats().length;
                     sheet.setCurrentStats(Arrays.copyOf(sheet.getCurrentStats(), model.getStats().length));
-                    if (oldLength < sheet.getCurrentStats().length)
-                    {
-                        for (int i = oldLength; i < sheet.getCurrentStats().length; i++)
-                        {
-                            sheet.getCurrentStats()[i] = 0;
-                        }
-                    }
-                    
+                    sheet.setMaxStats(Arrays.copyOf(sheet.getMaxStats(), model.getStats().length));
                     changed = true;
                 }
                 
                 if (model.getAttributes().length != sheet.getAttributes().length)
                 {
-                    int oldLength = sheet.getAttributes().length;
                     sheet.setAttributes(Arrays.copyOf(sheet.getAttributes(), model.getAttributes().length));
-                    if (oldLength < sheet.getAttributes().length)
-                    {
-                        for (int i = oldLength; i < sheet.getAttributes().length; i++)
-                        {
-                            sheet.getAttributes()[i] = 0;
-                        }
-                    }
-                    
+                    sheet.setAttributesMarked(Arrays.copyOf(sheet.getAttributesMarked(), model.getAttributes().length));
                     changed = true;
                 }
                 
                 if (model.getSkills().length != sheet.getSkills().length)
                 {
-                    int oldLength = sheet.getSkills().length;
                     sheet.setSkills(Arrays.copyOf(sheet.getSkills(), model.getSkills().length));
-                    if (oldLength < sheet.getSkills().length)
-                    {
-                        for (int i = oldLength; i < sheet.getSkills().length; i++)
-                        {
-                            sheet.getSkills()[i] = 0;
-                        }
-                    }
-                    
+                    sheet.setSkillsMarked(Arrays.copyOf(sheet.getSkillsMarked(), model.getSkills().length));
                     changed = true;
                 }
                 

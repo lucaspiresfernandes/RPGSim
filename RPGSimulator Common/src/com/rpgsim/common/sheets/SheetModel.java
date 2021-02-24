@@ -6,8 +6,8 @@ public class SheetModel implements Serializable
 {
     private final String[] info;
     private final ColorField[] stats;
-    private final DiceField[] attributes;
-    private final DiceField[] skills;
+    private final ModelDiceField[] attributes;
+    private final ModelDiceField[] skills;
     private final String[] equipmentDescriptions;
     private final String[] itemDescriptions;
 
@@ -23,8 +23,8 @@ public class SheetModel implements Serializable
 
     public SheetModel(String[] info, 
             ColorField[] stats, 
-            DiceField[] attributes, 
-            DiceField[] skills, 
+            ModelDiceField[] attributes, 
+            ModelDiceField[] skills, 
             String[] equipmentDescriptions,
             String[] itemDescriptions)
     {
@@ -46,12 +46,12 @@ public class SheetModel implements Serializable
         return stats;
     }
 
-    public DiceField[] getAttributes()
+    public ModelDiceField[] getAttributes()
     {
         return attributes;
     }
 
-    public DiceField[] getSkills()
+    public ModelDiceField[] getSkills()
     {
         return skills;
     }

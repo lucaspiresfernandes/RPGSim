@@ -1,0 +1,386 @@
+{
+  "info": [
+    "Name",
+    "Player",
+    "Occupation",
+    "Age",
+    "Sex",
+    "Residence",
+    "Birthplace"
+  ],
+  "stats": [
+    {
+      "name": "HP",
+      "color": 16711680
+    },
+    {
+      "name": "Sanity",
+      "color": 255
+    },
+    {
+      "name": "MP",
+      "color": 65535
+    }
+  ],
+  "attributes": [
+    {
+      "name": "Strength",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Dexterity",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Power",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Constituition",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Appeal",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Education",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Size",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Inteligence",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Damage Bonus",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Build",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Build",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Move Rate",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Maximum Load",
+      "diceNumModel": 100
+    }
+  ],
+  "skills": [
+    {
+      "name": "Accounting",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Antrhopology",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Appraise",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Archaeology",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Art/Craft: Acting",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Art/Craft: Barber",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Art/Craft: Calligraphy",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Art/Craft: Carpenter",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Art/Craft: Cook",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Art/Craft: Dancer",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Art/Craft: Fine Art",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Art/Craft: Forgery",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Art/Craft: Writer",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Art/Craft: Morris Dancer",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Art/Craft: Opera Singer",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Art/Craft: Painter and Decorator",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Art/Craft: Photographer",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Art/Craft: Potter",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Art/Craft: Sculptor",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Charm",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Climb",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Computer Use",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Credit Rating",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Cthulhu Mythos",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Disguise",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Dodge",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Drive Auto",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Elec Repair",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Electronics",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Fast Talk",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Fighting: Axe",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Fighting: Brawl",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Fighting: Flail",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Fighting: Garrote",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Fighting: Spear",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Fighting: Sword",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Fighting: Whip",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Fighting: Bow",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Firearms: Handgun",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Firearms: Heavy Weapons",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Firearms: Flamethrower",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Firearms: Machine Gun",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Firearms: Rifle/Shotgun",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Firearms: Submachine Gun",
+      "diceNumModel": 100
+    },
+    {
+      "name": "First Aid",
+      "diceNumModel": 100
+    },
+    {
+      "name": "History",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Intimidate",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Jump",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Language (Other)",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Language (Own)",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Law",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Library Use",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Listen",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Locksmith",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Mech Repair",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Medicine",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Natural World",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Navigate",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Occult",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Op. Hv. Machine",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Persuade",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Pilot: Aircraft",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Pilot: Boat",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Psychology",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Psychoanalysis",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Science",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Sleight Of Hand",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Spot Hidden",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Stealth",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Survival",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Swim",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Throw",
+      "diceNumModel": 100
+    },
+    {
+      "name": "Track",
+      "diceNumModel": 100
+    }
+  ],
+  "equipmentDescriptions": [
+    "Name",
+    "Skill",
+    "Damage",
+    "Range",
+    "Uses per round",
+    "Ammo",
+    "Malfunction"
+  ],
+  "itemDescriptions": [
+    "Name",
+    "Weight"
+  ]
+}

@@ -81,7 +81,7 @@ public class ServerManager extends Listener implements ServerActions
         
         this.serverGame = new ServerGame();
         
-        server = new Server();
+        server = new Server(16384, 16384);
         server.getKryo().setRegistrationRequired(false);
     }
     

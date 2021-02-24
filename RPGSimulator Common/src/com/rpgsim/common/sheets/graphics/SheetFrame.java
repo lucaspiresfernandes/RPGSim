@@ -2,14 +2,15 @@ package com.rpgsim.common.sheets.graphics;
 
 import com.rpgsim.common.FileManager;
 import com.rpgsim.common.serverpackages.UpdateType;
+import com.rpgsim.common.sheets.ModelDiceField;
 import com.rpgsim.common.sheets.PlayerSheet;
+import com.rpgsim.common.sheets.SheetDiceField;
 import com.rpgsim.common.sheets.SheetModel;
 import com.rpgsim.common.sheets.UpdateField;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -25,7 +26,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.MatteBorder;
@@ -86,19 +86,15 @@ public abstract class SheetFrame extends javax.swing.JFrame
             prgStats[i].setString(sheet.getCurrentStats()[i] + "/" + sheet.getMaxStats()[i]);
         }
         
-        txaAbout.setText(sheet.getAbout());
-        
-        txaExtras.setText(sheet.getExtras());
-        
         for (int i = 0; i < txtAttributes.length; i++)
             txtAttributes[i].setText(Integer.toString(sheet.getAttributes()[i]));
         for (int i = 0; i < chkAttributeMarked.length; i++)
-            chkAttributeMarked[i].setSelected(sheet.getAttributeMarked()[i]);
+            chkAttributeMarked[i].setSelected(sheet.getAttributesMarked()[i]);
         
         for (int i = 0; i < txtSkills.length; i++)
             txtSkills[i].setText(Integer.toString(sheet.getSkills()[i]));
         for (int i = 0; i < chkSkillMarked.length; i++)
-            chkSkillMarked[i].setSelected(sheet.getSkillMarked()[i]);
+            chkSkillMarked[i].setSelected(sheet.getSkillsMarked()[i]);
         
         for (int i = 0; i < equipments.size(); i++)
             removeEquipmentField(i);
@@ -120,17 +116,15 @@ public abstract class SheetFrame extends javax.swing.JFrame
         
         txtInfo = new JTextField[sheet.getInfo().length];
         txtAttributes = new JTextField[sheet.getAttributes().length];
-        chkAttributeMarked = new JCheckBox[sheet.getAttributeMarked().length];
+        chkAttributeMarked = new JCheckBox[sheet.getAttributes().length];
         txtSkills = new JTextField[sheet.getSkills().length];
-        chkSkillMarked = new JCheckBox[sheet.getSkillMarked().length];
+        chkSkillMarked = new JCheckBox[sheet.getSkills().length];
         prgStats = new JProgressBar[sheet.getCurrentStats().length];
         btnStatsUp = new JButton[prgStats.length];
         btnStatsDown = new JButton[prgStats.length];
         
         loadInfo();
         loadStats();
-        loadAbout();
-        loadExtras();
         loadAttributes();
         loadSkills();
         loadEquipments();
@@ -146,16 +140,6 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 String aux = (String) newValue;
                 sheet.getInfo()[propertyIndex] = aux;
                 txtInfo[propertyIndex].setText(aux);
-                break;
-            case ABOUT:
-                aux = (String) newValue;
-                sheet.setAbout(aux);
-                txaAbout.setText(aux);
-                break;
-            case EXTRAS:
-                aux = (String) newValue;
-                sheet.setExtras(aux);
-                txaExtras.setText(aux);
                 break;
             case CUR_STATS:
                 int intAux = (int) newValue;
@@ -180,20 +164,20 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 sheet.getAttributes()[propertyIndex] = intAux;
                 txtAttributes[propertyIndex].setText(Integer.toString(intAux));
                 break;
-            case MARK_ATTRIBUTES:
-                boolean bAux = (boolean) newValue;
-                sheet.getAttributeMarked()[propertyIndex] = bAux;
-                chkAttributeMarked[propertyIndex].setSelected(bAux);
+            case ATTRIBUTES_MARK:
+                boolean boolAux = (boolean) newValue;
+                sheet.getAttributesMarked()[propertyIndex] = boolAux;
+                chkAttributeMarked[propertyIndex].setSelected(boolAux);
                 break;
             case SKILLS:
                 intAux = (int) newValue;
                 sheet.getSkills()[propertyIndex] = intAux;
                 txtSkills[propertyIndex].setText(Integer.toString(intAux));
                 break;
-            case MARK_SKILLS:
-                bAux = (boolean) newValue;
-                sheet.getSkillMarked()[propertyIndex] = bAux;
-                chkSkillMarked[propertyIndex].setSelected(bAux);
+            case SKILLS_MARK:
+                boolAux = (boolean) newValue;
+                sheet.getSkillsMarked()[propertyIndex] = boolAux;
+                chkSkillMarked[propertyIndex].setSelected(boolAux);
                 break;
             case EQUIPMENTS:
                 String[] str = (String[]) newValue;
@@ -262,7 +246,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
             lblInfoDesc.setForeground(Color.WHITE);
             
             txtInfo[i] = new JTextField(sheet.getInfo()[i]);
-            txtInfo[i].setBounds(0, lblInfoDesc.getHeight() + 5, w, 20);
+            txtInfo[i].setBounds(0, lblInfoDesc.getHeight() + 5, w - 50, 20);
             txtInfo[i].setBackground(Color.BLACK);
             txtInfo[i].setForeground(Color.WHITE);
             txtInfo[i].setBorder(new MatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
@@ -419,63 +403,6 @@ public abstract class SheetFrame extends javax.swing.JFrame
         
     }
     
-    private void loadAbout()
-    {
-        //TODO: String serialization too large problem.
-        txaAbout.addKeyListener(new KeyAdapter()
-        {
-            @Override
-            public void keyPressed(KeyEvent e)
-            {
-                localChange = true;
-            }
-        });
-        txaAbout.getDocument().addDocumentListener(new SheetDocumentListener()
-        {
-            @Override
-            public void update()
-            {
-                if (txaAbout.getText().length() <= 1)
-                    txaAbout.repaint();
-                
-                if (!localChange)
-                    return;
-                
-                sheet.setAbout(txaAbout.getText());
-                
-                sendSheetUpdate(UpdateField.ABOUT, txaAbout.getText(), 0, UpdateType.UPDATE);
-            }
-        });
-    }
-    
-    private void loadExtras()
-    {
-        txaExtras.addKeyListener(new KeyAdapter()
-        {
-            @Override
-            public void keyPressed(KeyEvent e)
-            {
-                localChange = true;
-            }
-        });
-        txaExtras.getDocument().addDocumentListener(new SheetDocumentListener()
-        {
-            @Override
-            public void update()
-            {
-                if (txaExtras.getText().length() <= 1)
-                    txaExtras.repaint();
-                
-                if (!localChange)
-                    return;
-                
-                sheet.setExtras(txaExtras.getText());
-                
-                sendSheetUpdate(UpdateField.EXTRAS, txaExtras.getText(), 0, UpdateType.UPDATE);
-            }
-        });
-    }
-    
     private void loadAttributes()
     {
         scrAttributes.getVerticalScrollBar().setUnitIncrement(30);
@@ -501,17 +428,14 @@ public abstract class SheetFrame extends javax.swing.JFrame
             JPanel content = new JPanel(null, false);
             content.setLayout(new BoxLayout(content, BoxLayout.PAGE_AXIS));
             content.setPreferredSize(new Dimension(pnlW, pnlH));
-            content.setBackground(Color.BLACK);
             final int ii = i;
             
-            chkAttributeMarked[i] = new JCheckBox("", sheet.getAttributeMarked()[i]);
+            chkAttributeMarked[i] = new JCheckBox("", sheet.getAttributesMarked()[i]);
             chkAttributeMarked[i].setAlignmentX(CENTER_ALIGNMENT);
-            chkAttributeMarked[i].setBackground(Color.BLACK);
             chkAttributeMarked[i].addActionListener(l ->
             {
-                boolean val = chkAttributeMarked[ii].isSelected();
-                sheet.getAttributeMarked()[ii] = val;
-                sendSheetUpdate(UpdateField.MARK_ATTRIBUTES, val, ii, UpdateType.UPDATE);
+                sheet.getAttributesMarked()[ii] = chkAttributeMarked[ii].isSelected();
+                sendSheetUpdate(UpdateField.ATTRIBUTES_MARK, sheet.getAttributesMarked()[ii], ii, UpdateType.UPDATE);
             });
             
             lblAttributeDesc.setFont(f14);
@@ -525,7 +449,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 {
                     try
                     {
-                        int dice = rand.nextInt(model.getAttributes()[ii].getDiceNum() + 1);
+                        int dice = rand.nextInt(model.getAttributes()[ii].getDiceNumModel() + 1);
                         
                         int val = Integer.parseInt(txtAttributes[ii].getText());
                         
@@ -538,7 +462,6 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 }
             });
             
-            txtAttributes[i].setBackground(Color.BLACK);
             txtAttributes[i].setForeground(Color.WHITE);
             txtAttributes[i].setBorder(new MatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
             txtAttributes[i].setAlignmentX(CENTER_ALIGNMENT);
@@ -563,13 +486,27 @@ public abstract class SheetFrame extends javax.swing.JFrame
                     if (!localChange || txtAttributes[ii].getText().isEmpty())
                         return;
                     
-                    int attr = Integer.parseInt(txtAttributes[ii].getText());
+                    sheet.getAttributes()[ii] = Integer.parseInt(txtAttributes[ii].getText());
                     
-                    sheet.getAttributes()[ii] = attr;
-                    
-                    sendSheetUpdate(UpdateField.ATTRIBUTES, attr, ii, UpdateType.UPDATE);
+                    sendSheetUpdate(UpdateField.ATTRIBUTES, sheet.getAttributes()[ii], ii, UpdateType.UPDATE);
                 }
             });
+            
+            if (i % 2 == 0)
+            {
+                content.setBackground(Color.BLACK);
+                chkAttributeMarked[i].setBackground(Color.BLACK);
+                txtAttributes[i].setBackground(Color.BLACK);
+                txtAttributes[i].setBorder(new MatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
+            }
+            else
+            {
+                Color dk = new Color(16, 16, 16);
+                content.setBackground(dk);
+                chkAttributeMarked[i].setBackground(dk);
+                txtAttributes[i].setBackground(dk);
+                txtAttributes[i].setBorder(new MatteBorder(0, 0, 1, 0, Color.GRAY));
+            }
             
             content.add(chkAttributeMarked[i]);
             content.add(lblAttributeDesc);
@@ -587,7 +524,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
         FlowLayout layout = (FlowLayout) pnlSkillsContent.getLayout();
         
         int pnlW = 175;
-        int pnlH = 75;
+        int pnlH = 80;
         int hGap = layout.getHgap();
         int vGap = layout.getVgap();
         int numRow = (int) Math.ceil(model.getSkills().length / (pnlSkillsContent.getWidth() / (pnlW + hGap)));
@@ -599,40 +536,30 @@ public abstract class SheetFrame extends javax.swing.JFrame
         
         for (int i = 0; i < model.getSkills().length; i++)
         {
-            JLabel lblSkillDesc = new JLabel(model.getSkills()[i].getName());
-            txtSkills[i] = new JTextField(Integer.toString(sheet.getSkills()[i]));
-            
             JPanel content = new JPanel(null, false);
             content.setLayout(new BoxLayout(content, BoxLayout.PAGE_AXIS));
             content.setPreferredSize(new Dimension(pnlW, pnlH));
-            content.setBackground(Color.BLACK);
+            
+            pnlSkillsContent.add(content);
+            
             final int ii = i;
             
-            chkSkillMarked[i] = new JCheckBox("", sheet.getSkillMarked()[i]);
-            chkSkillMarked[i].setAlignmentX(CENTER_ALIGNMENT);
-            chkSkillMarked[i].setBackground(Color.BLACK);
-            chkSkillMarked[i].addActionListener(l ->
-            {
-                boolean val = chkSkillMarked[ii].isSelected();
-                sheet.getSkillMarked()[ii] = val;
-                sendSheetUpdate(UpdateField.MARK_SKILLS, val, ii, UpdateType.UPDATE);
-            });
-            
-            lblSkillDesc.setFont(f14);
-            lblSkillDesc.setBounds(0, 0, getStringWidth(lblSkillDesc.getFont(), lblSkillDesc.getText()), lblSkillDesc.getFont().getSize());
-            lblSkillDesc.setForeground(Color.WHITE);
-            lblSkillDesc.setAlignmentX(CENTER_ALIGNMENT);
-            lblSkillDesc.addMouseListener(new MouseAdapter()
+            JLabel skillDesc = new JLabel(model.getSkills()[i].getName());
+            skillDesc.setFont(f14);
+            skillDesc.setBounds(0, 0, getStringWidth(skillDesc.getFont(), skillDesc.getText()), skillDesc.getFont().getSize());
+            skillDesc.setForeground(Color.WHITE);
+            skillDesc.setAlignmentX(CENTER_ALIGNMENT);
+            skillDesc.addMouseListener(new MouseAdapter()
             {
                 @Override
                 public void mouseClicked(MouseEvent e)
                 {
                     try
                     {
-                        int dice = rand.nextInt(model.getSkills()[ii].getDiceNum() + 1);
-                        
+                        int dice = rand.nextInt(model.getSkills()[ii].getDiceNumModel() + 1);
+
                         int val = Integer.parseInt(txtSkills[ii].getText());
-                        
+
                         System.out.println(dice + " - " + val);
                     }
                     catch (NumberFormatException ex)
@@ -641,10 +568,20 @@ public abstract class SheetFrame extends javax.swing.JFrame
                     }
                 }
             });
+            content.add(skillDesc);
             
-            txtSkills[i].setBackground(Color.BLACK);
+            chkSkillMarked[i] = new JCheckBox("", sheet.getSkillsMarked()[i]);
+            chkSkillMarked[i].addActionListener(l ->
+            {
+                sheet.getSkillsMarked()[ii] = chkSkillMarked[ii].isSelected();
+                sendSheetUpdate(UpdateField.SKILLS_MARK, sheet.getSkillsMarked()[ii], ii, UpdateType.UPDATE);
+            });
+            chkSkillMarked[i].setAlignmentX(CENTER_ALIGNMENT);
+           
+            content.add(chkSkillMarked[i]);
+
+            txtSkills[i] = new JTextField(Integer.toString(sheet.getSkills()[i]));
             txtSkills[i].setForeground(Color.WHITE);
-            txtSkills[i].setBorder(new MatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
             txtSkills[i].setAlignmentX(CENTER_ALIGNMENT);
             txtSkills[i].setHorizontalAlignment(SwingConstants.CENTER);
             txtSkills[i].setFont(f);
@@ -667,19 +604,29 @@ public abstract class SheetFrame extends javax.swing.JFrame
                     if (!localChange || txtSkills[ii].getText().isEmpty())
                         return;
                     
-                    int attr = Integer.parseInt(txtSkills[ii].getText());
-                    
-                    sheet.getSkills()[ii] = attr;
-                    
-                    sendSheetUpdate(UpdateField.SKILLS, attr, ii, UpdateType.UPDATE);
+                    sheet.getSkills()[ii] = Integer.parseInt(txtSkills[ii].getText());
+
+                    sendSheetUpdate(UpdateField.SKILLS, sheet.getSkills()[ii], ii, UpdateType.UPDATE);
                 }
             });
-            
-            content.add(chkSkillMarked[i]);
-            content.add(lblSkillDesc);
             content.add(txtSkills[i]);
             
-            pnlSkillsContent.add(content);
+            if (i % 2 == 0)
+            {
+                content.setBackground(Color.BLACK);
+                chkSkillMarked[i].setBackground(Color.BLACK);
+                txtSkills[i].setBackground(Color.BLACK);
+                txtSkills[i].setBorder(new MatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
+            }
+            else
+            {
+                Color dk = new Color(16, 16, 16);
+                content.setBackground(dk);
+                chkSkillMarked[i].setBackground(dk);
+                txtSkills[i].setBackground(dk);
+                txtSkills[i].setBorder(new MatteBorder(0, 0, 1, 0, Color.GRAY));
+            }
+            
         }
     }
     
@@ -763,42 +710,6 @@ public abstract class SheetFrame extends javax.swing.JFrame
         pnlStats = new javax.swing.JPanel();
         lblStats = new javax.swing.JLabel();
         pnlStatsContent = new javax.swing.JPanel();
-        pnlAbout = new javax.swing.JPanel();
-        scrAbout = new javax.swing.JScrollPane();
-        txaAbout = new JTextArea()
-        {
-            @Override
-            protected void paintComponent(Graphics g)
-            {
-                super.paintComponent(g);
-                if (this.getText().isEmpty())
-                {
-                    g.setColor(Color.GRAY);
-                    g.setFont(f);
-                    g.drawString("Write about your character's likes, dislikes, dreams, etc.", 
-                        getInsets().left, g.getFontMetrics().getMaxAscent() + getInsets().top);
-                }
-            }
-        };
-        lblAbout = new javax.swing.JLabel();
-        pnlExtras = new javax.swing.JPanel();
-        scrExtras = new javax.swing.JScrollPane();
-        txaExtras = new JTextArea()
-        {
-            @Override
-            protected void paintComponent(Graphics g)
-            {
-                super.paintComponent(g);
-                if (this.getText().isEmpty())
-                {
-                    g.setColor(Color.GRAY);
-                    g.setFont(f);
-                    g.drawString("You can write anything you want here. (Notes, extra informations...)",
-                        getInsets().left, g.getFontMetrics().getMaxAscent() + getInsets().top);
-                }
-            }
-        };
-        lblExtras = new javax.swing.JLabel();
         scrAttributes = new SheetScrollPane();
         ;
         pnlAttributes = new javax.swing.JPanel();
@@ -827,9 +738,10 @@ public abstract class SheetFrame extends javax.swing.JFrame
         pnlMain.setBackground(new java.awt.Color(0, 0, 0));
         pnlMain.setPreferredSize(new java.awt.Dimension(1260, 2256));
 
+        scrInfo.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(102, 102, 102)));
+
         pnlInfo.setBackground(new java.awt.Color(0, 0, 0));
-        pnlInfo.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(102, 102, 102)));
-        pnlInfo.setPreferredSize(new java.awt.Dimension(550, 523));
+        pnlInfo.setPreferredSize(new java.awt.Dimension(500, 523));
 
         lblInfo.setFont(new java.awt.Font("Times New Roman", 0, 24)); // NOI18N
         lblInfo.setForeground(new java.awt.Color(255, 255, 255));
@@ -863,8 +775,9 @@ public abstract class SheetFrame extends javax.swing.JFrame
 
         scrInfo.setViewportView(pnlInfo);
 
+        scrStats.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(102, 102, 102)));
+
         pnlStats.setBackground(new java.awt.Color(0, 0, 0));
-        pnlStats.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(102, 102, 102)));
         pnlStats.setPreferredSize(new java.awt.Dimension(490, 510));
 
         lblStats.setFont(new java.awt.Font("Times New Roman", 0, 24)); // NOI18N
@@ -882,7 +795,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
             .addGroup(pnlStatsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlStatsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pnlStatsContent, javax.swing.GroupLayout.DEFAULT_SIZE, 472, Short.MAX_VALUE)
+                    .addComponent(pnlStatsContent, javax.swing.GroupLayout.DEFAULT_SIZE, 501, Short.MAX_VALUE)
                     .addComponent(lblStats, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -896,78 +809,6 @@ public abstract class SheetFrame extends javax.swing.JFrame
         );
 
         scrStats.setViewportView(pnlStats);
-
-        pnlAbout.setBackground(new java.awt.Color(0, 0, 0));
-        pnlAbout.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(102, 102, 102)));
-
-        txaAbout.setBackground(new java.awt.Color(102, 102, 102));
-        txaAbout.setColumns(20);
-        txaAbout.setForeground(new java.awt.Color(255, 255, 255));
-        txaAbout.setLineWrap(true);
-        txaAbout.setRows(5);
-        scrAbout.setViewportView(txaAbout);
-
-        lblAbout.setFont(new java.awt.Font("Times New Roman", 0, 24)); // NOI18N
-        lblAbout.setForeground(new java.awt.Color(255, 255, 255));
-        lblAbout.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblAbout.setText("About");
-
-        javax.swing.GroupLayout pnlAboutLayout = new javax.swing.GroupLayout(pnlAbout);
-        pnlAbout.setLayout(pnlAboutLayout);
-        pnlAboutLayout.setHorizontalGroup(
-            pnlAboutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAboutLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlAboutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(scrAbout)
-                    .addComponent(lblAbout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        pnlAboutLayout.setVerticalGroup(
-            pnlAboutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlAboutLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblAbout)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scrAbout, javax.swing.GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        pnlExtras.setBackground(new java.awt.Color(0, 0, 0));
-        pnlExtras.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(102, 102, 102)));
-
-        txaExtras.setBackground(new java.awt.Color(102, 102, 102));
-        txaExtras.setColumns(20);
-        txaExtras.setForeground(new java.awt.Color(255, 255, 255));
-        txaExtras.setLineWrap(true);
-        txaExtras.setRows(5);
-        scrExtras.setViewportView(txaExtras);
-
-        lblExtras.setFont(new java.awt.Font("Times New Roman", 0, 24)); // NOI18N
-        lblExtras.setForeground(new java.awt.Color(255, 255, 255));
-        lblExtras.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblExtras.setText("Extras");
-
-        javax.swing.GroupLayout pnlExtrasLayout = new javax.swing.GroupLayout(pnlExtras);
-        pnlExtras.setLayout(pnlExtrasLayout);
-        pnlExtrasLayout.setHorizontalGroup(
-            pnlExtrasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlExtrasLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlExtrasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(scrExtras, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(lblExtras, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        pnlExtrasLayout.setVerticalGroup(
-            pnlExtrasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlExtrasLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblExtras)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scrExtras, javax.swing.GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE)
-                .addContainerGap())
-        );
 
         scrAttributes.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(102, 102, 102)));
 
@@ -990,7 +831,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 .addContainerGap()
                 .addGroup(pnlAttributesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(pnlAttributesContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblAttributes, javax.swing.GroupLayout.DEFAULT_SIZE, 1034, Short.MAX_VALUE))
+                    .addComponent(lblAttributes, javax.swing.GroupLayout.DEFAULT_SIZE, 1036, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pnlAttributesLayout.setVerticalGroup(
@@ -999,7 +840,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 .addContainerGap()
                 .addComponent(lblAttributes)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlAttributesContent, javax.swing.GroupLayout.DEFAULT_SIZE, 202, Short.MAX_VALUE))
+                .addComponent(pnlAttributesContent, javax.swing.GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE))
         );
 
         scrAttributes.setViewportView(pnlAttributes);
@@ -1052,9 +893,9 @@ public abstract class SheetFrame extends javax.swing.JFrame
         lblEquipments.setText("Equipments");
 
         pnlEquipmentsDescription.setBackground(new java.awt.Color(0, 0, 0));
-        pnlEquipmentsDescription.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEADING, 60, 0));
+        pnlEquipmentsDescription.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEADING, 65, 0));
 
-        pnlEquipmentsContent.setBackground(new java.awt.Color(0, 0, 0));
+        pnlEquipmentsContent.setBackground(new java.awt.Color(102, 102, 102));
         pnlEquipmentsContent.setLayout(new javax.swing.BoxLayout(pnlEquipmentsContent, javax.swing.BoxLayout.Y_AXIS));
 
         javax.swing.GroupLayout pnlEquipmentsLayout = new javax.swing.GroupLayout(pnlEquipments);
@@ -1077,7 +918,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pnlEquipmentsDescription, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlEquipmentsContent, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE))
+                .addComponent(pnlEquipmentsContent, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE))
         );
 
         scrEquipments.setViewportView(pnlEquipments);
@@ -1092,7 +933,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
         lblItems.setText("Items");
 
         pnlItemsDescription.setBackground(new java.awt.Color(0, 0, 0));
-        pnlItemsDescription.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEADING, 100, 0));
+        pnlItemsDescription.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEADING, 200, 0));
 
         pnlItemsContent.setBackground(new java.awt.Color(0, 0, 0));
         pnlItemsContent.setLayout(new javax.swing.BoxLayout(pnlItemsContent, javax.swing.BoxLayout.Y_AXIS));
@@ -1117,7 +958,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pnlItemsDescription, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlItemsContent, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE))
+                .addComponent(pnlItemsContent, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE))
         );
 
         scrItems.setViewportView(pnlItems);
@@ -1129,17 +970,14 @@ public abstract class SheetFrame extends javax.swing.JFrame
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlMainLayout.createSequentialGroup()
                 .addGap(100, 100, 100)
                 .addGroup(pnlMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(scrAttributes, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 1060, Short.MAX_VALUE)
+                    .addComponent(scrAttributes, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(scrItems, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(scrEquipments, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlMainLayout.createSequentialGroup()
-                        .addGroup(pnlMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(pnlAbout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(scrInfo))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(pnlMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(pnlExtras, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(scrStats)))
+                        .addComponent(scrInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 523, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(scrStats, javax.swing.GroupLayout.PREFERRED_SIZE, 527, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(scrSkills, javax.swing.GroupLayout.Alignment.LEADING))
                 .addGap(100, 100, 100))
         );
@@ -1147,22 +985,18 @@ public abstract class SheetFrame extends javax.swing.JFrame
             pnlMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlMainLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(scrStats, javax.swing.GroupLayout.DEFAULT_SIZE, 595, Short.MAX_VALUE)
-                    .addComponent(scrInfo))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pnlAbout, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlExtras, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(pnlMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(scrInfo)
+                    .addComponent(scrStats))
                 .addGap(18, 18, 18)
-                .addComponent(scrAttributes, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(scrAttributes, javax.swing.GroupLayout.PREFERRED_SIZE, 370, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(scrSkills, javax.swing.GroupLayout.PREFERRED_SIZE, 507, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(scrEquipments, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(scrEquipments, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(scrItems, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addComponent(scrItems, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         scrMain.setViewportView(pnlMain);
@@ -1183,21 +1017,17 @@ public abstract class SheetFrame extends javax.swing.JFrame
     }// </editor-fold>//GEN-END:initComponents
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel lblAbout;
     private javax.swing.JLabel lblAttributes;
     private javax.swing.JLabel lblEquipments;
-    private javax.swing.JLabel lblExtras;
     private javax.swing.JLabel lblInfo;
     private javax.swing.JLabel lblItems;
     private javax.swing.JLabel lblSkills;
     private javax.swing.JLabel lblStats;
-    private javax.swing.JPanel pnlAbout;
     private javax.swing.JPanel pnlAttributes;
     private javax.swing.JPanel pnlAttributesContent;
     private javax.swing.JPanel pnlEquipments;
     private javax.swing.JPanel pnlEquipmentsContent;
     private javax.swing.JPanel pnlEquipmentsDescription;
-    private javax.swing.JPanel pnlExtras;
     private javax.swing.JPanel pnlInfo;
     private javax.swing.JPanel pnlInfoContent;
     private javax.swing.JPanel pnlItems;
@@ -1208,24 +1038,21 @@ public abstract class SheetFrame extends javax.swing.JFrame
     private javax.swing.JPanel pnlSkillsContent;
     private javax.swing.JPanel pnlStats;
     private javax.swing.JPanel pnlStatsContent;
-    private javax.swing.JScrollPane scrAbout;
     private javax.swing.JScrollPane scrAttributes;
     private javax.swing.JScrollPane scrEquipments;
-    private javax.swing.JScrollPane scrExtras;
     private javax.swing.JScrollPane scrInfo;
     private javax.swing.JScrollPane scrItems;
     private javax.swing.JScrollPane scrMain;
     private javax.swing.JScrollPane scrSkills;
     private javax.swing.JScrollPane scrStats;
-    private javax.swing.JTextArea txaAbout;
-    private javax.swing.JTextArea txaExtras;
     // End of variables declaration//GEN-END:variables
-    
     
     private JField createEquipmentField(String[] equip)
     {
         FlowLayout layout = new FlowLayout(FlowLayout.LEADING, ((FlowLayout)pnlEquipmentsDescription.getLayout()).getHgap(), 0);
         JField field = new JField(layout, false);
+        field.setPreferredSize(new Dimension(pnlEquipmentsContent.getWidth(), 30));
+        field.setMaximumSize(new Dimension(pnlEquipmentsContent.getWidth(), 30));
         field.setBackground(Color.BLACK);
         
         JLabel[] labels = new JLabel[equip.length];
@@ -1286,7 +1113,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
         
         pnlEquipmentsContent.setBounds(pnlEquipmentsContent.getX(), 
                 pnlEquipmentsContent.getY(), 
-                pnlEquipmentsContent.getWidth(), h);
+                pnlEquipmentsContent.getWidth(), h - 20);
         pnlEquipments.setPreferredSize(new Dimension(pnlEquipments.getPreferredSize().width, pnlEquipmentsContent.getY() + pnlEquipmentsContent.getHeight() + 20));
         scrEquipments.revalidate();
         pnlEquipments.revalidate();
@@ -1314,6 +1141,8 @@ public abstract class SheetFrame extends javax.swing.JFrame
     {
         FlowLayout layout = new FlowLayout(FlowLayout.LEADING, ((FlowLayout)pnlItemsDescription.getLayout()).getHgap(), 0);
         JField field = new JField(layout, false);
+        field.setPreferredSize(new Dimension(pnlItemsDescription.getWidth(), 30));
+        field.setMaximumSize(new Dimension(pnlItemsDescription.getWidth(), 30));
         field.setBackground(Color.BLACK);
         
         JLabel[] labels = new JLabel[item.length];

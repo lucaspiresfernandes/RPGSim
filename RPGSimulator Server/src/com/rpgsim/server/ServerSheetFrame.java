@@ -3,6 +3,7 @@ package com.rpgsim.server;
 import com.rpgsim.common.clientpackages.CharacterSheetFieldUpdateResponse;
 import com.rpgsim.common.serverpackages.UpdateType;
 import com.rpgsim.common.sheets.PlayerSheet;
+import com.rpgsim.common.sheets.SheetDiceField;
 import com.rpgsim.common.sheets.UpdateField;
 import com.rpgsim.common.sheets.graphics.SheetFrame;
 import java.util.HashMap;
@@ -42,12 +43,6 @@ public class ServerSheetFrame extends SheetFrame
                 case INFO:
                     svSheet.getInfo()[propertyIndex] = (String) newValue;
                     break;
-                case ABOUT:
-                    svSheet.setAbout((String) newValue);
-                    break;
-                case EXTRAS:
-                    svSheet.setExtras((String) newValue);
-                    break;
                 case CUR_STATS:
                     svSheet.getCurrentStats()[propertyIndex] = (int) newValue;
                     break;
@@ -57,8 +52,14 @@ public class ServerSheetFrame extends SheetFrame
                 case ATTRIBUTES:
                     svSheet.getAttributes()[propertyIndex] = (int) newValue;
                     break;
+                case ATTRIBUTES_MARK:
+                    svSheet.getAttributesMarked()[propertyIndex] = (boolean) newValue;
+                    break;
                 case SKILLS:
                     svSheet.getSkills()[propertyIndex] = (int) newValue;
+                    break;
+                case SKILLS_MARK:
+                    svSheet.getSkillsMarked()[propertyIndex] = (boolean) newValue;
                     break;
                 case EQUIPMENTS:
                     svSheet.getEquipments().set(propertyIndex, (String[]) newValue);
