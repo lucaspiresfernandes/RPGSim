@@ -42,13 +42,12 @@ public class Renderer
         AffineTransform transform = new AffineTransform();
         
         Vector2 t = gameObject.transform().position();
-        if (clientID == gameObject.getClientID())
-            transform.translate(t.x, t.y);
-        else
-            transform.translate(gameObject.getSmoothPosition().x, gameObject.getSmoothPosition().y);
-        
         Vector2 s = gameObject.transform().scale();
-        transform.scale(s.x, s.y);
+        
+        if (clientID == gameObject.getClientID())
+            transform.setTransform(s.x, 0.0, 0.0, s.y, t.x, t.y);
+        else
+            transform.setTransform(s.x, 0.0, 0.0, s.y, t.x, t.y);
         
         transform.rotate(Math.toRadians(gameObject.transform().rotation()), image.getWidth(null) * 0.5f, image.getHeight(null) * 0.5f);
         

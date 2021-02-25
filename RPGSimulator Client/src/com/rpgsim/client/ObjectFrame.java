@@ -39,7 +39,7 @@ public class ObjectFrame extends javax.swing.JFrame
         btnBackground.addActionListener(l ->
         {
             list.clear();
-            File parent = new File(FileManager.app_dir + "data files\\objects\\backgrounds");
+            File parent = new File(FileManager.app_dir + "data files\\backgrounds");
             for (File file : parent.listFiles())
             {
                 if (file.isFile())
@@ -71,7 +71,7 @@ public class ObjectFrame extends javax.swing.JFrame
                 case 1:
                     AsyncTask.executeAsyncTask("Background Load", () ->
                     {
-                        client.sendPackage(new BackgroundUpdateRequest(parent.toURI().relativize(new File(FileManager.app_dir + "data files\\objects\\backgrounds\\" + name).toURI()).getPath()));
+                        client.sendPackage(new BackgroundUpdateRequest(parent.toURI().relativize(new File(FileManager.app_dir + "data files\\backgrounds\\" + name).toURI()).getPath()));
                     });
                     break;
             }

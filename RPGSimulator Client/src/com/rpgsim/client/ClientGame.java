@@ -70,10 +70,10 @@ public class ClientGame extends Canvas implements Runnable
         else if (Input.getKey(KeyCode.D))
             screen.getTransform().position(new Vector2(screen.getTransform().position().x - 10, screen.getTransform().position().y));
         
-        if (Input.getKey(KeyCode.MINUS) && screen.getTransform().scale().x >= 1)
-            screen.getTransform().scale(new Vector2(screen.getTransform().scale().x - 0.01f, screen.getTransform().scale().y - 0.01f));
-        else if (Input.getKey(KeyCode.EQUALS))
-            screen.getTransform().scale(new Vector2(screen.getTransform().scale().x + 0.01f, screen.getTransform().scale().y + 0.01f));
+        double wheel = Input.mouseWheel() * 0.05f;
+        Vector2 scale = screen.getTransform().scale();
+        if (wheel != 0 && scale.x - wheel > 0)
+            screen.getTransform().scale(new Vector2(scale.x - wheel, scale.y - wheel));
         
         if (Input.getKeyDown(KeyCode.NUM1))
             sheetFrame.setVisible(true);
@@ -107,11 +107,12 @@ public class ClientGame extends Canvas implements Runnable
         addKeyListener(input);
         addMouseListener(input);
         addMouseMotionListener(input);
+        addMouseWheelListener(input);
         addFocusListener(input);
         
         this.sheetFrame.load(client.getAccount().getConnectionID(), model, sheet, true);
         
-        client.sendPackage(new InstantiatePrefabRequest(Input.mousePosition(), PrefabID.MOUSE, client.getAccount().getConnectionID(), "data files\\objects\\cursor.png"));
+        client.sendPackage(new InstantiatePrefabRequest(Input.mousePosition(), PrefabID.MOUSE, client.getAccount().getConnectionID(), "data files\\assets\\cursor.png"));
         gameRunning = true;
         requestFocus();
     }
@@ -134,6 +135,9 @@ public class ClientGame extends Canvas implements Runnable
         
         float dt = 0f;
         float ndt = 0f;
+        float timer = 0f;
+        
+        int frames = 0;
         
         while (networkRunning)
         {
@@ -143,11 +147,10 @@ public class ClientGame extends Canvas implements Runnable
             
             ndt += timePassed;
             
-            
-            
             if (gameRunning)
             {
                 dt += timePassed;
+                timer += timePassed;
                 
                 boolean render = false;
                 while (dt >= gameUpdateThreshold)
@@ -161,6 +164,7 @@ public class ClientGame extends Canvas implements Runnable
                 if (render)
                 {
                     render();
+                    frames++;
                 }
                 else
                 {
@@ -172,6 +176,13 @@ public class ClientGame extends Canvas implements Runnable
                     {
                         Logger.getLogger(ClientGame.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                }
+                
+                if (timer >= 1)
+                {
+                    System.out.println("FPS: " + frames);
+                    timer = 0;
+                    frames = 0;
                 }
             }
             

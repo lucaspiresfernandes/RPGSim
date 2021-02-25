@@ -24,7 +24,7 @@ public class PlayerSheet implements Serializable
         for (int i = 0; i < info.length; i++)
             info[i] = "none";
         
-        avatarRelativePath = "data files\\objects\\character.png";
+        avatarRelativePath = "data files\\assets\\character.png";
         
         currentStats = new int[sheet.getStats().length];
         for (int i = 0; i < currentStats.length; i++)

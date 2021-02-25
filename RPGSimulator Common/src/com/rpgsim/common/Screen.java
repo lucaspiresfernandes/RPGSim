@@ -2,6 +2,7 @@ package com.rpgsim.common;
 
 import com.rpgsim.common.game.Transform;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -28,13 +29,19 @@ public class Screen
     public void begin()
     {
         g = (Graphics2D) bs.getDrawGraphics();
-        g.setRenderingHints(new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY));
-        affineTransform.setTransform(transform.scale().x, 0.0, 0.0, transform.scale().y, transform.position().x, transform.position().y);
+        
+        Vector2 pos = transform.position();
+        Vector2 s = transform.scale();
+        float x = -pos.x / s.x;
+        float y = -pos.y / s.y;
+        float width = (screenWidth - pos.x) / s.x;
+        float height = (screenHeight - pos.y) / s.y;
+        
+        affineTransform.setTransform(transform.scale().x, 0.0, 0.0, transform.scale().y, pos.x, pos.y);
         g.setTransform(affineTransform);
+        g.setColor(Color.DARK_GRAY);
+        g.fillRect((int) x, (int) y, (int) width, (int) height);
         g.setColor(Color.BLACK);
-        int x = (int) affineTransform.getTranslateX();
-        int y = (int) affineTransform.getTranslateY();
-        g.fillRect(-x, -y, screenWidth - x, screenHeight - y);
     }
     
     public void end()

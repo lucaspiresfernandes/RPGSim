@@ -31,7 +31,6 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.Timer;
 import javax.swing.border.MatteBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -918,7 +917,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
         pnlEquipmentsDescription.setBackground(new java.awt.Color(0, 0, 0));
         pnlEquipmentsDescription.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEADING, 65, 0));
 
-        pnlEquipmentsContent.setBackground(new java.awt.Color(102, 102, 102));
+        pnlEquipmentsContent.setBackground(new java.awt.Color(0, 0, 0));
         pnlEquipmentsContent.setLayout(new javax.swing.BoxLayout(pnlEquipmentsContent, javax.swing.BoxLayout.Y_AXIS));
 
         javax.swing.GroupLayout pnlEquipmentsLayout = new javax.swing.GroupLayout(pnlEquipments);

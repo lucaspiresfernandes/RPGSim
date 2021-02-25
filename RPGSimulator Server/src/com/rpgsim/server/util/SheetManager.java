@@ -173,6 +173,7 @@ public class SheetManager
         String[] itemDescriptions = new String[]
         {
             "Name",
+            "Description",
             "Weight"
         };
         

@@ -8,9 +8,11 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
 
-public class Input implements KeyListener, MouseListener, MouseMotionListener, FocusListener
+public class Input implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener, FocusListener
 {
     private static final ArrayList<Integer> pressedKeys = new ArrayList<>();
     private static final ArrayList<Integer> heldKeys = new ArrayList<>();
@@ -19,6 +21,7 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, F
     private static final ArrayList<Integer> heldButtons = new ArrayList<>();
     
     private static int mouseX, mouseY;
+    private static double mouseWheel;
     
     private static boolean mouseMoved = false;
     private static boolean mouseDragging = false;
@@ -74,6 +77,11 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, F
     {
         return new Vector2((mouseX - screenTransform.position().x) / screenTransform.scale().x, 
                 (mouseY - screenTransform.position().y) / screenTransform.scale().y);
+    }
+    
+    public static double mouseWheel()
+    {
+        return mouseWheel;
     }
     
     @Override
@@ -133,6 +141,12 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, F
     }
     
     @Override
+    public void mouseWheelMoved(MouseWheelEvent e)
+    {
+        mouseWheel = e.getPreciseWheelRotation();
+    }
+    
+    @Override
     public void focusGained(FocusEvent e) {}
 
     @Override
@@ -155,6 +169,7 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, F
         for (Integer pd : pressedButtons)
             heldButtons.add(pd);
         mouseMoved = false;
+        mouseWheel = 0;
     }
     
 }

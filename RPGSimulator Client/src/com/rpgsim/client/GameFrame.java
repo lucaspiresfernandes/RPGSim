@@ -15,7 +15,7 @@ public class GameFrame extends JFrame
     {
         super("RPG Simulator");
         super.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        super.setSize(800, 600);
+        super.setSize(1280, 720);
         super.setResizable(false);
         super.setLocationRelativeTo(null);
         super.setLayout(null);

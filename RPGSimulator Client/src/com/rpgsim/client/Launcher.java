@@ -29,7 +29,8 @@ public class Launcher
         return new DataFile[]
         {
             new DataFile("data files\\objects"),
-            new DataFile("data files\\objects\\backgrounds"),
+            new DataFile("data files\\backgrounds"),
+            new DataFile("data files\\assets"),
             new DataFile("data files\\config.ini",
             "SaveUsername=false\n"
             + "SavePassword=false\n"
