@@ -1,13 +1,13 @@
 package com.rpgsim.common.sheets.graphics;
 
+import com.rpgsim.common.AsyncTask;
 import com.rpgsim.common.FileManager;
 import com.rpgsim.common.serverpackages.UpdateType;
-import com.rpgsim.common.sheets.ModelDiceField;
 import com.rpgsim.common.sheets.PlayerSheet;
-import com.rpgsim.common.sheets.SheetDiceField;
 import com.rpgsim.common.sheets.SheetModel;
 import com.rpgsim.common.sheets.UpdateField;
 import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -18,16 +18,20 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.border.MatteBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -294,6 +298,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
             Image aux = icon.getImage().getScaledInstance(iconW, iconH, Image.SCALE_SMOOTH);
             icon.setImage(aux);
             avatarImage = new JLabel(icon);
+            avatarImage.setAlignmentX(CENTER_ALIGNMENT);
             avatarImage.setPreferredSize(new Dimension(iconW, iconH));
             pnlStatsContent.add(avatarImage);
         }
@@ -430,6 +435,25 @@ public abstract class SheetFrame extends javax.swing.JFrame
             content.setPreferredSize(new Dimension(pnlW, pnlH));
             final int ii = i;
             
+            content.addMouseListener(new MouseAdapter()
+            {
+                @Override
+                public void mouseClicked(MouseEvent e)
+                {
+                    int field = sheet.getAttributes()[ii];
+                    
+                    if (field == 0)
+                    {
+                        JOptionPane.showMessageDialog(null, "This field cannot be rolled for its value is 0.");
+                        return;
+                    }
+                    
+                    int dice = rand.nextInt(model.getAttributes()[ii].getDiceWeight()) + 1;
+                    
+                    showDiceRollingDialog(field, dice);
+                }
+            });
+            
             chkAttributeMarked[i] = new JCheckBox("", sheet.getAttributesMarked()[i]);
             chkAttributeMarked[i].setAlignmentX(CENTER_ALIGNMENT);
             chkAttributeMarked[i].addActionListener(l ->
@@ -442,25 +466,6 @@ public abstract class SheetFrame extends javax.swing.JFrame
             lblAttributeDesc.setBounds(0, 0, getStringWidth(lblAttributeDesc.getFont(), lblAttributeDesc.getText()), lblAttributeDesc.getFont().getSize());
             lblAttributeDesc.setForeground(Color.WHITE);
             lblAttributeDesc.setAlignmentX(CENTER_ALIGNMENT);
-            lblAttributeDesc.addMouseListener(new MouseAdapter()
-            {
-                @Override
-                public void mouseClicked(MouseEvent e)
-                {
-                    try
-                    {
-                        int dice = rand.nextInt(model.getAttributes()[ii].getDiceNumModel() + 1);
-                        
-                        int val = Integer.parseInt(txtAttributes[ii].getText());
-                        
-                        System.out.println(dice + " - " + val);
-                    }
-                    catch (NumberFormatException ex)
-                    {
-                        JOptionPane.showMessageDialog(null, "To roll a dice, please type in a number in the selected attribute.");
-                    }
-                }
-            });
             
             txtAttributes[i].setForeground(Color.WHITE);
             txtAttributes[i].setBorder(new MatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
@@ -539,10 +544,28 @@ public abstract class SheetFrame extends javax.swing.JFrame
             JPanel content = new JPanel(null, false);
             content.setLayout(new BoxLayout(content, BoxLayout.PAGE_AXIS));
             content.setPreferredSize(new Dimension(pnlW, pnlH));
-            
             pnlSkillsContent.add(content);
             
             final int ii = i;
+            
+            content.addMouseListener(new MouseAdapter()
+            {
+                @Override
+                public void mouseClicked(MouseEvent e)
+                {
+                    int field = sheet.getSkills()[ii];
+                    
+                    if (field == 0)
+                    {
+                        JOptionPane.showMessageDialog(null, "This field cannot be rolled for its value is 0.");
+                        return;
+                    }
+                    
+                    int dice = rand.nextInt(model.getSkills()[ii].getDiceWeight()) + 1;
+                    
+                    showDiceRollingDialog(field, dice);
+                }
+            });
             
             JLabel skillDesc = new JLabel(model.getSkills()[i].getName());
             skillDesc.setFont(f14);
@@ -556,7 +579,7 @@ public abstract class SheetFrame extends javax.swing.JFrame
                 {
                     try
                     {
-                        int dice = rand.nextInt(model.getSkills()[ii].getDiceNumModel() + 1);
+                        int dice = rand.nextInt(model.getSkills()[ii].getDiceWeight() + 1);
 
                         int val = Integer.parseInt(txtSkills[ii].getText());
 
@@ -1225,6 +1248,54 @@ public abstract class SheetFrame extends javax.swing.JFrame
 
         scrItems.revalidate();
         pnlItems.revalidate();
+    }
+    
+    private void showDiceRollingDialog(int fieldValue, int diceValue)
+    {
+        String message = "You rolled " + diceValue + " - ";
+        Color color;
+        
+        if (fieldValue * 0.2f >= diceValue)
+        {
+            message += "Extreme";
+            color = new Color(0xDAA520);
+        }
+        else if (fieldValue * 0.5f >= diceValue)
+        {
+            message += "Good";
+            color = new Color(0x228B22);
+        }
+        else if (fieldValue >= diceValue)
+        {
+            message += "Success";
+            color = Color.BLACK;
+        }
+        else
+        {
+            message += "Failed";
+            color = Color.RED;
+        }
+        JLabel lbl = new JLabel(message);
+        lbl.setFont(f);
+        lbl.setForeground(color);
+        
+        JOptionPane pane = new JOptionPane(lbl, JOptionPane.INFORMATION_MESSAGE);
+        JDialog dialog = pane.createDialog(null, "Roll Result");
+        dialog.setModalityType(Dialog.ModalityType.MODELESS);
+        dialog.setVisible(true);
+        
+        AsyncTask.executeAsyncTask("Dice Roll Result", () -> 
+        {
+            try
+            {
+                Thread.sleep(2000);
+            }
+            catch (InterruptedException ex)
+            {
+                Logger.getLogger(SheetFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            dialog.dispose();
+        });
     }
     
     private int getStringWidth(Font font, String text)

@@ -5,18 +5,18 @@ import java.io.Serializable;
 public class ModelDiceField implements Serializable
 {
     private final String name;
-    private final int diceNumModel;
+    private final int diceWeight;
 
     private ModelDiceField()
     {
         this.name = null;
-        this.diceNumModel = 0;
+        this.diceWeight = 0;
     }
 
     public ModelDiceField(String name, int diceNum)
     {
         this.name = name;
-        this.diceNumModel = diceNum;
+        this.diceWeight = diceNum;
     }
 
     public String getName()
@@ -24,9 +24,9 @@ public class ModelDiceField implements Serializable
         return name;
     }
 
-    public int getDiceNumModel()
+    public int getDiceWeight()
     {
-        return diceNumModel;
+        return diceWeight;
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.rpgsim.common.Screen;
 import com.rpgsim.common.CommonConfigurations;
 import com.rpgsim.common.PrefabID;
 import com.rpgsim.common.Scene;
+import com.rpgsim.common.Vector2;
 import com.rpgsim.common.game.Input;
 import com.rpgsim.common.game.KeyCode;
 import com.rpgsim.common.serverpackages.InstantiatePrefabRequest;
@@ -60,19 +61,24 @@ public class ClientGame extends Canvas implements Runnable
     
     private void update(float dt)
     {
-        if (Input.getKey(KeyCode.W) && screen.getTransform().getTranslateY() < 0)
-            screen.getTransform().translate(0, 10);
+        if (Input.getKey(KeyCode.W) && screen.getTransform().position().y < 0)
+            screen.getTransform().position(new Vector2(screen.getTransform().position().x, screen.getTransform().position().y + 10));
         else if (Input.getKey(KeyCode.S))
-            screen.getTransform().translate(0, -10);
-        if (Input.getKey(KeyCode.A) && screen.getTransform().getTranslateX() < 0)
-            screen.getTransform().translate(10, 0);
+            screen.getTransform().position(new Vector2(screen.getTransform().position().x, screen.getTransform().position().y - 10));
+        if (Input.getKey(KeyCode.A) && screen.getTransform().position().x < 0)
+            screen.getTransform().position(new Vector2(screen.getTransform().position().x + 10, screen.getTransform().position().y));
         else if (Input.getKey(KeyCode.D))
-            screen.getTransform().translate(-10, 0);
+            screen.getTransform().position(new Vector2(screen.getTransform().position().x - 10, screen.getTransform().position().y));
         
-        if (Input.getKeyDown(KeyCode.F1))
+        if (Input.getKey(KeyCode.MINUS) && screen.getTransform().scale().x >= 1)
+            screen.getTransform().scale(new Vector2(screen.getTransform().scale().x - 0.01f, screen.getTransform().scale().y - 0.01f));
+        else if (Input.getKey(KeyCode.EQUALS))
+            screen.getTransform().scale(new Vector2(screen.getTransform().scale().x + 0.01f, screen.getTransform().scale().y + 0.01f));
+        
+        if (Input.getKeyDown(KeyCode.NUM1))
             sheetFrame.setVisible(true);
         
-        if (Input.getKeyDown(KeyCode.O))
+        if (Input.getKeyDown(KeyCode.NUM2))
             objectFrame.open();
         
         scene.updateGameObjects(client.getAccount().getConnectionID(), dt);

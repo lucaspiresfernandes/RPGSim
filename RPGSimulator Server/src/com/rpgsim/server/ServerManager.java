@@ -254,6 +254,10 @@ public class ServerManager extends Listener implements ServerActions
     public void onNetworkGameObjectTransformUpdate(int id, Vector2 position, Vector2 scale, float rotation, boolean flipX, boolean flipY)
     {
         NetworkGameObject go = serverGame.getScene().getGameObject(id);
+        
+        if (go == null)
+            return;
+        
         go.transform().position(position);
         go.transform().scale(scale);
         go.transform().rotation(rotation);
@@ -276,7 +280,10 @@ public class ServerManager extends Listener implements ServerActions
     @Override
     public void onNetworkGameObjectImageUpdate(int id, String relativePath)
     {
-        serverGame.getScene().getGameObject(id).renderer().setImagePath(relativePath);
+        NetworkGameObject go = serverGame.getScene().getGameObject(id);
+        if (go == null)
+            return;
+        go.renderer().setImagePath(relativePath);
         sendAll(new NetworkGameObjectImageUpdateResponse(id, relativePath), true);
     }
 

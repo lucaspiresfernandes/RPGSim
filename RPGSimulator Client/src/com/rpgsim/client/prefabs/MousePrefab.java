@@ -1,5 +1,6 @@
 package com.rpgsim.client.prefabs;
 
+import com.rpgsim.client.ClientGame;
 import com.rpgsim.common.PrefabID;
 import com.rpgsim.common.Vector2;
 import com.rpgsim.common.game.Input;
@@ -31,6 +32,12 @@ public class MousePrefab extends NetworkGameObject
         Vector2 mousePosition = Input.mousePosition();
         transform().position(mousePosition);
         
+        Vector2 s = ClientGame.getScreen().getTransform().scale();
+        s.x = 1 / s.x;
+        s.y = 1 / s.y;
+        
+        transform().scale(s);
+        
         if (heldObject == null)
         {
             if (Input.getMouseButtonDown(1))
@@ -41,11 +48,6 @@ public class MousePrefab extends NetworkGameObject
                     heldObject = obj;
                     anchorPoint = Vector2.subtract(transform().position(), obj.transform().position());
                 }
-            }
-            
-            if (Input.getKeyDown(KeyCode.EQUALS))
-            {
-                
             }
         }
         else
@@ -59,15 +61,15 @@ public class MousePrefab extends NetworkGameObject
             if (Input.getKeyDown(KeyCode.DELETE))
                 heldObject.setDestroyed(true);
             
-            if (Input.getKeyDown(KeyCode.EQUALS))
-                heldObject.transform().scale(new Vector2(heldObject.transform().scale().x + 0.1f, heldObject.transform().scale().y + 0.1f));
-            else if (Input.getKeyDown(KeyCode.MINUS))
-                heldObject.transform().scale(new Vector2(heldObject.transform().scale().x - 0.1f, heldObject.transform().scale().y - 0.1f));
+            if (Input.getKey(KeyCode.Z))
+                heldObject.transform().scale(new Vector2(heldObject.transform().scale().x + 0.025f, heldObject.transform().scale().y + 0.025f));
+            else if (Input.getKey(KeyCode.C))
+                heldObject.transform().scale(new Vector2(heldObject.transform().scale().x - 0.025f, heldObject.transform().scale().y - 0.025f));
             
-            if (Input.getKeyDown(KeyCode.OPEN_BRACKET))
-                heldObject.transform().rotation(heldObject.transform().rotation() - 15);
-            else if (Input.getKeyDown(KeyCode.CLOSE_BRACKET))
-                heldObject.transform().rotation(heldObject.transform().rotation() + 15);
+            if (Input.getKey(KeyCode.Q))
+                heldObject.transform().rotation(heldObject.transform().rotation() + 2);
+            else if (Input.getKey(KeyCode.E))
+                heldObject.transform().rotation(heldObject.transform().rotation() - 2);
             
             if (Input.getKeyDown(KeyCode.PERIOD))
                 heldObject.transform().flipX(!heldObject.transform().flipX());

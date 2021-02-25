@@ -81,4 +81,14 @@ public class Vector2
         return new Vector2(a.x + b.x, a.y + b.y);
     }
     
+    public static Vector2 multiply(Vector2 a, float b)
+    {
+        return new Vector2(a.x * b, a.y * b);
+    }
+    
+    public static Vector2 divide(Vector2 a, float b)
+    {
+        return new Vector2(a.x / b, a.y / b);
+    }
+    
 }

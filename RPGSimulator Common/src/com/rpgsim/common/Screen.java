@@ -1,5 +1,6 @@
 package com.rpgsim.common;
 
+import com.rpgsim.common.game.Transform;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -13,7 +14,9 @@ public class Screen
     private final BufferStrategy bs;
     private final int screenWidth, screenHeight;
     private Graphics2D g;
-    private AffineTransform transform = new AffineTransform();
+    
+    private final Transform transform = new Transform();
+    private final AffineTransform affineTransform = new AffineTransform();
     
     public Screen(BufferStrategy bs, int screenWidth, int screenHeight)
     {
@@ -25,11 +28,12 @@ public class Screen
     public void begin()
     {
         g = (Graphics2D) bs.getDrawGraphics();
-        g.setRenderingHints(new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_DEFAULT));
-        g.setTransform(transform);
+        g.setRenderingHints(new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY));
+        affineTransform.setTransform(transform.scale().x, 0.0, 0.0, transform.scale().y, transform.position().x, transform.position().y);
+        g.setTransform(affineTransform);
         g.setColor(Color.BLACK);
-        int x = (int) transform.getTranslateX();
-        int y = (int) transform.getTranslateY();
+        int x = (int) affineTransform.getTranslateX();
+        int y = (int) affineTransform.getTranslateY();
         g.fillRect(-x, -y, screenWidth - x, screenHeight - y);
     }
     
@@ -89,14 +93,15 @@ public class Screen
         g.drawRect(x, y, width, height);
     }
 
-    public AffineTransform getTransform()
+    public Transform getTransform()
     {
         return transform;
     }
 
-    public void setTransform(AffineTransform transform)
-    {
-        this.transform = transform;
+    public AffineTransform getAffineTransform() {
+        return affineTransform;
     }
+    
+    
     
 }

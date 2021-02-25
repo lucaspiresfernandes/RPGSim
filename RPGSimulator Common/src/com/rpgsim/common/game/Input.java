@@ -8,7 +8,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 
 public class Input implements KeyListener, MouseListener, MouseMotionListener, FocusListener
@@ -24,9 +23,9 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, F
     private static boolean mouseMoved = false;
     private static boolean mouseDragging = false;
     
-    private static AffineTransform screenTransform;
+    private static Transform screenTransform;
 
-    public Input(AffineTransform screenTransform)
+    public Input(Transform screenTransform)
     {
         Input.screenTransform = screenTransform;
     }
@@ -73,8 +72,8 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, F
     
     public static Vector2 mousePosition()
     {
-        return new Vector2((mouseX - screenTransform.getTranslateX()) / screenTransform.getScaleX(), 
-                (mouseY - screenTransform.getTranslateY()) / screenTransform.getScaleY());
+        return new Vector2((mouseX - screenTransform.position().x) / screenTransform.scale().x, 
+                (mouseY - screenTransform.position().y) / screenTransform.scale().y);
     }
     
     @Override
